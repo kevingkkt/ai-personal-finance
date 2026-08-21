@@ -1,0 +1,7 @@
+services:
+  front-page:
+    build:
+      context: ./front-page
+    container_name: finance-front-page
+    ports:
+      - "8080:80"
