@@ -36,4 +36,4 @@ jobs:
 
       - name: Build Kevin frontend Docker image
         run: |
-          docker build -t kevin-frontend ./kevin/frontends
+          docker build -t kevin-frontend ./kevin/frontend
