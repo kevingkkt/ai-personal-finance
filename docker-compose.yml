@@ -1,7 +1,28 @@
 services:
+
   front-page:
     build:
       context: ./front-page
     container_name: finance-front-page
     ports:
       - "8080:80"
+
+  kevin-backend:
+    build:
+      context: ./kevin/backend
+    container_name: kevin-backend
+    ports:
+      - "5001:5001"
+    volumes:
+      - ./kevin/database:/database
+    environment:
+      - DB_PATH=/database/transactions.db
+
+  kevin-frontend:
+    build:
+      context: ./kevin/frontend
+    container_name: kevin-frontend
+    ports:
+      - "8081:80"
+    depends_on:
+      - kevin-backend

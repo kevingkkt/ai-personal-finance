@@ -1,0 +1,39 @@
+name: Kevin CI
+
+on:
+  push:
+    branches:
+      - kevin
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-kevin-backend:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install dependencies
+        run: |
+          pip install -r kevin/backend/requirements.txt
+
+      - name: Check Python files
+        run: |
+          python -m py_compile kevin/backend/app.py
+          python -m py_compile kevin/database/init_db.py
+
+      - name: Build Kevin backend Docker image
+        run: |
+          docker build -t kevin-backend ./kevin/backend
+
+      - name: Build Kevin frontend Docker image
+        run: |
+          docker build -t kevin-frontend ./kevin/frontends
