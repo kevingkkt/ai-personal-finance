@@ -17,6 +17,11 @@ DB_PATH = os.environ.get(
     )
 )
 
+OLLAMA_URL = os.environ.get(
+    "OLLAMA_URL",
+    "http://localhost:11434/api/generate"
+)   
+
 
 def get_db_connection():
     conn = sqlite3.connect(DB_PATH)
@@ -204,7 +209,7 @@ Rules:
 
     try:
         response = requests.post(
-            "http://host.docker.internal:11434/api/generate",
+            OLLAMA_URL,
             json={
                 "model": "deepseek-r1:1.5b",
                 "prompt": prompt,

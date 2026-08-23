@@ -18,6 +18,18 @@ services:
     environment:
       - DB_PATH=/database/transactions.db
 
+  kevin-backend:
+  build:
+    context: ./kevin/backend
+  container_name: kevin-backend
+  ports:
+    - "5001:5001"
+  volumes:
+    - ./kevin/database:/database
+  environment:
+    - DB_PATH=/database/transactions.db
+    - OLLAMA_URL=http://host.docker.internal:11434/api/generate
+
   kevin-frontend:
     build:
       context: ./kevin/frontend
@@ -26,3 +38,5 @@ services:
       - "8081:80"
     depends_on:
       - kevin-backend
+
+  
