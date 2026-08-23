@@ -7,17 +7,35 @@ services:
     ports:
       - "8080:80"
 
+  kevin-database:
+    build:
+      context: ./kevin/database
+    container_name: kevin-database
+    ports:
+      - "5002:5002"
+    volumes:
+      - ./kevin/database/transactions.db:/app/transactions.db
+
+  ollama:
+    image: ollama/ollama:latest
+    container_name: finance-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+
   kevin-backend:
     build:
       context: ./kevin/backend
     container_name: kevin-backend
     ports:
       - "5001:5001"
-    volumes:
-      - ./kevin/database:/database
     environment:
-      - DB_PATH=/database/transactions.db
-      - OLLAMA_URL=http://host.docker.internal:11434/api/generate
+      - DATABASE_API_URL=http://kevin-database:5002
+      - OLLAMA_URL=http://ollama:11434/api/generate
+    depends_on:
+      - kevin-database
+      - ollama
 
   kevin-frontend:
     build:
@@ -27,3 +45,6 @@ services:
       - "8081:80"
     depends_on:
       - kevin-backend
+
+volumes:
+  ollama-data:

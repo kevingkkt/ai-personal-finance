@@ -1,185 +1,174 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-import sqlite3
 import os
 import requests
 
 app = Flask(__name__)
 CORS(app)
 
-DB_PATH = os.environ.get(
-    "DB_PATH",
-    os.path.join(
-        os.path.dirname(__file__),
-        "..",
-        "database",
-        "transactions.db"
-    )
+DATABASE_API_URL = os.environ.get(
+    "DATABASE_API_URL",
+    "http://127.0.0.1:5002"
 )
 
 OLLAMA_URL = os.environ.get(
     "OLLAMA_URL",
     "http://localhost:11434/api/generate"
-)   
-
-
-def get_db_connection():
-    conn = sqlite3.connect(DB_PATH)
-    conn.row_factory = sqlite3.Row
-    return conn
+)
 
 
 @app.route("/transactions", methods=["GET"])
 def get_transactions():
-    conn = get_db_connection()
+    try:
+        response = requests.get(
+            f"{DATABASE_API_URL}/transactions",
+            timeout=10
+        )
 
-    transactions = conn.execute(
-        "SELECT * FROM transactions ORDER BY date DESC"
-    ).fetchall()
+        return jsonify(response.json()), response.status_code
 
-    conn.close()
-
-    return jsonify([dict(row) for row in transactions])
+    except requests.exceptions.RequestException:
+        return jsonify({
+            "error": "Could not connect to database service"
+        }), 500
 
 
 @app.route("/transactions/<int:transaction_id>", methods=["GET"])
 def get_transaction(transaction_id):
-    conn = get_db_connection()
+    try:
+        response = requests.get(
+            f"{DATABASE_API_URL}/transactions/{transaction_id}",
+            timeout=10
+        )
 
-    transaction = conn.execute(
-        "SELECT * FROM transactions WHERE id = ?",
-        (transaction_id,)
-    ).fetchone()
+        return jsonify(response.json()), response.status_code
 
-    conn.close()
-
-    if transaction is None:
+    except requests.exceptions.RequestException:
         return jsonify({
-            "error": "Transaction not found"
-        }), 404
-
-    return jsonify(dict(transaction))
+            "error": "Could not connect to database service"
+        }), 500
 
 
 @app.route("/transactions", methods=["POST"])
 def create_transaction():
-    data = request.get_json()
-
-    conn = get_db_connection()
-
-    cursor = conn.execute(
-        """
-        INSERT INTO transactions
-        (type, category, amount, date, description)
-        VALUES (?, ?, ?, ?, ?)
-        """,
-        (
-            data["type"],
-            data["category"],
-            data["amount"],
-            data["date"],
-            data.get("description", "")
+    try:
+        response = requests.post(
+            f"{DATABASE_API_URL}/transactions",
+            json=request.get_json(),
+            timeout=10
         )
-    )
 
-    conn.commit()
+        return jsonify(response.json()), response.status_code
 
-    transaction_id = cursor.lastrowid
-
-    conn.close()
-
-    return jsonify({
-        "message": "Transaction created",
-        "id": transaction_id
-    }), 201
+    except requests.exceptions.RequestException:
+        return jsonify({
+            "error": "Could not connect to database service"
+        }), 500
 
 
 @app.route("/transactions/<int:transaction_id>", methods=["PUT"])
 def update_transaction(transaction_id):
-    data = request.get_json()
-
-    conn = get_db_connection()
-
-    existing_transaction = conn.execute(
-        "SELECT * FROM transactions WHERE id = ?",
-        (transaction_id,)
-    ).fetchone()
-
-    if existing_transaction is None:
-        conn.close()
-
-        return jsonify({
-            "error": "Transaction not found"
-        }), 404
-
-    conn.execute(
-        """
-        UPDATE transactions
-        SET type = ?,
-            category = ?,
-            amount = ?,
-            date = ?,
-            description = ?
-        WHERE id = ?
-        """,
-        (
-            data["type"],
-            data["category"],
-            data["amount"],
-            data["date"],
-            data.get("description", ""),
-            transaction_id
+    try:
+        response = requests.put(
+            f"{DATABASE_API_URL}/transactions/{transaction_id}",
+            json=request.get_json(),
+            timeout=10
         )
-    )
 
-    conn.commit()
-    conn.close()
+        return jsonify(response.json()), response.status_code
 
-    return jsonify({
-        "message": "Transaction updated"
-    })
+    except requests.exceptions.RequestException:
+        return jsonify({
+            "error": "Could not connect to database service"
+        }), 500
 
 
 @app.route("/transactions/<int:transaction_id>", methods=["DELETE"])
 def delete_transaction(transaction_id):
-    conn = get_db_connection()
+    try:
+        response = requests.delete(
+            f"{DATABASE_API_URL}/transactions/{transaction_id}",
+            timeout=10
+        )
 
-    existing_transaction = conn.execute(
-        "SELECT * FROM transactions WHERE id = ?",
-        (transaction_id,)
-    ).fetchone()
+        return jsonify(response.json()), response.status_code
 
-    if existing_transaction is None:
-        conn.close()
-
+    except requests.exceptions.RequestException:
         return jsonify({
-            "error": "Transaction not found"
-        }), 404
+            "error": "Could not connect to database service"
+        }), 500
 
-    conn.execute(
-        "DELETE FROM transactions WHERE id = ?",
-        (transaction_id,)
-    )
 
-    conn.commit()
-    conn.close()
+# HTMX route
+@app.route("/transactions-html", methods=["GET"])
+def get_transactions_html():
+    try:
+        response = requests.get(
+            f"{DATABASE_API_URL}/transactions",
+            timeout=10
+        )
 
-    return jsonify({
-        "message": "Transaction deleted"
-    })
+        if response.status_code != 200:
+            return "<p>Could not load transactions.</p>", 500
+
+        transactions = response.json()
+
+        rows = ""
+
+        for transaction in transactions:
+            rows += f"""
+            <tr>
+                <td>{transaction['id']}</td>
+                <td>{transaction['type']}</td>
+                <td>{transaction['category']}</td>
+                <td>${transaction['amount']:.2f}</td>
+                <td>{transaction['date']}</td>
+                <td>{transaction['description']}</td>
+            </tr>
+            """
+
+        return f"""
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>Type</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+
+            <tbody>
+                {rows}
+            </tbody>
+        </table>
+        """
+
+    except requests.exceptions.RequestException:
+        return "<p>Database service unavailable.</p>", 500
 
 
 @app.route("/ai-insights", methods=["GET"])
 def ai_insights():
-    conn = get_db_connection()
+    try:
+        database_response = requests.get(
+            f"{DATABASE_API_URL}/transactions",
+            timeout=10
+        )
 
-    transactions = conn.execute(
-        "SELECT * FROM transactions ORDER BY date DESC"
-    ).fetchall()
+        if database_response.status_code != 200:
+            return jsonify({
+                "error": "Could not retrieve transaction data"
+            }), 500
 
-    conn.close()
+        transaction_data = database_response.json()
 
-    transaction_data = [dict(row) for row in transactions]
+    except requests.exceptions.RequestException:
+        return jsonify({
+            "error": "Could not connect to database service"
+        }), 500
 
     prompt = f"""
 You are an AI assistant for a university personal finance project.
@@ -215,7 +204,7 @@ Rules:
                 "prompt": prompt,
                 "stream": False
             },
-            timeout=120
+            timeout=300
         )
 
         if response.status_code != 200:
@@ -234,6 +223,14 @@ Rules:
         return jsonify({
             "error": "Could not connect to Ollama"
         }), 500
+
+
+@app.route("/health", methods=["GET"])
+def health():
+    return jsonify({
+        "status": "ok",
+        "service": "Kevin Backend API"
+    })
 
 
 if __name__ == "__main__":
