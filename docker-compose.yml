@@ -16,6 +16,15 @@ services:
     volumes:
       - ./kevin/database/transactions.db:/app/transactions.db
 
+  budget-manager-database:
+    build:
+      context: ./budget-manager/database
+    container_name: budget-manager-database
+    ports:
+      - "5003:5003"
+    volumes:
+      - ./budget-manager/database/budget.db:/app/budget.db
+
   ollama:
     image: ollama/ollama:latest
     container_name: finance-ollama
@@ -37,6 +46,17 @@ services:
       - kevin-database
       - ollama
 
+  budget-manager-backend:
+    build:
+      context: ./budget-manager/backend
+    container_name: budget-manager-backend
+    ports:
+      - "5004:5004"
+    environment:
+      - DATABASE_API_URL=http://budget-manager-database:5003
+    depends_on:
+      - budget-manager-database
+
   kevin-frontend:
     build:
       context: ./kevin/frontend
@@ -45,6 +65,15 @@ services:
       - "8081:80"
     depends_on:
       - kevin-backend
+
+  budget-manager-frontend:
+    build:
+      context: ./budget-manager/frontend
+    container_name: budget-manager-frontend
+    ports:
+      - "8082:80"
+    depends_on:
+      - budget-manager-backend  
 
 volumes:
   ollama-data:
