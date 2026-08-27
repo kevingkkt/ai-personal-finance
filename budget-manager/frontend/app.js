@@ -101,7 +101,7 @@ aiButton.addEventListener("click", async function() {
     aiResult.textContent = "Analysing your budgets...";
 
     try {
-        const response = await fetch("http://127.0.0.1:5001/ai-insights");
+        const response = await fetch("http://127.0.0.1:5004/ai-insights");
         const data = await response.json();
 
         if (data.insight) {

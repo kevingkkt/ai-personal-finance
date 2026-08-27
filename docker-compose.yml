@@ -32,8 +32,10 @@ services:
       - "5004:5004"
     environment:
       - DATABASE_API_URL=http://budget-manager-database:5003
+      - OLLAMA_URL=http://ollama:11434/api/generate
     depends_on:
       - budget-manager-database
+      - ollama
 
   budget-manager-frontend:
     build:
