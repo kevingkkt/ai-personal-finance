@@ -1,0 +1,50 @@
+name: Lex CI
+
+on:
+  push:
+    branches:
+      - lex
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  test-budget-manager-services:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: "3.11"
+
+      - name: Install backend dependencies
+        run: |
+          pip install -r budget-manager/backend/requirements.txt
+
+      - name: Install database dependencies
+        run: |
+          pip install -r budget-manager/database/requirements.txt
+
+      - name: Check Python files
+        run: |
+          python -m py_compile budget-manager/backend/app.py
+          python -m py_compile budget-manager/database/app.py
+          python -m py_compile budget-manager/database/init_db.py
+          python -m py_compile budget-manager/agentic_loop.py
+          python -m py_compile budget-manager/tests/test_backend.py
+
+      - name: Build budget-manager backend Docker image
+        run: |
+          docker build -t budget-manager-backend ./budget-manager/backend
+
+      - name: Build budget-manager database Docker image
+        run: |
+          docker build -t budget-manager-database ./budget-manager/database
+
+      - name: Build budget-manager frontend Docker image
+        run: |
+          docker build -t budget-manager-frontend ./budget-manager/frontend
