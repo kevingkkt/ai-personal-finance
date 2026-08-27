@@ -23,7 +23,7 @@ services:
     ports:
       - "5003:5003"
     volumes:
-      - ./budget-manager/database/budget.db:/app/budget.db
+      - ./budget-manager/database/budgets.db:/app/budgets.db
 
   ollama:
     image: ollama/ollama:latest
