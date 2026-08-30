@@ -15,3 +15,8 @@ Rules:
 If information is unavailable in the supplied context, say:
 
 Information unavailable in supplied context.
+
+Suggest ONE short improvement for the application.
+
+Do not give financial advice.
+Focus only on software quality, reliability or usability.
