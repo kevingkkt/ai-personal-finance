@@ -5,9 +5,9 @@ cursor = conn.cursor()
 
 cursor.execute("""CREATE TABLE IF NOT EXISTS bills (
     bill_id INTEGER PRIMARY KEY AUTOINCREMENT,
-    payment_status BOOLEAN NOT NULL DEFAULT 0,
+    payment_status BOOLEAN NOT NULL DEFAULT 0  CHECK (payment_status IN (0, 1)),
     due_date DATE NOT NULL,
-    amount REAL NOT NULL,
+    amount REAL NOT NULL CHECK (amount >= 0),
     description TEXT
 )
 """)#I need to get from kevins table the type as that gives if its in mine
