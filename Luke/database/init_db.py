@@ -7,8 +7,8 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS bills (
     bill_id INTEGER PRIMARY KEY AUTOINCREMENT,
     payment_status BOOLEAN NOT NULL DEFAULT 0,
     due_date DATE NOT NULL,
-    amount REAL NOT NULL
-    description TEXT,
+    amount REAL NOT NULL,
+    description TEXT
 )
 """)#I need to get from kevins table the type as that gives if its in mine
 #then I just steam some of the info such as amount which is a bit of a yikes with the system but or well

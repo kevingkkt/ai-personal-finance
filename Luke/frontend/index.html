@@ -17,11 +17,39 @@
     <div class="Main">
         <h1> Welcome to Bill and Payment Tracker</h1>
         <div class="billSheet">
+            <table id="billsForm">
+                <thead>
+                    <tr>
+                        <th>Bill ID</th>
+                        <th>Payment status</th>
+                        <th>Due Date</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <!-- Bill rows will be added somehow Ill come back -->
+                </tbody>
+            </table>
+            <!-- I want a tick box to sort by paid or unpaid-->
 
         </div>
     </div>
     <div class="AI">
         <!--    I want a text box to use to enter stuff and then space for ai to respond then a button-->
+        <form id="askAIAdviceForm">
+            <label for="context-question">Question</label>
+            <input type="text" id="context-question" name="question" placeholder="Ask AI for more specific advice.">
+            <textarea id="aiQuestion" name="question" rows="4"></textarea>
+            <button type="submit">Ask </button>
+        </form>
     </div>
 </body>
 </html>
+<script src="app.js">
+    //Table scripts
+
+
+    //ai scripts
+
+</script>
