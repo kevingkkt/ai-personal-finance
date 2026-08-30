@@ -13,8 +13,8 @@ BACKEND_URL = "http://127.0.0.1:5001"
 
 #def function to actually talking to ai and getting a response'
 def get_ai_response_database(input):
-    
-    with open("prompt.txt", "r") as file:
+    prompt_path = os.path.join(os.path.dirname(__file__), "Prompts", "prompt.txt")
+    with open(prompt_path, "r") as file:
         text = file.read()
     try:
             response = requests.post(

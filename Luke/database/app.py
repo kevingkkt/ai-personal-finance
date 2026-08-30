@@ -6,7 +6,7 @@ import requests
 
 app = Flask(__name__)
 
-DATABASE_NAME = "/app/data/enrolment.db"
+DATABASE_NAME = "/app/bills.db"
 #basic function one
 def get_db_connection():
     conn = sqlite3.connect(DATABASE_NAME)
