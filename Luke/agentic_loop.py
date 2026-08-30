@@ -6,11 +6,7 @@ import os
 from pathlib import Path
 #Ai Genetic loop
 
-DB_PATH = os.path.join(
-    os.path.dirname(__file__),
-    "database",
-    "bills.db"
-)
+
 
 BACKEND_URL = "http://127.0.0.1:5001"
 
@@ -45,18 +41,12 @@ def get_ai_response_database(input):
     
     
 def get_data_from_db():
-    # Connect to the SQLite database
-    conn = sqlite3.connect(DB_PATH)
-    cursor = conn.cursor()
+    response = requests.get("http://127.0.0.1:5002/bills", timeout=10)
 
-    # Execute a query to fetch all bills
-    cursor.execute("SELECT * FROM bills")
-    bills = cursor.fetchall()
+    if response.status_code == 200:
+        return response.json()
 
-    # Close the database connection
-    conn.close()
-
-    return bills
+    return None
     
     
     
