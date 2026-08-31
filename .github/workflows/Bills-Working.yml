@@ -15,4 +15,18 @@ jobs:
     - name: Build the Docker image
       run: |
           docker-compose --version || (sudo apt-get update && sudo apt-get install -y docker-compose)
-  
+    
+    - name: check frontend 
+      run: |
+        docker-compose build \
+        bills-frontend
+
+    - name: check backend
+      run: |
+        docker-compose build \
+        bills-backend
+
+    - name: check database
+      run: |
+        docker-compose build \
+        bills-database
