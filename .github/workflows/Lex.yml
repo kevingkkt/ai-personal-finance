@@ -1,6 +1,9 @@
 name: budget-manager-evidence
 
 on:
+  push:
+    branches:
+      - lex
   workflow_dispatch:
 
 jobs:
