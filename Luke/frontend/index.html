@@ -36,17 +36,22 @@
             <!-- I want a tick box to sort by paid or unpaid-->
 
         </div>
-    </div>
-    <div class="AI">
-        <!--    I want a text box to use to enter stuff and then space for ai to respond then a button-->
-        <div id="askAIAdviceForm">
-            <label for="aiQuestion">AI Assistant</label>
-            <!-- dont need i changed my mind<input type="text" id="context-question" name="question" placeholder="Ask AI for more specific advice."> -->
-            <textarea id="aiQuestion" name="question" rows="4" placeholder="Type any specific help you need with mangaging your bills."></textarea>
-            <button type="submit">Ask </button>
-            <div id="aiResponse"></div>
+
+        <div class="AI">
+            <!--    I want a text box to use to enter stuff and then space for ai to respond then a button-->
+            <div id="askAIAdviceForm" class="AIForm">
+                <h2>AI Assistant</h2>
+                <!-- dont need i changed my mind<input type="text" id="context-question" name="question" placeholder="Ask AI for more specific advice."> -->
+                <textarea id="aiQuestion" name="question" rows="4" placeholder="Type any specific help you need with mangaging your bills."></textarea>
+                <button type="submit">Ask </button>
+            </div>
+            <div class="AIResponse">
+                <h2>AI Response</h2>
+                <div id="aiResponse"></div>
+            </div>
         </div>
     </div>
+    
 <script >
     //Table scripts
     //calling backend 

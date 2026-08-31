@@ -173,7 +173,7 @@ Also consider the following user input when providing your insights if that be a
 
     except requests.exceptions.RequestException:
         return jsonify({
-            "error": "Sorrt the program could not mange toconnect to Ollama"
+            "error": "Sorry, the program could not connect to Ollama"
         }), 500
 
 

@@ -3,7 +3,12 @@
     padding: 0;
     box-sizing: border-box;
 }
-
+.Main {
+    width: 90%;
+    max-width: 1200px;
+    margin: 0 auto;
+    text-align: center;
+}
 body {
     font-family: Arial, sans-serif;
     background-color: #f4f7fb;
@@ -11,6 +16,33 @@ body {
     display: flex;
     justify-content: center;
     margin: 0;
+}
+.billSheet{
+    width: 85%;
+    margin-bottom: 35px;
+}
+
+.AI{
+    display: flex;
+    width: 85%;
+}
+
+.AIForm{
+    display: flex;
+    flex-direction: column;
+    flex: 1;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+}
+
+
+
+.AIResponse{
+    flex: 1;
+    padding: 20px;
+    border: 1px solid #ccc;
+    border-radius: 8px;
 }
 
 .container {
