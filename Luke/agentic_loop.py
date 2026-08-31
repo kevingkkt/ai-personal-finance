@@ -12,7 +12,7 @@ BACKEND_URL = "http://127.0.0.1:5001"
 
 
 #def function to actually talking to ai and getting a response'
-def get_ai_response_database(input):
+def get_ai_response(input):
     prompt_path = os.path.join(os.path.dirname(__file__), "Prompts", "prompt.txt")
     with open(prompt_path, "r") as file:
         text = file.read()
@@ -47,8 +47,21 @@ def get_data_from_db():
         return response.json()
 
     return None
+
+def get_endpoints():
+    #Trying to check each endpoint
+    healthResponse = requests.get("http://127.0.0.1:5001/health")
+    billsResponse = requests.get("http://127.0.0.1:5001/bills")
+    singleBillResponse = requests.get("http://127.0.0.1:5001/bills/1")
     
+    TogetherResponse = {"health": healthResponse.status_code,
+        "bills": billsResponse.status_code,
+        "single_bill": singleBillResponse.status_code}
     
+def get_architecture():
+    #Architecture seems to be about the design / structure so Im going to use docker compose file and have ai read that
+    with open("docker-compose.yml", "r") as file:
+        return file.read()
     
     
 def main():
@@ -66,24 +79,24 @@ def main():
         print("0. Exit Loop")
         user_input = input("Enter your choice: ")
         while user_input not in ["0", "1", "2", "3"]:
-            print("Invalid choice. Please try again.")
+            print("Please Only Choose 1, 2, 3 or 0.")
             user_input = input("Enter your choice: ")
         match user_input:
             case "0":
                 print("Exiting loop.")
                 value = False
             case "1":
-                print("Getting AI review of database data...")
+                print("AI will analyse with database data:")
                 db_data = get_data_from_db()
-                get_ai_response_database(db_data)
+                get_ai_response(db_data)
             case "2":
-                print("Getting AI review of endpoints...")
-                # Call the function to get AI review of endpoints
-                # get_ai_response_endpoints()
+                print("AI will use the endpoints data to help review the data")
+                endpointsData = get_endpoints()
+                get_ai_response(endpointsData)
             case "3":
-                print("Getting AI review of architecture...")
-                # Call the function to get AI review of architecture
-                # get_ai_response_architecture()
+                print("Getting AI review of architecture")
+                architecture_data = get_architecture()
+                get_ai_response(architecture_data)
     
 if __name__ == "__main__":
     main()
