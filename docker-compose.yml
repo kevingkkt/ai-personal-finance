@@ -26,6 +26,6 @@ services:
       context: ./Luke/frontend
     container_name: bills-frontend
     ports:
-      - "8081:80"
+      - "8084:80"
     depends_on:
       - bills-backend
