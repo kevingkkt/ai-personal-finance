@@ -21,7 +21,7 @@ sample_bills = [
     (False, "2026-09-04", 120.00, "Internet bill"),
     (True, "2026-08-01", 80.00, "Phone bill"),
     (False, "2026-09-04", 90.00, "Cable bill"),
-    (True, "2026-08-01", 100.00, "Electricity bill"),
+    (True, "2026-08-01", 100.50, "Electricity bill"),
     (False, "2026-09-04", 150.00, "Sleep tax"),
     (True, "2026-08-01", 200.00, "dog bill"),
     (False, "2026-10-05", 120.00, "Internet bill"),

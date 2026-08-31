@@ -118,11 +118,10 @@ def get_bills_html():
         for bill in bills:
             rows += f"""
             <tr>
-                <td>{bill['id']}</td>
-                <td>{bill['type']}</td>
-                <td>{bill['category']}</td>
+                <td>{bill['bill_id']}</td>
+                <td>{bill['payment_status']}</td>
+                <td>{bill['due_date']}</td>
                 <td>${bill['amount']:.2f}</td>
-                <td>{bill['date']}</td>
                 <td>{bill['description']}</td>
             </tr>
             """
