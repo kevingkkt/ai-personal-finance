@@ -98,59 +98,14 @@ def delete_bill(bill_id):
             "error": "Could not connect to database service"
         }), 500
 
-
-# HTMX route
-@app.route("/bills-html", methods=["GET"])
-def get_bills_html():
-    try:
-        response = requests.get(
-            f"{DATABASE_API_URL}/bills",
-            timeout=10
-        )
-
-        if response.status_code != 200:
-            return "<p>The bills were unable to be loaded.</p>", 500
-
-        bills = response.json()
-
-        rows = ""
-
-        for bill in bills:
-            rows += f"""
-            <tr>
-                <td>{bill['bill_id']}</td>
-                <td>{bill['payment_status']}</td>
-                <td>{bill['due_date']}</td>
-                <td>${bill['amount']:.2f}</td>
-                <td>{bill['description']}</td>
-            </tr>
-            """
-
-        return f"""
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Type</th>
-                    <th>Category</th>
-                    <th>Amount</th>
-                    <th>Date</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {rows}
-            </tbody>
-        </table>
-        """
-
-    except requests.exceptions.RequestException:
-        return "<p>Database service unavailable.</p>", 500
-
-
-@app.route("/ai-insights", methods=["GET"])
+@app.route("/ai-insights", methods=["POST"])
 def ai_insights():
+    print("backend was called for AI insights")
+    inputData = request.get_json()
+    input = inputData.get("input", "")
+    #this is for the database
+    
+    
     try:
         database_response = requests.get(
             f"{DATABASE_API_URL}/bills",
@@ -186,6 +141,9 @@ Do not include your reasoning, thinking process, analysis steps, or a second fin
 
 Rules:
 Return as a string in about 1 paragraph.
+
+Also consider the following user input when providing your insights if that be a specific area they want to focus on or a specific question they have about the bills:
+{input}
 """
 
     try:
@@ -196,7 +154,7 @@ Return as a string in about 1 paragraph.
                 "prompt": prompt,
                 "stream": False
             },
-            timeout=300
+            timeout=600
         )
 
         if response.status_code != 200:
@@ -205,7 +163,7 @@ Return as a string in about 1 paragraph.
             }), 500
 
         result = response.json()
-
+        print("AI made it to the end")
         return jsonify({
             "model": "deepseek-r1:1.5b",
             "insight": result["response"]

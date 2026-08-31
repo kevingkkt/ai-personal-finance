@@ -39,12 +39,13 @@
     </div>
     <div class="AI">
         <!--    I want a text box to use to enter stuff and then space for ai to respond then a button-->
-        <form id="askAIAdviceForm">
-            <label for="context-question">Question</label>
-            <input type="text" id="context-question" name="question" placeholder="Ask AI for more specific advice.">
-            <textarea id="aiQuestion" name="question" rows="4"></textarea>
+        <div id="askAIAdviceForm">
+            <label for="aiQuestion">AI Assistant</label>
+            <!-- dont need i changed my mind<input type="text" id="context-question" name="question" placeholder="Ask AI for more specific advice."> -->
+            <textarea id="aiQuestion" name="question" rows="4" placeholder="Type any specific help you need with mangaging your bills."></textarea>
             <button type="submit">Ask </button>
-        </form>
+            <div id="aiResponse"></div>
+        </div>
     </div>
 <script >
     //Table scripts
@@ -84,7 +85,34 @@
         }
     }
     fetchBills();
-    //ai scripts
+    //ai scripts\
+    
+    const submit = document.getElementById('askAIAdviceForm').querySelector('button');
+    submit.addEventListener('click', async (event) => {
+        console.log("ai script loaded");
+        event.preventDefault();
+        const userinput = document.getElementById('aiQuestion').value;
+        const response = document.getElementById('aiResponse');
+        response.innerHTML = "Ai Has not responded yet";
+        try {
+            const response = await fetch("http://127.0.0.1:5001/ai-insights", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ input: userinput })
+            });
+
+
+            const output = await response.json();
+
+            response.innerHTML = output.insight;
+            console.log("made to the end of the try block for ai script");
+        } catch (error) {
+            console.error('Error fetching AI insights:', error);
+            response.innerHTML = "Error fetching AI insights. Please try again later.";
+        }
+    });
 
 </script>
 </body>
