@@ -112,7 +112,7 @@
 
             const output = await response.json();
             AIresponse.innerHTML = "";
-            AIresponse.innerHTML = `<p><strong>AI Insight:</strong> ${output.insight}</p>`;
+            AIresponse.textContent = output.insight;
             console.log("AI insight received:", output.insight);
             console.log("made to the end of the try block for ai script");
         } catch (error) {

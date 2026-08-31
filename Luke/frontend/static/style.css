@@ -18,8 +18,19 @@ body {
     margin: 0;
 }
 .billSheet{
-    width: 85%;
+    width: 100%;
     margin-bottom: 35px;
+}
+.billSheet table {
+    width: 85%;
+    border-collapse: collapse;
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px;
+    text-decoration: none;
+    color: #1f2937;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    transition: 0.2s;
 }
 
 .AI{
@@ -27,22 +38,27 @@ body {
     width: 85%;
 }
 
+
 .AIForm{
     display: flex;
     flex-direction: column;
     flex: 1;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
 }
 
 
 
 .AIResponse{
     flex: 1;
-    padding: 20px;
-    border: 1px solid #ccc;
-    border-radius: 8px;
+    background-color: white;
+    padding: 30px;
+    border-radius: 12px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    white-space: pre-line;
+    text-align: left;
 }
 
 .container {
