@@ -71,7 +71,7 @@
                 const row = document.createElement('tr');
                 row.innerHTML = `
                     <td>${bill.bill_id}</td>
-                    <td>${bill.payment_status}</td>
+                    <td>${bill.payment_status == 1 ? "Paid" : "Pending"}</td>
                     <td>${bill.due_date}</td>
                     <td>${bill.amount}</td>
                     <td>${bill.description}</td>
