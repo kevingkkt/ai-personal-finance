@@ -103,13 +103,3 @@ aiButton.addEventListener("click", async function() {
     try {
         const response = await fetch("http://127.0.0.1:5004/ai-insights");
         const data = await response.json();
-
-        if (data.insight) {
-            aiResult.textContent = data.insight;
-        } else {
-            aiResult.textContent = "AI insight could not be generated.";
-        }
-    } catch (error) {
-        aiResult.textContent = "Could not connect to the AI service.";
-    }
-});
