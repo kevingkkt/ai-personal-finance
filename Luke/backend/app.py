@@ -100,9 +100,10 @@ def delete_bill(bill_id):
 
 @app.route("/ai-insights", methods=["POST"])
 def ai_insights():
-    print("backend was called for AI insights")
-    inputData = request.get_json()
-    input = inputData.get("input", "")
+    #adding flush to see if it truely isnt geting even in but we will see
+    print("backend was called for AI insights", flush =True)
+    inputData = request.get_json() or  {}
+    userInput = inputData.get("input", "")
     #this is for the database
     
     
@@ -143,10 +144,11 @@ Rules:
 Return as a string in about 1 paragraph.
 
 Also consider the following user input when providing your insights if that be a specific area they want to focus on or a specific question they have about the bills:
-{input}
+{userInput}
 """
 
     try:
+        print("check just before OLLAMA to see if its at fault", flush =True)
         response = requests.post(
             OLLAMA_URL,
             json={
@@ -156,7 +158,7 @@ Also consider the following user input when providing your insights if that be a
             },
             timeout=600
         )
-
+        print("check just after OLLAMA to see if its at fault", flush =True)
         if response.status_code != 200:
             return jsonify({
                 "error": "The AI service is unavailable with the following status code: " + str(response.status_code)
