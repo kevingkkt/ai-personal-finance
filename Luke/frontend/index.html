@@ -92,9 +92,10 @@
         console.log("ai script loaded");
         event.preventDefault();
         const userinput = document.getElementById('aiQuestion').value;
-        const response = document.getElementById('aiResponse');
-        response.innerHTML = "Ai Has not responded yet";
+        const AIresponse = document.getElementById('aiResponse');
+        AIresponse.innerHTML = "Ai Has not responded yet";
         try {
+            console.log("fetching AI insights with user input:", userinput);
             const response = await fetch("http://127.0.0.1:5001/ai-insights", {
                 method: 'POST',
                 headers: {
@@ -105,12 +106,13 @@
 
 
             const output = await response.json();
-
-            response.innerHTML = output.insight;
+            AIresponse.innerHTML = "";
+            AIresponse.innerHTML = `<p><strong>AI Insight:</strong> ${output.insight}</p>`;
+            console.log("AI insight received:", output.insight);
             console.log("made to the end of the try block for ai script");
         } catch (error) {
             console.error('Error fetching AI insights:', error);
-            response.innerHTML = "Error fetching AI insights. Please try again later.";
+            AIresponse.innerHTML = "Error fetching AI insights. Please try again later.";
         }
     });
 
