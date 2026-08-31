@@ -27,7 +27,8 @@
                         <th>Description</th>
                     </tr>
                 </thead>
-                <tbody>
+                <tbody id="billRows">
+
                     <!-- Bill rows will be added somehow Ill come back -->
                 </tbody>
             </table>
@@ -44,12 +45,47 @@
             <button type="submit">Ask </button>
         </form>
     </div>
-</body>
-</html>
-<script src="app.js">
+<script >
     //Table scripts
+    //calling backend 
+    async function fetchBills() {
+        const billRows = document.getElementById('billRows');
 
+        billRows.innerHTML = `<tr><td colspan="5">Waiting for bills...</td></tr>`;
+        try 
+        {
+            const response = await fetch("http://127.0.0.1:5001/bills");
+            if (!response.ok) 
+            {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        
+            
+            const bills = await response.json();
 
+            billRows.innerHTML = "";
+
+            bills.forEach(bill => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${bill.bill_id}</td>
+                    <td>${bill.payment_status}</td>
+                    <td>${bill.due_date}</td>
+                    <td>${bill.amount}</td>
+                    <td>${bill.description}</td>
+                `;
+                billRows.appendChild(row);
+            });
+        }
+        catch (error) {
+            console.error('Error fetching bills:', error);
+            billRows.innerHTML = `<tr><td colspan="5">Error fetching bills. Please try again later.</td></tr>`;
+        }
+    }
+    fetchBills();
     //ai scripts
 
 </script>
+</body>
+</html>
+<!-- Plan is to not use the app.js and just do here -->
