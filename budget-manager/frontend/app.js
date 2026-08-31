@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:5004/budgets"; 
+const API_URL = "http://127.0.0.1:5004/budgets";
 
 const form = document.getElementById("budgetForm");
 const table = document.getElementById("budgetTable");
@@ -6,28 +6,35 @@ const table = document.getElementById("budgetTable");
 let editingId = null;
 
 async function loadBudgets() {
-    const response = await fetch(API_URL);
-    const budgets = await response.json();
+    try {
+        const response = await fetch(API_URL);
+        if (!response.ok) throw new Error("Failed to load budgets");
 
-    table.innerHTML = "";
+        const budgets = await response.json();
 
-    budgets.forEach(budget => {
-        const row = document.createElement("tr");
+        table.innerHTML = "";
 
-        row.innerHTML = `
-            <td>${budget.name}</td>
-            <td>${budget.amount}</td>
-            <td>${budget.start_date}</td>
-            <td>${budget.end_date}</td>
-            <td>${budget.description || ""}</td>
-            <td>
-                <button onclick="editBudget(${budget.id})">Edit</button>
-                <button onclick="deleteBudget(${budget.id})">Delete</button>
-            </td>
-        `;
+        budgets.forEach(budget => {
+            const row = document.createElement("tr");
 
-        table.appendChild(row);
-    });
+            row.innerHTML = `
+                <td>${budget.name}</td>
+                <td>${Number(budget.amount).toFixed(2)}</td>
+                <td>${budget.start_date}</td>
+                <td>${budget.end_date}</td>
+                <td>${budget.description || ""}</td>
+                <td>
+                    <button onclick="editBudget(${budget.id})">Edit</button>
+                    <button onclick="deleteBudget(${budget.id})">Delete</button>
+                </td>
+            `;
+
+            table.appendChild(row);
+        });
+    } catch (err) {
+        table.innerHTML = `<tr><td colspan="6">Error loading budgets</td></tr>`;
+        console.error(err);
+    }
 }
 
 form.addEventListener("submit", async function(event) {
@@ -41,56 +48,77 @@ form.addEventListener("submit", async function(event) {
         description: document.getElementById("description").value
     };
 
-    if (editingId === null) {
-        await fetch(API_URL, {
-            method: "POST",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(budget)
-        });
-    } else {
-        await fetch(`${API_URL}/${editingId}`, {
-            method: "PUT",
-            headers: {
-                "Content-Type": "application/json"
-            },
-            body: JSON.stringify(budget)
-        });
+    try {
+        if (editingId === null) {
+            await fetch(API_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(budget)
+            });
+        } else {
+            await fetch(`${API_URL}/${editingId}`, {
+                method: "PUT",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify(budget)
+            });
 
-        editingId = null;
-        document.querySelector("button[type='submit']").textContent =
-            "Add Budget";
+            editingId = null;
+            document.querySelector("button[type='submit']").textContent =
+                "Add Budget";
+        }
+
+        form.reset();
+        await loadBudgets();
+    } catch (err) {
+        console.error(err);
+        alert("Error saving budget");
     }
-
-    form.reset();
-    loadBudgets();
 });
 
 async function editBudget(id) {
-    const response = await fetch(`${API_URL}/${id}`);
-    const budget = await response.json();
+    try {
+        const response = await fetch(`${API_URL}/${id}`);
+        if (!response.ok) throw new Error("Failed to fetch budget");
 
-    document.getElementById("name").value = budget.name;
-    document.getElementById("amount").value = budget.amount;
-    document.getElementById("start_date").value = budget.start_date;
-    document.getElementById("end_date").value = budget.end_date;
-    document.getElementById("description").value =
-        budget.description || "";
+        const budget = await response.json();
 
-    editingId = id;
+        document.getElementById("name").value = budget.name;
+        document.getElementById("amount").value = budget.amount;
+        document.getElementById("start_date").value = budget.start_date;
+        document.getElementById("end_date").value = budget.end_date;
+        document.getElementById("description").value =
+            budget.description || "";
 
-    document.querySelector("button[type='submit']").textContent =
-        "Update Budget";
+        editingId = id;
+
+        document.querySelector("button[type='submit']").textContent =
+            "Update Budget";
+    } catch (err) {
+        console.error(err);
+        alert("Error loading budget for edit");
+    }
 }
 
 async function deleteBudget(id) {
-    await fetch(`${API_URL}/${id}`, {
-        method: "DELETE"
-    });
+    try {
+        await fetch(`${API_URL}/${id}`, {
+            method: "DELETE"
+        });
 
-    loadBudgets();
+        await loadBudgets();
+    } catch (err) {
+        console.error(err);
+        alert("Error deleting budget");
+    }
 }
+
+// Expose edit/delete functions for inline onclick handlers
+window.editBudget = editBudget;
+window.deleteBudget = deleteBudget;
 
 loadBudgets();
 
@@ -102,4 +130,19 @@ aiButton.addEventListener("click", async function() {
 
     try {
         const response = await fetch("http://127.0.0.1:5004/ai-insights");
+        if (!response.ok) throw new Error("AI service returned an error");
+
         const data = await response.json();
+
+        if (data && data.insight) {
+            aiResult.textContent = data.insight;
+        } else if (data && data.error) {
+            aiResult.textContent = `Error: ${data.error}`;
+        } else {
+            aiResult.textContent = JSON.stringify(data);
+        }
+    } catch (err) {
+        console.error(err);
+        aiResult.textContent = "Could not fetch AI insights.";
+    }
+});

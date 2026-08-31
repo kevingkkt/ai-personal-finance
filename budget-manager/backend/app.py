@@ -8,7 +8,7 @@ CORS(app)
 
 DATABASE_API_URL = os.environ.get(
     "DATABASE_API_URL",
-    "http://127.0.0.1:5004"
+    "http://127.0.0.1:5003"
 )
 
 OLLAMA_URL = os.environ.get(
