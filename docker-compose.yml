@@ -5,3 +5,30 @@ services:
     container_name: finance-front-page
     ports:
       - "8080:80"
+  bills-database:
+    build:
+      context: ./Luke/database
+    container_name: bills-database
+    ports:
+      - "5002:5002"
+
+  bills-backend:
+    build:
+      context: ./Luke/backend
+    container_name: bills-backend
+    ports:
+      - "5001:5001"
+    environment:
+      - DATABASE_API_URL=http://bills-database:5002
+      - OLLAMA_URL=http://host.docker.internal:11434/api/generate
+    depends_on:
+      - bills-database
+
+  bills-frontend:
+    build:
+      context: ./Luke/frontend
+    container_name: bills-frontend
+    ports:
+      - "8084:80"
+    depends_on:
+      - bills-backend
