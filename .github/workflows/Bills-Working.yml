@@ -74,49 +74,48 @@ jobs:
         - name: stop the bills docker
           if: always()
           run: docker-compose down
+  evidence-pack:
+    runs-on: ubuntu-latest
+    needs: [smoke-check]
 
-    evidence-pack:
-      runs-on: ubuntu-latest
-      needs: [smoke-check]
+    steps:
+      - uses: actions/checkout@v4
 
-      steps:
-        - uses: actions/checkout@v4
-
-        - name: Create reports directory
-          run: mkdir -p reports
-          working-directory: ${{ github.workspace }}
-        
-        - name: get report.json
-          run: |
-            cat > reports/report.json <<EOL
-            {
-            "workflow_name": "Bills-Working",
-            "run_id": "${{ github.run_id }}",
-            "commit_sha": "${{ github.sha }}",
-            "branch": "${{ github.ref_name }}",
-            "generated_timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
-            }
-            EOL
-
-        - name: Generate report.md
-          run: |
-            cat > reports/report.md << EOL
-            ## Bills Workflow Report
-
-            - Workflow: Bills section of the assessment
-            - Run ID: ${{ github.run_id }}
-            - Commit SHA: ${{ github.sha }}
-            - Branch: ${{ github.ref_name }}
-            EOL
+      - name: Create reports directory
+        run: mkdir -p reports
+        working-directory: ${{ github.workspace }}
       
-        - name: Generate run-view.md
-          run: |
-            cat > reports/run-view.md << EOF
-            Run URL:
-            https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
-            EOF
-          
-        - uses: actions/upload-artifact@v4
-          with:
-            name: bills-report
-            path: reports
+      - name: get report.json
+        run: |
+          cat > reports/report.json <<EOL
+          {
+          "workflow_name": "Bills-Working",
+          "run_id": "${{ github.run_id }}",
+          "commit_sha": "${{ github.sha }}",
+          "branch": "${{ github.ref_name }}",
+          "generated_timestamp": "$(date -u +%Y-%m-%dT%H:%M:%SZ)"
+          }
+          EOL
+
+      - name: Generate report.md
+        run: |
+          cat > reports/report.md << EOL
+          ## Bills Workflow Report
+
+          - Workflow: Bills section of the assessment
+          - Run ID: ${{ github.run_id }}
+          - Commit SHA: ${{ github.sha }}
+          - Branch: ${{ github.ref_name }}
+          EOL
+    
+      - name: Generate run-view.md
+        run: |
+          cat > reports/run-view.md << EOF
+          Run URL:
+          https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
+          EOF
+        
+      - uses: actions/upload-artifact@v4
+        with:
+          name: bills-report
+          path: reports
