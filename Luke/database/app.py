@@ -3,7 +3,6 @@ import sqlite3
 
 import requests
 
-from Luke.backend.app import DATABASE_API_URL
 
 
 app = Flask(__name__)
@@ -70,60 +69,60 @@ def get_bills_by_status():
 #These are UPDATE
 #################################
 #update a bills payment status 
-@app.route("/bills/<int:bill_id>", methods=["PUT"])
-def update_bill_status(bill_id):
-    try:
-        response = requests.put(
-            f"{DATABASE_API_URL}/bills/{bill_id}",
-            json=request.get_json(),
-            timeout=10
-        )
+# @app.route("/bills/<int:bill_id>", methods=["PUT"])
+# def update_bill_status(bill_id):
+#     try:
+#         response = requests.put(
+#             f"{DATABASE_API_URL}/bills/{bill_id}",
+#             json=request.get_json(),
+#             timeout=10
+#         )
 
-        return jsonify(response.json()), response.status_code
+#         return jsonify(response.json()), response.status_code
 
-    except requests.exceptions.RequestException:
-        return jsonify({
-            "error": "Sorry could not connect to database service"
-        }), 500
+#     except requests.exceptions.RequestException:
+#         return jsonify({
+#             "error": "Sorry could not connect to database service"
+#         }), 500
 
 ##########
 #Delete
 ######################
 #delete a bill by id although we see if i actually add in functionality to delete a bill by id later
-@app.route("/bills/<int:bill_id>", methods=["DELETE"])
-def delete_bill(bill_id):
-    try:
-        response = requests.delete(
-            f"{DATABASE_API_URL}/bills/{bill_id}",
-            timeout=10
-        )
+# @app.route("/bills/<int:bill_id>", methods=["DELETE"])
+# def delete_bill(bill_id):
+#     try:
+#         response = requests.delete(
+#             f"{DATABASE_API_URL}/bills/{bill_id}",
+#             timeout=10
+#         )
 
-        return jsonify(response.json()), response.status_code
+#         return jsonify(response.json()), response.status_code
 
-    except requests.exceptions.RequestException:
-        return jsonify({
-            "error": "Sorry, it was unable to database service"
-        }), 500
+#     except requests.exceptions.RequestException:
+#         return jsonify({
+#             "error": "Sorry, it was unable to database service"
+#         }), 500
 
 #############
 #CREATE
 ################
 #I want to create a new bill
-@app.route("/bills", methods=["POST"])
-def create_bill():
-    try:
-        response = requests.post(
-            f"{DATABASE_API_URL}/bills",
-            json=request.get_json(),
-            timeout=10
-        )
+# @app.route("/bills", methods=["POST"])
+# def create_bill():
+#     try:
+#         response = requests.post(
+#             f"{DATABASE_API_URL}/bills",
+#             json=request.get_json(),
+#             timeout=10
+#         )
 
-        return jsonify(response.json()), response.status_code
+#         return jsonify(response.json()), response.status_code
 
-    except requests.exceptions.RequestException:
-        return jsonify({
-            "error": "Sorry, it was unable to connect to the database service"
-        }), 500
+#     except requests.exceptions.RequestException:
+#         return jsonify({
+#             "error": "Sorry, it was unable to connect to the database service"
+#         }), 500
 
 ####Health for the thing
 @app.get("/health")
