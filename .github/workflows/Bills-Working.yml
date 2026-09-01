@@ -4,6 +4,7 @@ on:
   push:
     branches: 
       - Luke
+      - main
 
 jobs:
 
