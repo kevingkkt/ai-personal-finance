@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Bill and Payment Tracker</title>
+
+    <link rel="stylesheet" href="static/style.css">
+ <!--   <link rel="stylesheet" href="style.css"> -->
+
+    <!-- HTMX -->
+    <!--<script src="https://unpkg.com/htmx.org@2.0.4"></script> -->
+</head>
+
+<body>
+    <div class="Main">
+        <h1> Welcome to Bill and Payment Tracker</h1>
+        <div class="billSheet">
+            <table id="billsForm">
+                <thead>
+                    <tr>
+                        <th>Bill ID</th>
+                        <th>Payment status</th>
+                        <th>Due Date</th>
+                        <th>Amount</th>
+                        <th>Description</th>
+                    </tr>
+                </thead>
+                <tbody id="billRows">
+
+                    <!-- Bill rows will be added somehow Ill come back -->
+                </tbody>
+            </table>
+            <!-- I want a tick box to sort by paid or unpaid-->
+
+        </div>
+
+        <div class="AI">
+            <!--    I want a text box to use to enter stuff and then space for ai to respond then a button-->
+            <div id="askAIAdviceForm" class="AIForm">
+                <h2>AI Assistant</h2>
+                <!-- dont need i changed my mind<input type="text" id="context-question" name="question" placeholder="Ask AI for more specific advice."> -->
+                <textarea id="aiQuestion" name="question" rows="4" placeholder="Type any specific help you need with mangaging your bills."></textarea>
+                <button type="submit">Ask </button>
+            </div>
+            <div class="AIResponse">
+                <h2>AI Response</h2>
+                <div id="aiResponse"></div>
+            </div>
+        </div>
+    </div>
+    
+<script >
+    //Table scripts
+    //calling backend 
+    async function fetchBills() {
+        const billRows = document.getElementById('billRows');
+
+        billRows.innerHTML = `<tr><td colspan="5">Waiting for bills...</td></tr>`;
+        try 
+        {
+            const response = await fetch("http://127.0.0.1:5004/bills");
+            if (!response.ok) 
+            {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+        
+            
+            const bills = await response.json();
+
+            billRows.innerHTML = "";
+
+            bills.forEach(bill => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${bill.bill_id}</td>
+                    <td>${bill.payment_status == 1 ? "Paid" : "Pending"}</td>
+                    <td>${bill.due_date}</td>
+                    <td>${bill.amount}</td>
+                    <td>${bill.description}</td>
+                `;
+                billRows.appendChild(row);
+            });
+        }
+        catch (error) {
+            console.error('Error fetching bills:', error);
+            billRows.innerHTML = `<tr><td colspan="5">Error fetching bills. Please try again later.</td></tr>`;
+        }
+    }
+    fetchBills();
+    //ai scripts\
+    
+    const submit = document.getElementById('askAIAdviceForm').querySelector('button');
+    submit.addEventListener('click', async (event) => {
+        console.log("ai script loaded");
+        event.preventDefault();
+        const userinput = document.getElementById('aiQuestion').value;
+        const AIresponse = document.getElementById('aiResponse');
+        AIresponse.innerHTML = "Ai Has not responded yet";
+        try {
+            console.log("fetching AI insights with user input:", userinput);
+            const response = await fetch("http://127.0.0.1:5004/ai-insights", {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ input: userinput })
+            });
+
+
+            const output = await response.json();
+            AIresponse.innerHTML = "";
+            AIresponse.textContent = output.insight;
+            console.log("AI insight received:", output.insight);
+            console.log("made to the end of the try block for ai script");
+        } catch (error) {
+            console.error('Error fetching AI insights:', error);
+            AIresponse.innerHTML = "Error fetching AI insights. Please try again later.";
+        }
+    });
+
+</script>
+</body>
+</html>
+<!-- Plan is to not use the app.js and just do here -->
