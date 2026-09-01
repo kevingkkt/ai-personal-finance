@@ -2,7 +2,8 @@ name: Bills-Working
 
 on:
   push:
-    branches: Luke
+    branches: 
+      - Luke
 
 jobs:
 
