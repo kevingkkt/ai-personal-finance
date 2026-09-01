@@ -107,7 +107,7 @@ jobs:
             - Run ID: ${{ github.run_id }}
             - Commit SHA: ${{ github.sha }}
             - Branch: ${{ github.ref_name }}
-            EOF
+            EOL
       
         - name: Generate run-view.md
           run: |
