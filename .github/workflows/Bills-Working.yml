@@ -115,7 +115,7 @@ jobs:
           https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}
           EOF
         
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v5
         with:
           name: bills-report
           path: reports
