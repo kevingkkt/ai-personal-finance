@@ -39,14 +39,6 @@ def test_invalid_transaction():
     response = requests.get(f"{BACKEND_URL}/budgets/9999")
     assert response.status_code == 404
 
-
-def test_htmx_transactions():
-    response = requests.get(f"{BACKEND_URL}/budgets-html")
-    assert response.status_code == 200
-    assert "<table>" in response.text
-    assert "Grocery" in response.text
-
-
 def test_ai_insights():
     response = requests.get(
         f"{BACKEND_URL}/ai-insights",

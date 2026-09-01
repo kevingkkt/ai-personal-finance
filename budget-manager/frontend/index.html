@@ -9,8 +9,6 @@
 
     <link rel="stylesheet" href="style.css">
 
-    <!-- HTMX -->
-    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
 </head>
 
 <body>
@@ -67,17 +65,6 @@
         </form>
             
         <h2>Budgets</h2>
-
-        <button
-            type="button"
-            hx-get="http://127.0.0.1:5004/budgets-html"
-            hx-target="#htmxResult"
-            hx-swap="innerHTML">
-            Refresh Budgets with HTMX
-        </button>
-
-        <div id="htmxResult"></div>
-
 
         <table>
 

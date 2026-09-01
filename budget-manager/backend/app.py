@@ -98,58 +98,6 @@ def delete_budget(budget_id):
             "error": "Could not connect to database service"
         }), 500
 
-
-# HTMX route
-@app.route("/budgets-html", methods=["GET"])
-def get_budgets_html():
-    try:
-        response = requests.get(
-            f"{DATABASE_API_URL}/budgets",
-            timeout=10
-        )
-
-        if response.status_code != 200:
-            return "<p>Could not load budgets.</p>", 500
-
-        budgets = response.json()
-
-        rows = ""
-
-        for budget in budgets:
-            rows += f"""
-            <tr>
-                <td>{budget['id']}</td>
-                <td>{budget['name']}</td>
-                <td>${budget['amount']:.2f}</td>
-                <td>{budget['start_date']}</td>
-                <td>{budget['end_date']}</td>
-                <td>{budget['description']}</td>
-            </tr>
-            """
-
-        return f"""
-        <table>
-            <thead>
-                <tr>
-                    <th>ID</th>
-                    <th>Name</th>
-                    <th>Amount</th>
-                    <th>Start Date</th>
-                    <th>End Date</th>
-                    <th>Description</th>
-                </tr>
-            </thead>
-
-            <tbody>
-                {rows}
-            </tbody>
-        </table>
-        """
-
-    except requests.exceptions.RequestException:
-        return "<p>Database service unavailable.</p>", 500
-
-
 @app.route("/ai-insights", methods=["GET"])
 def ai_insights():
     try:
@@ -171,7 +119,7 @@ def ai_insights():
         }), 500
 
     prompt = f"""
-You are an AI assistant for a university personal finance project.
+You are an AI assistant for a personal finance project.
 
 Analyse these monthly budgets::
 
