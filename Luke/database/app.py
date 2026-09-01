@@ -3,6 +3,8 @@ import sqlite3
 
 import requests
 
+from Luke.backend.app import DATABASE_API_URL
+
 
 app = Flask(__name__)
 
@@ -123,6 +125,13 @@ def create_bill():
             "error": "Sorry, it was unable to connect to the database service"
         }), 500
 
-
+####Health for the thing
+@app.get("/health")
+def health_check():
+    try:
+        response = requests.get(f"{DATABASE_API_URL}/health", timeout=10)
+        return jsonify(response.json()), response.status_code
+    except requests.exceptions.RequestException:
+        return jsonify({"error": "Sorry, it was unable to connect to the database service"}), 500
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5002, debug=True)
