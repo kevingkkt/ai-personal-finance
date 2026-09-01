@@ -5,3 +5,18 @@ services:
     container_name: finance-front-page
     ports:
       - "8080:80"
+
+  grace-database:
+    build:
+      context: ./grace/database
+    container_name: grace-database
+    ports:
+      - "6003:6003"
+    environment:
+      DB_PATH: /app/data/savings_goals.db
+    volumes:
+      - grace-savings-data:/app/data
+    restart: unless-stopped
+
+volumes:
+  grace-savings-data:
