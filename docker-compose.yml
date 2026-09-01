@@ -18,5 +18,29 @@ services:
       - grace-savings-data:/app/data
     restart: unless-stopped
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: finance-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+
+  grace-backend:
+    build:
+      context: ./grace/backend
+    container_name: grace-backend
+    ports:
+      - "5003:5003"
+    environment:
+      DATABASE_API_URL: http://grace-database:6003
+      OLLAMA_URL: http://ollama:11434/api/generate
+    depends_on:
+      - grace-database
+      - ollama
+    restart: unless-stopped
+
 volumes:
   grace-savings-data:
+  ollama-data:
