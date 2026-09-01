@@ -1,15 +1,17 @@
 from flask import Flask, jsonify, request
 import sqlite3
+import os
 
 app = Flask(__name__)
 
-DATABASE_NAME = "/app/data/savings_goals.db"
-
+DB_PATH = os.environ.get(
+    "DB_PATH",
+    os.path.join(os.path.dirname(__file__), "savings_goals.db")
+)
 
 def get_db_connection():
-    conn = sqlite3.connect(DATABASE_NAME)
+    conn = sqlite3.connect(DB_PATH)
     conn.row_factory = sqlite3.Row
-    conn.execute("PRAGMA foreign_keys = ON")
     return conn
 
 

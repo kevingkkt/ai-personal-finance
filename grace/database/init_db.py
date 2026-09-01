@@ -1,6 +1,17 @@
 import sqlite3
+import os
 
-conn = sqlite3.connect("savings_goals.db")
+DB_PATH = os.environ.get(
+    "DB_PATH",
+    os.path.join(os.path.dirname(__file__), "savings_goals.db")
+)
+
+database_directory = os.path.dirname(DB_PATH)
+
+if database_directory:
+    os.makedirs(database_directory, exist_ok=True)
+
+conn = sqlite3.connect(DB_PATH)
 cursor = conn.cursor()
 
 cursor.execute("""
