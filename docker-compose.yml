@@ -21,6 +21,8 @@ services:
     environment:
       - DATABASE_API_URL=http://bills-database:5002
       - OLLAMA_URL=http://host.docker.internal:11434/api/generate
+    depends_on:
+      - bills-database
 
   bills-frontend:
     build:

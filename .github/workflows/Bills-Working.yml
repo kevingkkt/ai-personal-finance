@@ -12,7 +12,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-    - uses: actions/checkout@v4
+    - uses: actions/checkout@v5
     - name: Build the Docker image
       run: |
           docker-compose --version || (sudo apt-get update && sudo apt-get install -y docker-compose)
@@ -37,7 +37,7 @@ jobs:
       needs: [build]
 
       steps:
-        - uses: actions/checkout@v4
+        - uses: actions/checkout@v5
 
         - name: Verify docker-compose
           run: |
@@ -79,7 +79,7 @@ jobs:
     needs: [smoke-check]
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v5
 
       - name: Create reports directory
         run: mkdir -p reports
