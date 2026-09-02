@@ -8,7 +8,7 @@ DB_PATH = os.path.join(
     "budgets.db"
 )
 
-BACKEND_URL = "http://127.0.0.1:5004"
+BACKEND_URL = "http://127.0.0.1:5008"
 
 
 def plan():
@@ -86,12 +86,12 @@ The application currently has:
 - CRUD API
 - Web frontend
 - Docker support
-- AI spending insights using DeepSeek
+- AI budget insights using DeepSeek
 
 Suggest ONE short improvement for the application.
 
 Do not give financial advice.
-Focus only on software quality, reliability or usability.
+Focus only on software quality, reliability or usability. Check the back to front page button is implemented correctly. If not suggest enhancement.
 """
 
         try:

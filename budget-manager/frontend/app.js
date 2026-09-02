@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:5004/budgets";
+const API_URL = "http://127.0.0.1:5008/budgets";
 
 const form = document.getElementById("budgetForm");
 const table = document.getElementById("budgetTable");
@@ -146,3 +146,10 @@ aiButton.addEventListener("click", async function() {
         aiResult.textContent = "Could not fetch AI insights.";
     }
 });
+
+const backButton = document.getElementById("backButton");
+
+backButton.addEventListener("click", function () {
+    window.location.href = "http://localhost:8080";
+});
+

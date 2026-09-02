@@ -1,7 +1,7 @@
 import requests
 
-BACKEND_URL = "http://127.0.0.1:5004"
-DATABASE_URL = "http://127.0.0.1:5003"
+BACKEND_URL = "http://127.0.0.1:5008"
+DATABASE_URL = "http://127.0.0.1:5007"
 
 
 def test_backend_health():
@@ -14,7 +14,7 @@ def test_database_health():
     assert response.status_code == 200
 
 
-def test_get_transactions():
+def test_get_budgets():
     response = requests.get(f"{BACKEND_URL}/budgets")
     assert response.status_code == 200
 
@@ -24,7 +24,7 @@ def test_get_transactions():
     assert len(data) >= 10
 
 
-def test_get_single_transaction():
+def test_get_single_budget():
     response = requests.get(f"{BACKEND_URL}/budgets/1")
     assert response.status_code == 200
 
@@ -35,7 +35,7 @@ def test_get_single_transaction():
     assert "amount" in data
 
 
-def test_invalid_transaction():
+def test_invalid_budget():
     response = requests.get(f"{BACKEND_URL}/budgets/9999")
     assert response.status_code == 404
 

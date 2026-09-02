@@ -8,7 +8,7 @@ CORS(app)
 
 DATABASE_API_URL = os.environ.get(
     "DATABASE_API_URL",
-    "http://127.0.0.1:5003"
+    "http://127.0.0.1:5007"
 )
 
 OLLAMA_URL = os.environ.get(
@@ -182,5 +182,5 @@ if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
         debug=True,
-        port=5004
+        port=5008
     )
