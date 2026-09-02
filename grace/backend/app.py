@@ -16,6 +16,11 @@ OLLAMA_URL = os.environ.get(
     "http://localhost:11434/api/generate"
 )
 
+AI_ADVICE_MODEL = os.environ.get(
+    "AI_ADVICE_MODEL",
+    "deepseek-r1:1.5b"
+)
+
 @app.route("/goals", methods=["GET"])
 def get_goals():
     try:
@@ -272,7 +277,7 @@ Keep the response concise and practical.
         response = requests.post(
             OLLAMA_URL,
             json={
-                "model": "deepseek-r1:1.5b",
+                "model": AI_ADVICE_MODEL,
                 "prompt": prompt,
                 "stream": False
             },
@@ -290,7 +295,7 @@ Keep the response concise and practical.
         result = response.json()
 
         return jsonify({
-            "model": "deepseek-r1:1.5b",
+            "model": AI_ADVICE_MODEL,
             "goal_id": goal_id,
             "insight": result["response"]
         })

@@ -34,7 +34,7 @@ jobs:
           python -m py_compile grace/backend/app.py
           python -m py_compile grace/database/app.py
           python -m py_compile grace/database/init_db.py
-          # python -m py_compile grace/agentic_loop.py
+          python -m py_compile grace/agentic_loop.py
           # python -m py_compile grace/tests/test_backend.py
 
       - name: Build grace backend Docker image

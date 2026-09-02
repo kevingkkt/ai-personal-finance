@@ -36,6 +36,8 @@ services:
     environment:
       DATABASE_API_URL: http://grace-database:6003
       OLLAMA_URL: http://ollama:11434/api/generate
+      AI_ADVICE_MODEL: deepseek-r1:1.5b
+      AGENTIC_MODEL: qwen2.5:1.5b
     depends_on:
       - grace-database
       - ollama

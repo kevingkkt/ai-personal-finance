@@ -28,7 +28,10 @@
     </section>
 
     <section id="detail" class="hidden">
-      <div class="heading"><div><h2 id="detail-name"></h2><p id="detail-summary"></p></div><button id="detail-close" class="secondary">Close</button></div>
+      <div class="heading"><div>
+        <h2 id="detail-name"></h2>
+        <p id="detail-summary"></p>
+      </div><button id="detail-close" class="secondary">Close</button></div>
       <h3 id="contribution-form-title">Add a contribution</h3>
       <form id="contribution-form">
         <label>Amount ($)<input id="contribution-amount" type="number" min="0.01" step="0.01" required></label>
@@ -36,7 +39,14 @@
         <div class="actions"><button type="submit" id="contribution-save">Add contribution</button><button type="button" id="contribution-cancel" class="secondary hidden">Cancel</button></div>
       </form>
       <div class="table-wrap"><table><thead><tr><th>Amount</th><th>Date</th><th>Actions</th></tr></thead><tbody id="contributions-body"></tbody></table></div>
-      <div class="ai"><h3>AI savings advice</h3><label>Optional question<textarea id="ai-question" rows="3" placeholder="How much should I save each week?"></textarea></label><button id="ai-button">Generate advice</button><p id="ai-result" class="result hidden"></p></div>
+      <div class="ai">
+        <h3>AI savings advice</h3>
+        <label>Optional question<textarea id="ai-question" rows="3" placeholder="How much should I save each week?"></textarea></label>
+        <div class="actions">
+          <button id="ai-button" type="button">Advice</button>
+        </div>
+        <p id="ai-result" class="result hidden"></p>
+      </div>
     </section>
     <p id="message" class="notice hidden"></p>
   </main>
