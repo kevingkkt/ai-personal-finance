@@ -44,3 +44,7 @@ jobs:
       - name: Build grace database Docker image
         run: |
           docker build -t grace-database ./grace/database
+  
+      - name: Build grace frontend Docker image
+        run: |
+          docker build -t grace-frontend ./grace/frontend

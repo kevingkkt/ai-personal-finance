@@ -41,6 +41,16 @@ services:
       - ollama
     restart: unless-stopped
 
+  grace-frontend:
+    build:
+      context: ./grace/frontend
+    container_name: grace-frontend
+    ports:
+      - "3003:80"
+    depends_on:
+      - grace-backend
+    restart: unless-stopped
+
 volumes:
   grace-savings-data:
   ollama-data:
