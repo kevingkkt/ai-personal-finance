@@ -9,6 +9,7 @@ DB_PATH = os.path.join(
 )
 
 BACKEND_URL = "http://127.0.0.1:5001"
+OLLAMA_URL = "http://127.0.0.1:11434/api/generate"
 
 
 def plan():
@@ -19,12 +20,13 @@ def plan():
     print("\nPLAN")
 
     plan_data = {
-        "goal": "Review the Income & Expense Tracker",
+        "goal": "Review the Income & Expense Tracker implementation",
         "checks": [
             "database records",
             "transactions API",
             "CRUD functionality",
-            "AI spending insights"
+            "microservices connection",
+            "Docker integration"
         ]
     }
 
@@ -73,51 +75,78 @@ def observe(record_count):
         return False
 
 
-def adapt(api_working):
+def adapt(api_working, record_count):
     print("\nADAPT")
 
-    if api_working:
-        prompt = """
-You are reviewing an Income & Expense Tracker for a university
-software project.
+    if not api_working:
+        print("Backend API requires review before continuing.")
+        return
 
-The application currently has:
-- SQLite transaction storage
-- CRUD API
-- Web frontend
-- Docker support
-- AI spending insights using DeepSeek
+    prompt = f"""
+You are the implementation review AI for a university software project.
 
-Suggest ONE short improvement for the application.
+Review the following Income & Expense Tracker implementation.
 
-Do not give financial advice.
-Focus only on software quality, reliability or usability.
+Current implementation:
+- SQLite database
+- Database contains {record_count} transaction records
+- Flask database microservice
+- Flask backend REST API
+- CRUD operations
+- HTML, CSS, JavaScript and HTMX frontend
+- Docker and Docker Compose
+- AI financial insights using DeepSeek
+- Backend transaction API is working
+
+Your role is to review the SOFTWARE IMPLEMENTATION only.
+
+Check:
+- software quality
+- reliability
+- usability
+- microservices design
+- API design
+- database implementation
+- Docker integration
+
+Based only on the implementation information above, identify the single
+most important software improvement.
+
+Return exactly this format:
+
+Improvement: <one short improvement>
+Reason: <one short reason>
+
+Do not list multiple improvements.
+Do not suggest functionality that is already implemented.
+Do not provide financial advice.
+Do not review the written report.
+Do not use Markdown.
 """
 
-        try:
-            response = requests.post(
-                "http://localhost:11434/api/generate",
-                json={
-                    "model": "deepseek-r1:1.5b",
-                    "prompt": prompt,
-                    "stream": False
-                },
-                timeout=120
-            )
+    try:
+        response = requests.post(
+            OLLAMA_URL,
+            json={
+                "model": "qwen2.5:0.5b",
+                "prompt": prompt,
+                "stream": False
+            },
+            timeout=180
+        )
 
-            if response.status_code == 200:
-                result = response.json()
+        if response.status_code == 200:
+            result = response.json()
 
-                print("AI Review:")
-                print(result["response"])
-            else:
-                print("AI review could not be generated.")
+            print("\nIMPLEMENTATION AI REVIEW")
+            print("Model: Qwen")
+            print(result["response"])
+        else:
+            print("Qwen implementation review could not be generated.")
 
-        except requests.exceptions.RequestException:
-            print("Could not connect to Ollama.")
-
-    else:
-        print("Backend API requires review before continuing.")
+    except requests.exceptions.RequestException as error:
+        print("Could not connect to Qwen through Ollama.")
+        print(error)
 
 
 def main():
@@ -127,7 +156,7 @@ def main():
 
     api_working = observe(record_count)
 
-    adapt(api_working)
+    adapt(api_working, record_count)
 
     print("\nAGENTIC LOOP COMPLETE")
 
