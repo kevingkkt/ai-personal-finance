@@ -5,7 +5,7 @@ services:
       context: ./front-page
     container_name: finance-front-page
     ports:
-      - "8080:80"
+      - "3000:80"
 
   # Kevin - Income & Expense Tracker
 
@@ -14,7 +14,7 @@ services:
       context: ./kevin/database
     container_name: kevin-database
     ports:
-      - "5002:5002"
+      - "6001:5002"
     volumes:
       - ./kevin/database/transactions.db:/app/transactions.db
 
@@ -44,7 +44,7 @@ services:
       context: ./kevin/frontend
     container_name: kevin-frontend
     ports:
-      - "8081:80"
+      - "3001:80"
     depends_on:
       - kevin-backend
 
@@ -55,7 +55,7 @@ services:
       context: ./Luke/database
     container_name: bills-database
     ports:
-      - "5003:5002"
+      - "6004:5002"
 
   bills-backend:
     build:
@@ -74,7 +74,7 @@ services:
       context: ./Luke/frontend
     container_name: bills-frontend
     ports:
-      - "8084:80"
+      - "3004:80"
     depends_on:
       - bills-backend
 
