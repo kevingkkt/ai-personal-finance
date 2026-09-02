@@ -1,4 +1,4 @@
-const API_URL = "http://127.0.0.1:5008/budgets";
+const API_URL = "http://127.0.0.1:5002/budgets";
 
 const form = document.getElementById("budgetForm");
 const table = document.getElementById("budgetTable");
@@ -129,7 +129,7 @@ aiButton.addEventListener("click", async function() {
     aiResult.textContent = "Analysing your budgets...";
 
     try {
-        const response = await fetch("http://127.0.0.1:5004/ai-insights");
+        const response = await fetch("http://127.0.0.1:5002/ai-insights");
         if (!response.ok) throw new Error("AI service returned an error");
 
         const data = await response.json();

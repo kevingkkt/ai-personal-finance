@@ -12,7 +12,7 @@ services:
       context: ./budget-manager/database
     container_name: budget-manager-database
     ports:
-      - "5007:5007"
+      - "6002:6002"
     volumes:
       - ./budget-manager/database/budgets.db:/app/budgets.db
     
@@ -30,9 +30,9 @@ services:
       context: ./budget-manager/backend
     container_name: budget-manager-backend
     ports:
-      - "5008:5008"
+      - "5002:5002"
     environment:
-      - DATABASE_API_URL=http://budget-manager-database:5007
+      - DATABASE_API_URL=http://budget-manager-database:6002
       - OLLAMA_URL=http://ollama:11434/api/generate
     depends_on:
       - budget-manager-database

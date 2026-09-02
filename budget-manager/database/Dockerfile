@@ -9,6 +9,6 @@ RUN pip install --no-cache-dir -r requirements.txt
 COPY app.py .
 COPY init_db.py .
 
-EXPOSE 5007
+EXPOSE 6002
 
 CMD ["python", "app.py"]

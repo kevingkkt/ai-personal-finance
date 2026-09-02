@@ -8,7 +8,7 @@ DB_PATH = os.path.join(
     "budgets.db"
 )
 
-BACKEND_URL = "http://127.0.0.1:5008"
+BACKEND_URL = "http://127.0.0.1:5002"
 
 
 def plan():
@@ -86,19 +86,19 @@ The application currently has:
 - CRUD API
 - Web frontend
 - Docker support
-- AI budget insights using DeepSeek
+- AI budget insights using Qwen 2.5 3B Instruct
 
 Suggest ONE short improvement for the application.
 
 Do not give financial advice.
-Focus only on software quality, reliability or usability. Check the back to front page button is implemented correctly. If not suggest enhancement.
+Focus only on software quality, reliability or usability.
 """
 
         try:
             response = requests.post(
                 "http://localhost:11434/api/generate",
                 json={
-                    "model": "deepseek-r1:1.5b",
+                    "model": "qwen2.5:3b-instruct",
                     "prompt": prompt,
                     "stream": False
                 },

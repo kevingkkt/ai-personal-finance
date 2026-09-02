@@ -1,7 +1,7 @@
 import requests
 
-BACKEND_URL = "http://127.0.0.1:5008"
-DATABASE_URL = "http://127.0.0.1:5007"
+BACKEND_URL = "http://127.0.0.1:5002"
+DATABASE_URL = "http://127.0.0.1:6002"
 
 
 def test_backend_health():
