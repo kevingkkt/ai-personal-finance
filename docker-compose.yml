@@ -43,7 +43,7 @@ services:
       context: ./budget-manager/frontend
     container_name: budget-manager-frontend
     ports:
-      - "8082:80"
+      - "3002:80"
     depends_on:
       - budget-manager-backend
 

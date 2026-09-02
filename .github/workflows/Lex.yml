@@ -56,7 +56,7 @@ jobs:
             return 1
           }
 
-          check_url "http://localhost:8082/"
+          check_url "http://localhost:3002/"
           check_url "http://localhost:5002/health"
           check_url "http://localhost:6002/health"
 
