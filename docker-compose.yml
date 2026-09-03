@@ -16,6 +16,8 @@ services:
       - ollama-data:/root/.ollama
     restart: unless-stopped
 
+  # Grace - Savings goal
+
   grace-database:
     build:
       context: ./grace/database
