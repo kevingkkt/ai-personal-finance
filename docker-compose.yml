@@ -11,7 +11,7 @@ services:
       context: ./Luke/database
     container_name: bills-database
     ports:
-      - "5002:5002"
+      - "6004:6004"
 
   budget-manager-database:
     build:
@@ -72,6 +72,6 @@ services:
       - "11434:11434"
     volumes:
       - ollama-data:/root/.ollama
-
-  volumes:
-    ollama-data:
+    
+volumes:
+  ollama-data:
