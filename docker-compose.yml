@@ -101,15 +101,6 @@ services:
     ports:
       - "6004:5002"
 
-  budget-manager-database:
-    build:
-      context: ./budget-manager/database
-    container_name: budget-manager-database
-    ports:
-      - "6002:6002"
-    volumes:
-      - ./budget-manager/database/budgets.db:/app/budgets.db
-
   bills-backend:
     build:
       context: ./Luke/backend
@@ -122,19 +113,6 @@ services:
     depends_on:
       - ollama
       - bills-database
-
-  budget-manager-backend:
-    build:
-      context: ./budget-manager/backend
-    container_name: budget-manager-backend
-    ports:
-      - "5002:5002"
-    environment:
-      - DATABASE_API_URL=http://budget-manager-database:6002
-      - OLLAMA_URL=http://ollama:11434/api/generate
-    depends_on:
-      - budget-manager-database
-      - ollama
 
   bills-frontend:
     build:
@@ -154,6 +132,30 @@ services:
     depends_on:
       - budget-manager-backend
     
+  # Lex - Budget Manager
+  
+  budget-manager-backend:
+    build:
+      context: ./budget-manager/backend
+    container_name: budget-manager-backend
+    ports:
+      - "5002:5002"
+    environment:
+      - DATABASE_API_URL=http://budget-manager-database:6002
+      - OLLAMA_URL=http://ollama:11434/api/generate
+    depends_on:
+      - budget-manager-database
+      - ollama
+
+  budget-manager-database:
+    build:
+      context: ./budget-manager/database
+    container_name: budget-manager-database
+    ports:
+      - "6002:6002"
+    volumes:
+      - ./budget-manager/database/budgets.db:/app/budgets.db
+
 volumes:
   grace-savings-data:
   ollama-data:
