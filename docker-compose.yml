@@ -52,10 +52,6 @@ services:
     depends_on:
       - grace-backend
     restart: unless-stopped
-
-volumes:
-  grace-savings-data:
-  ollama-data:
   
   bills-database:
     build:
@@ -117,4 +113,5 @@ volumes:
       - budget-manager-backend
     
 volumes:
+  grace-savings-data:
   ollama-data:
