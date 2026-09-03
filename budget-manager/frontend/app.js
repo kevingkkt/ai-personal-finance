@@ -18,15 +18,15 @@ async function loadBudgets() {
             const row = document.createElement("tr");
 
             row.innerHTML = `
+                <td>
+                    <button onclick="editBudget(${budget.id})">Edit</button>
+                    <button onclick="deleteBudget(${budget.id})">Delete</button>
+                </td>
                 <td>${budget.name}</td>
                 <td>${Number(budget.amount).toFixed(2)}</td>
                 <td>${budget.start_date}</td>
                 <td>${budget.end_date}</td>
                 <td>${budget.description || ""}</td>
-                <td>
-                    <button onclick="editBudget(${budget.id})">Edit</button>
-                    <button onclick="deleteBudget(${budget.id})">Delete</button>
-                </td>
             `;
 
             table.appendChild(row);

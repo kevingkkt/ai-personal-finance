@@ -17,6 +17,40 @@
 
         <h1>Budget Manager</h1>
 
+        <div class="ai-section">
+
+            <h2>AI Budget Insights</h2>
+
+            <button
+                type="button"
+                id="aiButton">
+                Get AI Budget Insights
+            </button>
+
+            <div id="aiResult"></div>
+
+        </div>
+
+        <h2>Budgets</h2>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Actions</th>
+                    <th>Name</th>
+                    <th>Amount</th>
+                    <th>Start Date</th>
+                    <th>End Date</th>
+                    <th>Description</th>
+                </tr>
+            </thead>
+
+            <tbody id="budgetTable">
+            </tbody>
+
+        </table>
+
         <form id="budgetForm">
 
             <label for="name">Budget Name</label>
@@ -63,41 +97,6 @@
             </button>
 
         </form>
-            
-        <h2>Budgets</h2>
-
-        <table>
-
-            <thead>
-                <tr>
-                    <th>Name</th>
-                    <th>Amount</th>
-                    <th>Start Date</th>
-                    <th>End Date</th>
-                    <th>Description</th>
-                    <th>Actions</th>
-                </tr>
-            </thead>
-
-            <tbody id="budgetTable">
-            </tbody>
-
-        </table>
-
-
-        <div class="ai-section">
-
-            <h2>AI Budget Insights</h2>
-
-            <button
-                type="button"
-                id="aiButton">
-                Get AI Budget Insights
-            </button>
-
-            <div id="aiResult"></div>
-
-        </div>
         
         <div class="back-button">
 
