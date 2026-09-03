@@ -6,6 +6,15 @@ services:
     ports:
       - "8080:80"
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: finance-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+
   grace-database:
     build:
       context: ./grace/database
@@ -16,15 +25,6 @@ services:
       DB_PATH: /app/data/savings_goals.db
     volumes:
       - grace-savings-data:/app/data
-    restart: unless-stopped
-
-  ollama:
-    image: ollama/ollama:latest
-    container_name: finance-ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama-data:/root/.ollama
     restart: unless-stopped
 
   grace-backend:
@@ -55,4 +55,66 @@ services:
 
 volumes:
   grace-savings-data:
+  ollama-data:
+  
+  bills-database:
+    build:
+      context: ./Luke/database
+    container_name: bills-database
+    ports:
+      - "6004:6004"
+
+  budget-manager-database:
+    build:
+      context: ./budget-manager/database
+    container_name: budget-manager-database
+    ports:
+      - "6002:6002"
+    volumes:
+      - ./budget-manager/database/budgets.db:/app/budgets.db
+
+  bills-backend:
+    build:
+      context: ./Luke/backend
+    container_name: bills-backend
+    ports:
+      - "5001:5001"
+    environment:
+      - DATABASE_API_URL=http://bills-database:5002
+      - OLLAMA_URL=http://host.docker.internal:11434/api/generate
+    depends_on:
+      - bills-database
+
+  budget-manager-backend:
+    build:
+      context: ./budget-manager/backend
+    container_name: budget-manager-backend
+    ports:
+      - "5002:5002"
+    environment:
+      - DATABASE_API_URL=http://budget-manager-database:6002
+      - OLLAMA_URL=http://ollama:11434/api/generate
+    depends_on:
+      - budget-manager-database
+      - ollama
+
+  bills-frontend:
+    build:
+      context: ./Luke/frontend
+    container_name: bills-frontend
+    ports:
+      - "8084:80"
+    depends_on:
+      - bills-backend
+
+  budget-manager-frontend:
+    build:
+      context: ./budget-manager/frontend
+    container_name: budget-manager-frontend
+    ports:
+      - "3002:80"
+    depends_on:
+      - budget-manager-backend
+    
+volumes:
   ollama-data:
