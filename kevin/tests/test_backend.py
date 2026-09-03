@@ -45,7 +45,7 @@ def test_htmx_transactions():
     response = requests.get(f"{BACKEND_URL}/transactions-html")
     assert response.status_code == 200
     assert "<table>" in response.text
-    assert "Salary" in response.text
+    assert "Monthly salary" in response.text
 
 
 def test_ai_insights():
