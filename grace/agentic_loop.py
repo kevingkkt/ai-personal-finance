@@ -181,28 +181,35 @@ def main():
     parser.add_argument("--checks-only", action="store_true", help="Skip the Qwen request")
     args = parser.parse_args()
 
-    print("PLAN:", PLAN)
-    print("ACT: Check live database records and backend read endpoints")
+    print("PLAN")
+    print(PLAN)
+    print("\nACT")
+    print("Check live database records and backend read endpoints")
 
     ok_data, data_message = observe_data_quality()
     ok_api, api_message = observe_live_endpoints()
     message = f"{data_message}. {api_message}."
-    print("OBSERVE:", message)
+    print("\nOBSERVE")
+    print(data_message)
+    print(api_message)
 
+    print("\nADAPT")
     if ok_data and ok_api:
-        print("ADAPT: Read checks passed. Consider the AI suggestion before making changes.")
+        print("Read checks passed. Consider the AI suggestion before making changes.")
     else:
-        print("ADAPT: Investigate the reported failures and rerun validation.")
+        print("Investigate the reported failures and rerun validation.")
 
     if args.checks_only:
-        print("ADAPT (Local AI suggestion): skipped --checks-only")
+        print("Local AI suggestion: skipped --checks-only")
         advice_error = None
     else:
         print("Local AI model:", OLLAMA_MODEL)
         advice, advice_error = get_local_agent_advice(message)
-        print("ADAPT (Local AI suggestion):", advice or advice_error)
+        print("Local AI suggestion:")
+        print(advice or advice_error)
 
     print("Human review required. No records or source files were changed.")
+    print("\nAGENTIC LOOP COMPLETE")
     return 0 if ok_data and ok_api and advice_error is None else 1
 
 
