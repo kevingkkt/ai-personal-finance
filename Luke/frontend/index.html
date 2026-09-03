@@ -61,7 +61,7 @@
         billRows.innerHTML = `<tr><td colspan="5">Waiting for bills...</td></tr>`;
         try 
         {
-            const response = await fetch("http://127.0.0.1:5001/bills");
+            const response = await fetch("http://127.0.0.1:5004/bills");
             if (!response.ok) 
             {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -101,7 +101,7 @@
         AIresponse.innerHTML = "Ai Has not responded yet";
         try {
             console.log("fetching AI insights with user input:", userinput);
-            const response = await fetch("http://127.0.0.1:5001/ai-insights", {
+            const response = await fetch("http://127.0.0.1:5004/ai-insights", {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'

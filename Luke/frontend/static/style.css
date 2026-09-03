@@ -13,7 +13,6 @@ body {
     font-family: Arial, sans-serif;
     background-color: #f4f7fb;
     color: #1f2937;
-    display: flex;
     justify-content: center;
     margin: 0;
 }
@@ -21,8 +20,20 @@ body {
     width: 100%;
     margin-bottom: 35px;
 }
+
+.billSheet th,
+.billSheet td {    
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.billSheet th {
+    background-color: #f1f3f5;
+}
+
 .billSheet table {
-    width: 85%;
+    margin: 0 auto;
     border-collapse: collapse;
     background-color: white;
     padding: 30px;
@@ -35,7 +46,7 @@ body {
 
 .AI{
     display: flex;
-    width: 85%;
+
 }
 
 
@@ -61,53 +72,8 @@ body {
     text-align: left;
 }
 
-.container {
-    width: 90%;
-    max-width: 1100px;
-    margin: 60px auto;
-    text-align: center;
-}
 
 h1 {
     font-size: 36px;
     margin-bottom: 12px;
-}
-
-.subtitle {
-    color: #6b7280;
-    margin-bottom: 40px;
-}
-
-.feature-grid {
-    display: grid;
-    grid-template-columns: repeat(2, 1fr);
-    gap: 24px;
-}
-
-.feature-card {
-    background-color: white;
-    padding: 30px;
-    border-radius: 12px;
-    text-decoration: none;
-    color: #1f2937;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
-    transition: 0.2s;
-}
-
-.feature-card:hover {
-    transform: translateY(-4px);
-}
-
-.feature-card h2 {
-    margin-bottom: 10px;
-}
-
-.feature-card p {
-    color: #6b7280;
-    margin-bottom: 18px;
-}
-
-.feature-card span {
-    font-size: 14px;
-    font-weight: bold;
 }

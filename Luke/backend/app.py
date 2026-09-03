@@ -6,15 +6,9 @@ import requests
 app = Flask(__name__)
 CORS(app)
 
-DATABASE_API_URL = os.environ.get(
-    "DATABASE_API_URL",
-    "http://127.0.0.1:5002"
-)
+DATABASE_API_URL = os.environ.get("DATABASE_API_URL", "http://127.0.0.1:5002")
 
-OLLAMA_URL = os.environ.get(
-    "OLLAMA_URL",
-    "http://localhost:11434/api/generate"
-)
+OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434/api/generate")
 
 #get all the bills
 @app.route("/bills", methods=["GET"])
