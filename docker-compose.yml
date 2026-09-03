@@ -25,7 +25,6 @@ services:
       - "11434:11434"
     volumes:
       - ollama-data:/root/.ollama
-
   kevin-backend:
     build:
       context: ./kevin/backend
@@ -65,8 +64,9 @@ services:
       - "5004:5001"
     environment:
       - DATABASE_API_URL=http://bills-database:5002
-      - OLLAMA_URL=http://host.docker.internal:11434/api/generate
+      - OLLAMA_URL=http://ollama:11434/api/generate
     depends_on:
+      - ollama
       - bills-database
 
   bills-frontend:
