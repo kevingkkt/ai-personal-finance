@@ -39,15 +39,57 @@
         <div class="actions"><button type="submit" id="contribution-save">Add contribution</button><button type="button" id="contribution-cancel" class="secondary hidden">Cancel</button></div>
       </form>
       <div class="table-wrap"><table><thead><tr><th>Amount</th><th>Date</th><th>Actions</th></tr></thead><tbody id="contributions-body"></tbody></table></div>
-      <div class="ai">
-        <h3>AI savings advice</h3>
-        <label>Optional question<textarea id="ai-question" rows="3" placeholder="How much should I save each week?"></textarea></label>
-        <div class="actions">
-          <button id="ai-button" type="button">Advice</button>
-        </div>
-        <p id="ai-result" class="result hidden"></p>
-      </div>
     </section>
+
+    <!-- AI insights are separate from the hidden goal details. -->
+    <section class="ai">
+      <h3>AI savings insights</h3>
+
+      <p>
+        Leave the goal name blank for overall insights.
+        Enter a goal name for insights about a specific goal.
+      </p>
+
+      <label for="ai-goal-name">
+        Goal name (optional)
+        <input
+          id="ai-goal-name"
+          type="text"
+          maxlength="100"
+          placeholder="For example: Emergency fund"
+        >
+      </label>
+
+      <div id="ai-choice-container" class="hidden">
+        <label for="ai-goal-choice">
+          Multiple goals match. Choose one:
+        </label>
+        <select id="ai-goal-choice"></select>
+      </div>
+
+      <label for="ai-question">
+        Optional question
+        <textarea
+          id="ai-question"
+          rows="3"
+          maxlength="2000"
+          placeholder="How can I improve my savings progress?"
+        ></textarea>
+      </label>
+
+      <div class="actions">
+        <button id="ai-button" type="button">
+          Generate insight
+        </button>
+      </div>
+
+      <p
+        id="ai-result"
+        class="result hidden"
+        aria-live="polite"
+      ></p>
+    </section>
+
     <p id="message" class="notice hidden"></p>
   </main>
   <script src="app.js"></script>

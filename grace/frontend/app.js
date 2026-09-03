@@ -611,33 +611,119 @@ getElement("#contributions-body").addEventListener(
 );
 
 
+// AI insights: reset duplicate-name choices when the name changes.
+getElement("#ai-goal-name").addEventListener(
+    "input",
+    function () {
+        getElement("#ai-goal-choice").replaceChildren();
+        getElement("#ai-choice-container").classList.add("hidden");
+    }
+);
+
+
+// AI insights: overall by default, or a specific named goal.
 getElement("#ai-button").addEventListener(
     "click",
     async function () {
         const button = getElement("#ai-button");
         const result = getElement("#ai-result");
+        const nameInput = getElement("#ai-goal-name");
+        const questionInput = getElement("#ai-question");
+        const choice = getElement("#ai-goal-choice");
+        const choiceContainer = getElement("#ai-choice-container");
+
+        const choosingGoal =
+            !choiceContainer.classList.contains("hidden");
+
+        if (choosingGoal && !choice.value) {
+            result.textContent = "Please choose one of the matching goals.";
+            result.classList.remove("hidden");
+            return;
+        }
+
+        const payload = {
+            goal_name: nameInput.value.trim(),
+            input: questionInput.value.trim()
+        };
+
+        if (choosingGoal) {
+            payload.goal_id = Number(choice.value);
+        }
 
         button.disabled = true;
-        result.textContent = "Generating advice...";
+        nameInput.disabled = true;
+        questionInput.disabled = true;
+        choice.disabled = true;
+
+        result.textContent = "Generating insight...";
         result.classList.remove("hidden");
 
         try {
-            const question =
-                getElement("#ai-question").value.trim();
+            const response = await fetch(
+                `${API_URL}/ai-insights`,
+                {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                }
+            );
 
-            const data = await call("/ai-insights", {
-                method: "POST",
-                body: JSON.stringify({
-                    goal_id: state.goalId,
-                    input: question
-                })
-            });
+            const data = await response.json();
 
-            result.textContent = data.insight;
+            if (
+                response.status === 409 &&
+                Array.isArray(data.matches)
+            ) {
+                choice.replaceChildren();
+
+                const placeholder = document.createElement("option");
+                placeholder.value = "";
+                placeholder.textContent = "Choose a goal";
+                choice.appendChild(placeholder);
+
+                data.matches.forEach(function (goal) {
+                    const option = document.createElement("option");
+
+                    option.value = goal.id;
+                    option.textContent =
+                        `${goal.goal_name} - ${money(goal.target_amount)} - ` +
+                        `${goal.target_date} - ID ${goal.id}`;
+
+                    choice.appendChild(option);
+                });
+
+                choiceContainer.classList.remove("hidden");
+                result.textContent = data.error;
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(
+                    data.error || "Could not generate insights."
+                );
+            }
+
+            if (
+                typeof data.insight !== "string" ||
+                !data.insight.trim()
+            ) {
+                throw new Error("AI returned no insight.");
+            }
+
+            const heading = data.scope === "overall"
+                ? "Overall savings insights"
+                : `Insights for ${data.goal_name}`;
+
+            result.textContent = `${heading}\n\n${data.insight}`;
         } catch (error) {
             result.textContent = error.message;
         } finally {
             button.disabled = false;
+            nameInput.disabled = false;
+            questionInput.disabled = false;
+            choice.disabled = false;
         }
     }
 );
