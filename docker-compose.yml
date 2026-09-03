@@ -6,6 +6,57 @@ services:
     ports:
       - "8080:80"
 
+  ollama:
+    image: ollama/ollama:latest
+    container_name: finance-ollama
+    ports:
+      - "11434:11434"
+    volumes:
+      - ollama-data:/root/.ollama
+    restart: unless-stopped
+
+  grace-database:
+    build:
+      context: ./grace/database
+    container_name: grace-database
+    ports:
+      - "6003:6003"
+    environment:
+      DB_PATH: /app/data/savings_goals.db
+    volumes:
+      - grace-savings-data:/app/data
+    restart: unless-stopped
+
+  grace-backend:
+    build:
+      context: ./grace/backend
+    container_name: grace-backend
+    ports:
+      - "5003:5003"
+    environment:
+      DATABASE_API_URL: http://grace-database:6003
+      OLLAMA_URL: http://ollama:11434/api/generate
+      AI_ADVICE_MODEL: deepseek-r1:1.5b
+      AGENTIC_MODEL: qwen2.5:1.5b
+    depends_on:
+      - grace-database
+      - ollama
+    restart: unless-stopped
+
+  grace-frontend:
+    build:
+      context: ./grace/frontend
+    container_name: grace-frontend
+    ports:
+      - "3003:80"
+    depends_on:
+      - grace-backend
+    restart: unless-stopped
+
+volumes:
+  grace-savings-data:
+  ollama-data:
+  
   bills-database:
     build:
       context: ./Luke/database
@@ -64,14 +115,6 @@ services:
       - "3002:80"
     depends_on:
       - budget-manager-backend
-
-  ollama:
-    image: ollama/ollama:latest
-    container_name: finance-ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama-data:/root/.ollama
     
 volumes:
   ollama-data:
