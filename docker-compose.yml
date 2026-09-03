@@ -54,11 +54,7 @@ services:
       - grace-backend
     restart: unless-stopped
 
-volumes:
-  grace-savings-data:
-  ollama-data:
   
-      - "3000:80"
 
   # Kevin - Income & Expense Tracker
 
@@ -71,13 +67,6 @@ volumes:
     volumes:
       - ./kevin/database/transactions.db:/app/transactions.db
 
-  ollama:
-    image: ollama/ollama:latest
-    container_name: finance-ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama-data:/root/.ollama
   kevin-backend:
     build:
       context: ./kevin/backend
@@ -163,8 +152,5 @@ volumes:
       - budget-manager-backend
     
 volumes:
-  ollama-data:
-
-
-volumes:
+  grace-savings-data:
   ollama-data:
