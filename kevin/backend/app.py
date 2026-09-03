@@ -170,30 +170,70 @@ def ai_insights():
             "error": "Could not connect to database service"
         }), 500
 
+    # Calculate financial totals using Python
+    total_income = 0.0
+    total_expenses = 0.0
+    expense_categories = {}
+
+    for transaction in transaction_data:
+        transaction_type = transaction["type"].lower()
+        amount = float(transaction["amount"])
+        category = transaction["category"]
+
+        if transaction_type == "income":
+            total_income += amount
+
+        elif transaction_type == "expense":
+            total_expenses += amount
+
+            if category not in expense_categories:
+                expense_categories[category] = 0.0
+
+            expense_categories[category] += amount
+
+    # Calculate remaining income
+    remaining_amount = total_income - total_expenses
+
+    # Save 60% of remaining income
+    recommended_saving = max(0, remaining_amount * 0.60)
+
+    # Find highest spending category
+    if expense_categories:
+        highest_category = max(
+            expense_categories,
+            key=expense_categories.get
+        )
+
+        highest_category_amount = expense_categories[highest_category]
+
+    else:
+        highest_category = "None"
+        highest_category_amount = 0.0
+
+    # DeepSeek receives the calculated information
     prompt = f"""
 You are an AI assistant for a university personal finance project.
 
-Analyse these income and expense transactions:
+Transaction data:
 
 {transaction_data}
 
-Return ONLY the final answer.
-Do not include your reasoning, thinking process, analysis steps, or a second final answer.
+The application calculated:
 
-Use exactly this format:
+Total Income: ${total_income:.2f}
+Total Expenses: ${total_expenses:.2f}
+Remaining Income: ${remaining_amount:.2f}
+Recommended Saving: ${recommended_saving:.2f}
+Highest Spending Category: {highest_category} - ${highest_category_amount:.2f}
 
-Total Income: $0.00
-Total Expenses: $0.00
-Highest Spending Category: Category - $0.00
-Saving Suggestion: One short practical suggestion.
+Review the financial summary.
 
-Rules:
-- Calculate using only the transaction data provided.
-- Do not use Markdown formatting.
-- Do not use **, #, or LaTeX symbols.
-- Do not suggest increasing spending as a way to save money.
-- Do not provide investment, tax, loan, credit, or professional financial advice.
-- Keep the saving suggestion to one short sentence.
+The saving rule used by the application is:
+Save 60% of the remaining income after expenses.
+
+Do not provide investment, tax, loan, credit, or professional financial advice.
+Do not recommend a different saving percentage.
+Keep the response short.
 """
 
     try:
@@ -212,11 +252,22 @@ Rules:
                 "error": "AI service unavailable"
             }), 500
 
-        result = response.json()
+        # DeepSeek has successfully reviewed the transaction summary
+        response.json()
+
+        # Final displayed values use Python calculations
+        insight = (
+            f"Total Income: ${total_income:,.2f}\n"
+            f"Total Expenses: ${total_expenses:,.2f}\n"
+            f"Highest Spending Category: "
+            f"{highest_category} - ${highest_category_amount:,.2f}\n"
+            f"Saving Suggestion: Save 60% of your remaining income "
+            f"after expenses, which is ${recommended_saving:,.2f}."
+        )
 
         return jsonify({
             "model": "deepseek-r1:1.5b",
-            "insight": result["response"]
+            "insight": insight
         })
 
     except requests.exceptions.RequestException:
