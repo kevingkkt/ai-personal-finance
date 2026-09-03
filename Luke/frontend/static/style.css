@@ -13,7 +13,6 @@ body {
     font-family: Arial, sans-serif;
     background-color: #f4f7fb;
     color: #1f2937;
-    display: flex;
     justify-content: center;
     margin: 0;
 }
@@ -22,7 +21,6 @@ body {
     margin-bottom: 35px;
 }
 .billSheet table {
-    width: 85%;
     margin: 0 auto;
     border-collapse: collapse;
     background-color: white;
@@ -36,7 +34,7 @@ body {
 
 .AI{
     display: flex;
-    width: 85%;
+
 }
 
 
