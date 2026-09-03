@@ -8,7 +8,7 @@ from pathlib import Path
 
 
 
-BACKEND_URL = "http://127.0.0.1:5001"
+BACKEND_URL = "http://127.0.0.1:5004"
 
 
 #def function to actually talking to ai and getting a response'
@@ -41,7 +41,7 @@ def get_ai_response(input):
     
     
 def get_data_from_db():
-    response = requests.get("http://127.0.0.1:5002/bills", timeout=10)
+    response = requests.get("http://127.0.0.1:6004/bills", timeout=10)
 
     if response.status_code == 200:
         return response.json()
@@ -50,9 +50,9 @@ def get_data_from_db():
 
 def get_endpoints():
     #Trying to check each endpoint
-    healthResponse = requests.get("http://127.0.0.1:5001/health")
-    billsResponse = requests.get("http://127.0.0.1:5001/bills")
-    singleBillResponse = requests.get("http://127.0.0.1:5001/bills/1")
+    healthResponse = requests.get("http://127.0.0.1:5004/health")
+    billsResponse = requests.get("http://127.0.0.1:5004/bills")
+    singleBillResponse = requests.get("http://127.0.0.1:5004/bills/1")
     
     TogetherResponse = {"health": healthResponse.status_code,
         "bills": billsResponse.status_code,
