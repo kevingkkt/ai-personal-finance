@@ -6,6 +6,8 @@ on:
       - Luke
       - main
       - kevin
+      
+  workflow_dispatch:
 
 jobs:
 
