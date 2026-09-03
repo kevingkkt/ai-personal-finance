@@ -20,6 +20,18 @@ body {
     width: 100%;
     margin-bottom: 35px;
 }
+
+.billSheet th,
+.billSheet td {    
+    padding: 12px;
+    border: 1px solid #ddd;
+    text-align: left;
+}
+
+.billSheet th {
+    background-color: #f1f3f5;
+}
+
 .billSheet table {
     margin: 0 auto;
     border-collapse: collapse;
