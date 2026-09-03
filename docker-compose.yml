@@ -1,4 +1,5 @@
 services:
+
   front-page:
     build:
       context: ./front-page
@@ -52,13 +53,51 @@ services:
     depends_on:
       - grace-backend
     restart: unless-stopped
+
+  
+
+  # Kevin - Income & Expense Tracker
+
+  kevin-database:
+    build:
+      context: ./kevin/database
+    container_name: kevin-database
+    ports:
+      - "6001:5002"
+    volumes:
+      - ./kevin/database/transactions.db:/app/transactions.db
+
+  kevin-backend:
+    build:
+      context: ./kevin/backend
+    container_name: kevin-backend
+    ports:
+      - "5001:5001"
+    environment:
+      - DATABASE_API_URL=http://kevin-database:5002
+      - OLLAMA_URL=http://ollama:11434/api/generate
+    depends_on:
+      - kevin-database
+      - ollama
+
+  kevin-frontend:
+    build:
+      context: ./kevin/frontend
+    container_name: kevin-frontend
+    ports:
+      - "3001:80"
+    depends_on:
+      - kevin-backend
+
+  # Luke - Bills & Payments
+
   
   bills-database:
     build:
       context: ./Luke/database
     container_name: bills-database
     ports:
-      - "6004:6004"
+      - "6004:5002"
 
   budget-manager-database:
     build:
@@ -74,11 +113,12 @@ services:
       context: ./Luke/backend
     container_name: bills-backend
     ports:
-      - "5001:5001"
+      - "5004:5001"
     environment:
       - DATABASE_API_URL=http://bills-database:5002
-      - OLLAMA_URL=http://host.docker.internal:11434/api/generate
+      - OLLAMA_URL=http://ollama:11434/api/generate
     depends_on:
+      - ollama
       - bills-database
 
   budget-manager-backend:
@@ -99,7 +139,7 @@ services:
       context: ./Luke/frontend
     container_name: bills-frontend
     ports:
-      - "8084:80"
+      - "3004:80"
     depends_on:
       - bills-backend
 
@@ -113,5 +153,6 @@ services:
       - budget-manager-backend
     
 volumes:
+  grace-savings-data:
   grace-savings-data:
   ollama-data:

@@ -1,0 +1,129 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+    <title>Income & Expense Tracker</title>
+
+    <link rel="stylesheet" href="style.css">
+
+    <!-- HTMX -->
+    <script src="https://unpkg.com/htmx.org@2.0.4"></script>
+</head>
+
+<body>
+
+    <div class="container">
+
+        <h1>Income & Expense Tracker</h1>
+
+        <form id="transactionForm">
+
+            <label for="type">Type</label>
+            <select id="type" required>
+                <option value="Income">Income</option>
+                <option value="Expense">Expense</option>
+            </select>
+
+            <label for="category">Category</label>
+            <input
+                type="text"
+                id="category"
+                placeholder="e.g. Food, Salary, Transport"
+                required
+            >
+
+            <label for="amount">Amount</label>
+
+            <div class="field-group">
+                <input
+                    type="text"
+                    id="amount"
+                    inputmode="decimal"
+                    placeholder="0.00"
+                    autocomplete="off"
+                    required
+                >
+
+                <small id="amountError" class="error-message"></small>
+            </div>
+
+            <label for="date">Date</label>
+
+            <div class="field-group">
+                <input
+                    type="text"
+                    id="date"
+                    inputmode="numeric"
+                    placeholder="dd/mm/yyyy"
+                    maxlength="10"
+                    autocomplete="off"
+                    required
+                >
+
+                <small id="dateError" class="error-message"></small>
+            </div>
+
+            <label for="description">Description</label>
+            <input
+                type="text"
+                id="description"
+                placeholder="Optional description"
+            >
+
+            <button type="submit" id="submitButton">
+                Add Transaction
+            </button>
+
+        </form>
+
+        <h2>Transactions</h2>
+
+        <button
+            type="button"
+            hx-get="http://127.0.0.1:5001/transactions-html"
+            hx-target="#htmxResult"
+            hx-swap="innerHTML">
+            Refresh Transactions
+        </button>
+
+        <div id="htmxResult"></div>
+
+        <table>
+
+            <thead>
+                <tr>
+                    <th>Type</th>
+                    <th>Category</th>
+                    <th>Amount</th>
+                    <th>Date</th>
+                    <th>Description</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+
+            <tbody id="transactionTable"></tbody>
+
+        </table>
+
+        <div class="ai-section">
+
+            <h2>AI Spending Insights</h2>
+
+            <button type="button" id="aiButton">
+                Get AI Spending Insights
+            </button>
+
+            <div id="aiResult"></div>
+
+        </div>
+
+    </div>
+
+    <script src="app.js?v=4"></script>
+
+</body>
+
+</html>

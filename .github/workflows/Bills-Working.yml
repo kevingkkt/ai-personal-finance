@@ -5,6 +5,7 @@ on:
     branches: 
       - Luke
       - main
+      - kevin
 
 jobs:
 
@@ -68,9 +69,9 @@ jobs:
               return 1
             }
 
-            check_url "http://localhost:8084/"
-            check_url "http://localhost:5001/health"
-            check_url "http://localhost:5002/health"
+            check_url "http://localhost:3004/"
+            check_url "http://localhost:5004/health"
+            check_url "http://localhost:6004/health"
 
         - name: stop the bills docker
           if: always()
