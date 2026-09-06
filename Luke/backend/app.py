@@ -120,7 +120,8 @@ def ai_insights():
         }), 500
 
     prompt = f"""
-You are a intelligent ai assistant that is able to analyse incomining  bills and provide insights on making sure that bills are being paid on time  and won't miss a bill payment.
+You are a intelligent ai assistant that is able to analyse incomining  bills and provide insights on making sure that bills are 
+being paid on time  and won't miss a bill payment.
 
 
 Analyse the following bill data and give insights on how to manage the bills effectively:
@@ -129,15 +130,20 @@ Analyse the following bill data and give insights on how to manage the bills eff
 
 Output the following in this exact format:
 Give a summary of the unpaid bills, including the total amount due and the number of unpaid bills.
-and then give a list of reccommendations on how to pay off the bills the best way possible each week and the amount that they should pay each week to make sure that they are paying off the bills on time and not missing any payments.
+and then give a list of reccommendations on how to pay off the bills the best way possible each week and the amount that they should pay each 
+week to make sure that they are paying off the bills on time and not missing any payments.
 
 Return ONLY the final answer.
 Do not include your reasoning, thinking process, analysis steps, or a second final answer.
 
 Rules:
 Return as a string in about 1 paragraph.
+Do not make up any extra information that is not from the bill data or user input.
+Do not ignore any of the user input, if it is relevant to the bills.
 
-Also consider the following user input when providing your insights if that be a specific area they want to focus on or a specific question they have about the bills:
+
+Also consider the following user input when providing your insights if that be a specific area they want to focus on or a specific question 
+they have about the bills:
 {userInput}
 """
 
