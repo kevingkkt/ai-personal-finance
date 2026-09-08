@@ -29,7 +29,7 @@ def get_ai_response(input):
 
             if response.status_code == 200:
                 result = response.json()
-
+                print("stage 3 OBSERVE phase")
                 print("AI Review:")
                 print(result["response"])
             else:
@@ -54,9 +54,8 @@ def get_endpoints():
     billsResponse = requests.get("http://127.0.0.1:5004/bills")
     singleBillResponse = requests.get("http://127.0.0.1:5004/bills/1")
     
-    TogetherResponse = {"health": healthResponse.status_code,
-        "bills": billsResponse.status_code,
-        "single_bill": singleBillResponse.status_code}
+    TogetherResponse = {"health": healthResponse.status_code, "bills": billsResponse.status_code, "single_bill": singleBillResponse.status_code}
+    return TogetherResponse
     
 def get_architecture():
     #Architecture seems to be about the design / structure so Im going to use docker compose file and have ai read that
@@ -70,8 +69,9 @@ def main():
     #Ill probably just have functions up above with differnt parts of the system focused on for each
     value = True
     while value== True:
-        print("AGENTIC LOOP RUNNING")
+        print("Phase 1: PLAN")
         #I want to split it off into cases
+        print("Lets Plan What area would you like AI to help with?")
         print("Choose an option:")
         print("1. Get AI review of database data")
         print("2. Get AI to review endpoints")
@@ -86,17 +86,26 @@ def main():
                 print("Exiting loop.")
                 value = False
             case "1":
+                print("phase 2: ACT")
                 print("AI will analyse with database data:")
                 db_data = get_data_from_db()
                 get_ai_response(db_data)
+                print("Phase 4: ADAPT phase")
+                print("Think about if the AI review has valuable insights for the system to be adapted to.")
             case "2":
+                print("phase 2: ACT")
                 print("AI will use the endpoints data to help review the data")
                 endpointsData = get_endpoints()
                 get_ai_response(endpointsData)
+                print("Phase 4: ADAPT phase")
+                print("Think about if the AI review has valuable insights for the system to be adapted to.")
             case "3":
+                print("phase 2: ACT")
                 print("Getting AI review of architecture")
                 architecture_data = get_architecture()
                 get_ai_response(architecture_data)
+                print("Phase 4: ADAPT phase")
+                print("Think about if the AI review has valuable insights for the system to be adapted to.")
     
 if __name__ == "__main__":
     main()
