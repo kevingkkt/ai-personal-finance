@@ -13,6 +13,13 @@ cursor.execute("""CREATE TABLE IF NOT EXISTS bills (
 """)#I need to get from kevins table the type as that gives if its in mine
 #then I just steam some of the info such as amount which is a bit of a yikes with the system but or well
 #I want amount screw dealing with kevins table so I need a amount
+cursor.execute("SELECT  COUNT(*) FROM bills  ")
+checkingBills = cursor.fetchone()[0]
+
+if checkingBills > 0:
+    print("Database already has bills. Skipping insertion.")
+    conn.close()
+    exit()
 
 sample_bills = [
     (True, "2026-08-01", 100.00, "Electricity bill"),
