@@ -462,6 +462,145 @@ aiButton.addEventListener(
     }
 );
 
+// ----------------------------------
+// MCP
+// ----------------------------------
+
+const mcpButton =
+    document.getElementById("mcpButton");
+
+const mcpResult =
+    document.getElementById("mcpResult");
+
+
+mcpButton.addEventListener(
+    "click",
+    async function () {
+
+        mcpResult.textContent =
+            "Calling shared MCP server...";
+
+        try {
+
+            const response =
+                await fetch(
+                    "http://127.0.0.1:5001/mcp-income-expense-summary"
+                );
+
+            const data =
+                await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.error || "MCP request failed"
+                );
+            }
+
+            const result =
+                data.result;
+
+            mcpResult.textContent =
+                `MCP Tool: ${data.tool}\n` +
+                `Total Income: $${Number(result.total_income).toFixed(2)}\n` +
+                `Total Expenses: $${Number(result.total_expenses).toFixed(2)}\n` +
+                `Net Balance: $${Number(result.net_balance).toFixed(2)}\n` +
+                `Expense Percentage: ${Number(result.expense_percentage).toFixed(2)}%\n` +
+                `Status: ${result.status}`;
+
+        } catch (error) {
+
+            console.error(error);
+
+            mcpResult.textContent =
+                "Could not connect to the MCP service.";
+        }
+    }
+);
+
+// ----------------------------------
+// RAG
+// ----------------------------------
+
+const ragButton =
+    document.getElementById("ragButton");
+
+const ragQuestion =
+    document.getElementById("ragQuestion");
+
+const ragResult =
+    document.getElementById("ragResult");
+
+
+ragButton.addEventListener(
+    "click",
+    async function () {
+
+        const question =
+            ragQuestion.value.trim();
+
+        if (!question) {
+            ragResult.textContent =
+                "Please enter a question.";
+            return;
+        }
+
+        ragResult.textContent =
+            "Searching project knowledge...";
+
+        try {
+
+            const response =
+                await fetch(
+                    "http://127.0.0.1:5001/rag-query",
+                    {
+                        method: "POST",
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+                        body: JSON.stringify({
+                            query: question
+                        })
+                    }
+                );
+
+            const data =
+                await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.error ||
+                    "RAG request failed"
+                );
+            }
+
+            if (data.grounded === false) {
+
+                ragResult.textContent =
+                    `${data.answer}\n` +
+                    `Confidence: ${data.confidence}`;
+
+                return;
+            }
+
+            const sources =
+                data.sources.join(", ");
+
+            ragResult.textContent =
+                `Answer: ${data.answer}\n\n` +
+                `Source: ${sources}\n` +
+                `Confidence: ${data.confidence}`;
+
+        } catch (error) {
+
+            console.error(error);
+
+            ragResult.textContent =
+                "Could not connect to the RAG service.";
+        }
+    }
+);
+
 
 // Load transactions when page opens
 loadTransactions();

@@ -94,6 +94,55 @@ th {
     line-height: 1.6;
 }
 
+#mcpButton {
+    width: 100%;
+    margin: 20px 0;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#mcpResult {
+    white-space: pre-wrap;
+    background: #f4f7fb;
+    padding: 20px;
+    margin-bottom: 25px;
+    border-radius: 8px;
+    line-height: 1.6;
+}
+
+.mcp-section {
+    margin-top: 30px;
+}
+
+.rag-section {
+    margin-top: 30px;
+}
+
+#ragQuestion {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    box-sizing: border-box;
+}
+
+#ragButton {
+    width: 100%;
+    margin: 15px 0;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#ragResult {
+    white-space: pre-wrap;
+    background: #f4f7fb;
+    padding: 20px;
+    margin-bottom: 25px;
+    border-radius: 8px;
+    line-height: 1.6;
+}
+
 @media (max-width: 700px) {
     form {
         grid-template-columns: 1fr;
