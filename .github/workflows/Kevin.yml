@@ -4,32 +4,59 @@ on:
   push:
     branches:
       - kevin
+      - kevin-release1
+
   pull_request:
     branches:
       - main
 
+
 jobs:
+
   test-kevin-services:
+
     runs-on: ubuntu-latest
 
+    env:
+      MCP_ENABLED: "false"
+      RAG_ENABLED: "false"
+
     steps:
+
       - name: Checkout repository
         uses: actions/checkout@v4
+
 
       - name: Set up Python
         uses: actions/setup-python@v5
         with:
           python-version: "3.11"
 
-      - name: Install backend dependencies
+
+      # ----------------------------------
+      # Install dependencies
+      # ----------------------------------
+
+      - name: Install Kevin backend dependencies
         run: |
           pip install -r kevin/backend/requirements.txt
 
-      - name: Install database dependencies
+
+      - name: Install Kevin database dependencies
         run: |
           pip install -r kevin/database/requirements.txt
 
-      - name: Check Python files
+
+      - name: Install Release 1 AI service dependencies
+        run: |
+          pip install -r ai-services/requirements.txt
+
+
+      # ----------------------------------
+      # Python validation
+      # ----------------------------------
+
+      - name: Check Kevin Python files
         run: |
           python -m py_compile kevin/backend/app.py
           python -m py_compile kevin/database/app.py
@@ -37,14 +64,40 @@ jobs:
           python -m py_compile kevin/agentic_loop.py
           python -m py_compile kevin/tests/test_backend.py
 
+
+      - name: Check Release 1 AI service files
+        run: |
+          python -m py_compile ai-services/mcp_server.py
+          python -m py_compile ai-services/mcp_test_client.py
+          python -m py_compile ai-services/rag_server.py
+          python -m py_compile ai-services/shared_agentic_loop.py
+
+
+      # ----------------------------------
+      # Docker builds
+      # ----------------------------------
+
       - name: Build Kevin backend Docker image
         run: |
           docker build -t kevin-backend ./kevin/backend
+
 
       - name: Build Kevin database Docker image
         run: |
           docker build -t kevin-database ./kevin/database
 
+
       - name: Build Kevin frontend Docker image
         run: |
           docker build -t kevin-frontend ./kevin/frontend
+
+
+      # ----------------------------------
+      # Release 1 CI confirmation
+      # ----------------------------------
+
+      - name: Confirm MCP and RAG disabled in CI
+        run: |
+          echo "MCP_ENABLED=$MCP_ENABLED"
+          echo "RAG_ENABLED=$RAG_ENABLED"
+          echo "MCP and RAG remain local services and are not started in CI."

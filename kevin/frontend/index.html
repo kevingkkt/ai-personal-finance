@@ -85,7 +85,8 @@
             type="button"
             hx-get="http://127.0.0.1:5001/transactions-html"
             hx-target="#htmxResult"
-            hx-swap="innerHTML">
+            hx-swap="innerHTML"
+        >
             Refresh Transactions
         </button>
 
@@ -108,6 +109,9 @@
 
         </table>
 
+
+        <!-- AI Spending Insights -->
+
         <div class="ai-section">
 
             <h2>AI Spending Insights</h2>
@@ -120,9 +124,56 @@
 
         </div>
 
+
+        <!-- MCP -->
+
+        <div class="mcp-section">
+
+            <h2>MCP Income & Expense Summary</h2>
+
+            <p>
+                Uses the shared MCP server to calculate an income and expense
+                summary from the current transaction records.
+            </p>
+
+            <button type="button" id="mcpButton">
+                Get MCP Income & Expense Summary
+            </button>
+
+            <div id="mcpResult"></div>
+
+        </div>
+
+
+        <!-- RAG -->
+
+        <div class="rag-section">
+
+            <h2>RAG Financial Assistant</h2>
+
+            <p>
+                Ask a question about income, expenses, spending categories,
+                remaining money or transaction records.
+            </p>
+
+            <input
+                type="text"
+                id="ragQuestion"
+                placeholder="Ask a question..."
+            >
+
+            <button type="button" id="ragButton">
+                Ask RAG
+            </button>
+
+            <div id="ragResult"></div>
+
+        </div>
+
     </div>
 
-    <script src="app.js?v=4"></script>
+
+    <script src="app.js?v=7"></script>
 
 </body>
 

@@ -7,14 +7,7 @@ services:
     ports:
       - "8080:80"
 
-  ollama:
-    image: ollama/ollama:latest
-    container_name: finance-ollama
-    ports:
-      - "11434:11434"
-    volumes:
-      - ollama-data:/root/.ollama
-    restart: unless-stopped
+
 
   # Grace - Savings goal
 
@@ -38,12 +31,11 @@ services:
       - "5003:5003"
     environment:
       DATABASE_API_URL: http://grace-database:6003
-      OLLAMA_URL: http://ollama:11434/api/generate
+      OLLAMA_URL: http://host.docker.internal:11434/api/generate
       AI_ADVICE_MODEL: deepseek-r1:1.5b
       AGENTIC_MODEL: qwen2.5:1.5b
     depends_on:
       - grace-database
-      - ollama
     restart: unless-stopped
 
   grace-frontend:
@@ -77,10 +69,12 @@ services:
       - "5001:5001"
     environment:
       - DATABASE_API_URL=http://kevin-database:5002
-      - OLLAMA_URL=http://ollama:11434/api/generate
+      - OLLAMA_URL=http://host.docker.internal:11434/api/generate
+      - MCP_URL=http://host.docker.internal:7001/mcp
+      - RAG_URL=http://host.docker.internal:7002/rag
     depends_on:
       - kevin-database
-      - ollama
+     
 
   kevin-frontend:
     build:
@@ -109,9 +103,8 @@ services:
       - "5004:5001"
     environment:
       - DATABASE_API_URL=http://bills-database:5002
-      - OLLAMA_URL=http://ollama:11434/api/generate
+      - OLLAMA_URL=http://host.docker.internal:11434/api/generate
     depends_on:
-      - ollama
       - bills-database
 
   bills-frontend:
@@ -142,10 +135,10 @@ services:
       - "5002:5002"
     environment:
       - DATABASE_API_URL=http://budget-manager-database:6002
-      - OLLAMA_URL=http://ollama:11434/api/generate
+      - OLLAMA_URL=http://host.docker.internal:11434/api/generate
     depends_on:
       - budget-manager-database
-      - ollama
+
 
   budget-manager-database:
     build:
@@ -158,4 +151,3 @@ services:
 
 volumes:
   grace-savings-data:
-  ollama-data:
