@@ -39,6 +39,11 @@
         <div class="actions"><button type="submit" id="contribution-save">Add contribution</button><button type="button" id="contribution-cancel" class="secondary hidden">Cancel</button></div>
       </form>
       <div class="table-wrap"><table><thead><tr><th>Amount</th><th>Date</th><th>Actions</th></tr></thead><tbody id="contributions-body"></tbody></table></div>
+      <div class="release-one">
+        <h3>Calculate this goal’s progress</h3>
+        <button id="savings-mcp-button" type="button">Calculate progress</button>
+        <p id="savings-mcp-result" class="result" aria-live="polite"></p>
+      </div>
     </section>
 
     <!-- AI insights are separate from the hidden goal details. -->
@@ -88,6 +93,16 @@
         class="result hidden"
         aria-live="polite"
       ></p>
+    </section>
+
+    <section class="release-one">
+      <h2>Savings knowledge</h2>
+      <p>Ask about the application's savings rules. Answers include their source and evidence confidence.</p>
+      <label for="savings-rag-question">Question</label>
+      <textarea id="savings-rag-question" rows="3" maxlength="1000"
+        placeholder="How is savings progress calculated?"></textarea>
+      <button id="savings-rag-button" type="button">Ask savings knowledge</button>
+      <p id="savings-rag-result" class="result" aria-live="polite"></p>
     </section>
 
     <p id="message" class="notice hidden"></p>

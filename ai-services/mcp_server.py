@@ -1,21 +1,31 @@
 from mcp.server import MCPServer
 from mcp.server.transport_security import TransportSecuritySettings
+from datetime import datetime
+from decimal import Decimal, InvalidOperation, ROUND_HALF_UP
+import math
+from typing import Annotated
+from pydantic import Field
+
+MoneyInput = Annotated[float, Field(strict=True)]
 
 
 mcp = MCPServer("AI Personal Finance MCP Server")
 
 
-@mcp.tool()
+@mcp.tool(structured_output=True)
 def calculate_income_expense_summary(
-    total_income: float,
-    total_expenses: float
-) -> dict:
+    total_income: MoneyInput,
+    total_expenses: MoneyInput
+) -> dict[str, object]:
     """
     Calculate an income and expense summary.
 
     This tool only performs deterministic calculations
     using the supplied income and expense totals.
     """
+
+    if not math.isfinite(total_income) or not math.isfinite(total_expenses):
+        raise ValueError("Income and expenses must be finite.")
 
     if total_income < 0:
         raise ValueError(
@@ -53,6 +63,70 @@ def calculate_income_expense_summary(
             2
         ),
         "status": status
+    }
+
+
+def money_value(value, name, *, positive=False):
+    if isinstance(value, bool):
+        raise ValueError(f"{name} must be a number")
+    try:
+        amount = Decimal(str(value))
+    except (InvalidOperation, TypeError, ValueError):
+        raise ValueError(f"{name} must be a number")
+    if not amount.is_finite():
+        raise ValueError(f"{name} must be finite")
+    if amount < 0 or (positive and amount == 0):
+        raise ValueError(f"{name} is outside the allowed range")
+    if amount > Decimal("1000000000"):
+        raise ValueError(f"{name} exceeds the supported limit")
+    if amount != amount.quantize(Decimal("0.01")):
+        raise ValueError(f"{name} must have at most two decimal places")
+    return amount
+
+
+def parse_goal_date(value, name):
+    if not isinstance(value, str):
+        raise ValueError(f"{name} must use DD-MM-YYYY")
+    try:
+        parsed = datetime.strptime(value, "%d-%m-%Y").date()
+    except ValueError:
+        raise ValueError(f"{name} must be a real DD-MM-YYYY date")
+    if parsed.strftime("%d-%m-%Y") != value:
+        raise ValueError(f"{name} must use DD-MM-YYYY")
+    return parsed
+
+
+@mcp.tool(structured_output=True)
+def calculate_savings_goal_progress(
+    target_amount: MoneyInput,
+    current_amount: MoneyInput,
+    target_date: str,
+    reference_date: str,
+) -> dict[str, object]:
+    """Read-only calculation from supplied amounts and DD-MM-YYYY dates.
+
+    No database, filesystem, shell or external URL access. Money must be
+    finite, at most two decimal places and at most one billion dollars.
+    Progress can exceed 100%; completed goals take precedence over overdue.
+    """
+    target = money_value(target_amount, "target_amount", positive=True)
+    current = money_value(current_amount, "current_amount")
+    deadline = parse_goal_date(target_date, "target_date")
+    today = parse_goal_date(reference_date, "reference_date")
+    remaining = max(target - current, Decimal("0"))
+    days = (deadline - today).days
+    percentage = (current / target * 100).quantize(
+        Decimal("0.01"), rounding=ROUND_HALF_UP
+    )
+    status = ("completed" if remaining == 0 else "overdue" if days < 0
+              else "due_today" if days == 0 else "active")
+    return {
+        "tool": "calculate_savings_goal_progress",
+        "target_amount": float(target), "current_amount": float(current),
+        "remaining_amount": float(remaining),
+        "progress_percentage": float(percentage),
+        "target_date": target_date, "reference_date": reference_date,
+        "days_remaining": days, "status": status,
     }
 
 
