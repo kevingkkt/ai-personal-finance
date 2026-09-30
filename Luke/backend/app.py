@@ -10,6 +10,9 @@ DATABASE_API_URL = os.environ.get("DATABASE_API_URL", "http://127.0.0.1:5002")
 
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434/api/generate")
 
+MCP_URL = os.environ.get("MCP_URL","http://localhost:7007/mcp")
+
+RAG_URL = os.environ.get("RAG_URL","http://localhost:7008/rag")
 #get all the bills
 @app.route("/bills", methods=["GET"])
 def get_bills():
@@ -32,6 +35,40 @@ def get_bill(bill_id):
     try:
         response = requests.get(
             f"{DATABASE_API_URL}/bills/{bill_id}",
+            timeout=10
+        )
+
+        return jsonify(response.json()), response.status_code
+
+    except requests.exceptions.RequestException:
+        return jsonify({
+            "error": "Could not connect to database service"
+        }), 500
+# for paid bills
+@app.route("/bills/paid", methods=["GET"])
+def get_paid_bills():
+    try:
+        response = requests.get(
+            f"{DATABASE_API_URL}/bills/by-status",
+            params={"payment_status": 1},
+            timeout=10
+        )
+
+        return jsonify(response.json()), response.status_code
+
+    except requests.exceptions.RequestException:
+        return jsonify({
+            "error": "Could not connect to database service"
+        }), 500
+
+
+# for unpaid bills
+@app.route("/bills/unpaid", methods=["GET"])
+def get_unpaid_bills():
+    try:
+        response = requests.get(
+            f"{DATABASE_API_URL}/bills/by-status",
+            params={"payment_status": 0},
             timeout=10
         )
 
