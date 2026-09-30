@@ -113,8 +113,10 @@ def main():
                 print("Phase 4: ADAPT phase")
                 print("Think about if the AI review has valuable insights for the system to be adapted to.")
             case "4":
+                print("starting up")
                 print("phase 2: Act getting MCP tools")
                 
+                print("phase 2 complete")
                 print("phase 3: Observe")
                 
                 
