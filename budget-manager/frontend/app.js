@@ -147,6 +147,87 @@ aiButton.addEventListener("click", async function() {
     }
 });
 
+const mcpButton = document.getElementById("mcpButton");
+const mcpResult = document.getElementById("mcpResult");
+
+mcpButton.addEventListener("click", async function() {
+    mcpResult.textContent = "Calling shared MCP server...";
+
+    try {
+        const response = await fetch(
+            "http://127.0.0.1:5002/mcp-budget-summary"
+        );
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "MCP request failed");
+        }
+
+        const result = data.result;
+        const largest = result.largest_category;
+        const smallest = result.smallest_category;
+
+        mcpResult.textContent =
+            `MCP Tool: ${data.tool}\n` +
+            `Budget Count: ${result.budget_count}\n` +
+            `Total Budget: $${Number(result.total_budget).toFixed(2)}\n` +
+            `Average Category Amount: $${Number(result.average_category_amount).toFixed(2)}\n` +
+            `Largest Category: ${largest ? `${largest.name} - $${Number(largest.amount).toFixed(2)}` : "No data"}\n` +
+            `Smallest Category: ${smallest ? `${smallest.name} - $${Number(smallest.amount).toFixed(2)}` : "No data"}\n` +
+            `Top Three Share: ${Number(result.top_three_share_pct).toFixed(2)}%`;
+    } catch (error) {
+        console.error(error);
+        mcpResult.textContent = "Could not connect to the MCP service.";
+    }
+});
+
+const ragButton = document.getElementById("ragButton");
+const ragQuestion = document.getElementById("ragQuestion");
+const ragResult = document.getElementById("ragResult");
+
+ragButton.addEventListener("click", async function() {
+    const question = ragQuestion.value.trim();
+
+    if (!question) {
+        ragResult.textContent = "Please enter a question.";
+        return;
+    }
+
+    ragResult.textContent = "Searching project knowledge...";
+
+    try {
+        const response = await fetch(
+            "http://127.0.0.1:5002/rag-query",
+            {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json"
+                },
+                body: JSON.stringify({query: question})
+            }
+        );
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "RAG request failed");
+        }
+
+        if (data.grounded === false) {
+            ragResult.textContent =
+                `${data.answer}\nConfidence: ${data.confidence}`;
+            return;
+        }
+
+        ragResult.textContent =
+            `Answer: ${data.answer}\n\n` +
+            `Source: ${data.sources.join(", ")}\n` +
+            `Confidence: ${data.confidence}`;
+    } catch (error) {
+        console.error(error);
+        ragResult.textContent = "Could not connect to the RAG service.";
+    }
+});
+
 const backButton = document.getElementById("backButton");
 
 backButton.addEventListener("click", function () {
