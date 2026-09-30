@@ -116,6 +116,9 @@ services:
     depends_on:
       - bills-backend
 
+  
+    
+  # Lex - Budget Manager
   budget-manager-frontend:
     build:
       context: ./budget-manager/frontend
@@ -124,9 +127,7 @@ services:
       - "3002:80"
     depends_on:
       - budget-manager-backend
-    
-  # Lex - Budget Manager
-  
+
   budget-manager-backend:
     build:
       context: ./budget-manager/backend
@@ -136,6 +137,8 @@ services:
     environment:
       - DATABASE_API_URL=http://budget-manager-database:6002
       - OLLAMA_URL=http://host.docker.internal:11434/api/generate
+      - MCP_URL=http://host.docker.internal:7001/mcp
+      - RAG_URL=http://host.docker.internal:7002/rag
     depends_on:
       - budget-manager-database
 

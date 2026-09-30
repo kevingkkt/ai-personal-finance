@@ -2,8 +2,11 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from datetime import datetime
 from collections import defaultdict
+import asyncio
+import json
 import os
 import requests
+from mcp import Client
 
 app = Flask(__name__)
 CORS(app)
@@ -18,6 +21,15 @@ OLLAMA_URL = os.environ.get(
     "http://localhost:11434/api/generate"
 )
 
+MCP_URL = os.environ.get(
+    "MCP_URL",
+    "http://localhost:7001/mcp"
+)
+
+RAG_URL = os.environ.get(
+    "RAG_URL",
+    "http://localhost:7002/rag"
+)
 
 @app.route("/budgets", methods=["GET"])
 def get_budgets():
@@ -250,6 +262,55 @@ def build_budget_summary(budgets):
     }
 
 
+async def call_budget_summary_mcp(summary):
+    async with Client(MCP_URL) as client:
+        result = await client.call_tool(
+            "analyze_budget_summary",
+            {"summary_json": json.dumps(summary)}
+        )
+
+        if result.is_error:
+            raise Exception("MCP tool returned an error")
+
+        if not result.content:
+            raise Exception("MCP returned no content")
+
+        return json.loads(result.content[0].text)
+
+
+@app.route("/mcp-budget-summary", methods=["GET"])
+def mcp_budget_summary():
+    try:
+        database_response = requests.get(
+            f"{DATABASE_API_URL}/budgets",
+            timeout=10
+        )
+    except requests.exceptions.RequestException:
+        return jsonify({
+            "error": "Could not connect to database service"
+        }), 500
+
+    if database_response.status_code != 200:
+        return jsonify({
+            "error": "Could not retrieve budget data"
+        }), 500
+
+    summary = build_budget_summary(database_response.json())
+
+    try:
+        mcp_result = asyncio.run(call_budget_summary_mcp(summary))
+        return jsonify({
+            "source": "Shared MCP Server",
+            "tool": "analyze_budget_summary",
+            "result": mcp_result
+        })
+    except Exception as error:
+        return jsonify({
+            "error": "Could not connect to MCP server",
+            "details": str(error)
+        }), 500
+
+
 @app.route("/ai-insights", methods=["GET"])
 def ai_insights():
     try:
@@ -362,6 +423,32 @@ If no budget data is available, return:
         return jsonify({
             "error": "Could not connect to Ollama"
         }), 500
+
+
+@app.route("/rag-query", methods=["POST"])
+def rag_query():
+    data = request.get_json(silent=True) or {}
+    query = str(data.get("query", "")).strip()
+
+    if not query:
+        return jsonify({
+            "error": "A RAG question is required."
+        }), 400
+
+    try:
+        response = requests.post(
+            RAG_URL,
+            json={"query": query},
+            timeout=120
+        )
+        response.raise_for_status()
+        return jsonify(response.json())
+
+    except requests.exceptions.RequestException as error:
+        return jsonify({
+            "error": "Could not connect to RAG server.",
+            "details": str(error)
+        }), 503
 
 
 @app.route("/health", methods=["GET"])
