@@ -91,7 +91,7 @@ async def call_total_unpaid_mcp():
         )
 
         if result.is_error:
-            raise Exception("MCP tool returned an error"+result.is_error)
+            raise Exception("MCP tool returned an error")
 
         if not result.content:
             raise Exception("MCP tool returned no content")

@@ -161,12 +161,15 @@
 
         if (isMcpEnabled()) {
             //we also want to change this to be 
+            totalUnpaidButton.disabled = false;
             mcpOutput.textContent ="MCP is ON Feel free to use as you please";
         } else {
+            //adding button toggle
+            totalUnpaidButton.disabled =true;
             mcpOutput.textContent = "MCP is OFF";
 
             //tell them to turn it off
-           
+        
         }
 
     }
@@ -212,7 +215,7 @@ totalUnpaidButton.addEventListener("click", async () => {
             throw new Error(result.error);
         }
 
-        mcpOutput.textContent ="Total unpaid: $" + result.total_unpaid;
+        mcpOutput.textContent ="Total unpaid: $" + result.result.total_unpaid;
 
     } catch (error) {
 
