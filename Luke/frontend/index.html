@@ -50,6 +50,31 @@
                 <div id="aiResponse"></div>
             </div>
         </div>
+        <div class="MCP">
+            <h2>MCP</h2>
+            <label>
+                <input type="checkbox" id="mcpOnOff">
+                Enable MCP
+                <!--also want when off the buttons to turn off in front end-->
+            </label>
+
+            <button id="totalUnpaidButton">
+                Get Total Unpaid
+            </button>
+
+            <div id="mcpOutput">
+                Awaiting use of MCP
+            </div>
+            <!--Changed mind we only doing the get total unpaid as its enough and I dont care enough to do better-->
+            <!--    Need on off switch first then text box then -->
+
+            <!--slider for showing paid and not paid-->
+
+            <!--button for getting total unpaid costs-->
+            
+        </div>
+
+
     </div>
     
 <script >
@@ -120,6 +145,84 @@
             AIresponse.innerHTML = "Error fetching AI insights. Please try again later.";
         }
     });
+
+
+    //MCP area
+    const mcpOnOff = document.getElementById("mcpOnOff");
+    const totalUnpaidButton = document.getElementById("totalUnpaidButton");
+    const mcpOutput = document.getElementById("mcpOutput");
+
+    //we want default set up 
+    //same as lab
+    function isMcpEnabled() {
+        return mcpOnOff.checked;
+    }
+    function renderMcpState() {
+
+        if (isMcpEnabled()) {
+            //we also want to change this to be 
+            mcpOutput.textContent ="MCP is ON Feel free to use as you please";
+        } else {
+            mcpOutput.textContent = "MCP is OFF";
+
+            //tell them to turn it off
+           
+        }
+
+    }
+
+
+
+// When checkbox is changed
+mcpOnOff.addEventListener("change", () => {
+
+    renderMcpState();
+
+    if (!isMcpEnabled()) {
+         //tell them to turn it off
+        mcpOutput.textContent ="MCP is OFF. Enable MCP to use the tool.";
+    }
+    else
+    {
+         mcpOutput.textContent ="MCP is ON Feel free to use as you please";
+    }
+
+});
+//default setting these upp than event listener deals with it
+
+    renderMcpState();
+
+    if (!isMcpEnabled()) {
+
+         mcpOutput.textContent ="MCP is OFF. Enable MCP to use the tool.";
+
+    }
+
+//Now the set up for on button click we run the main function
+// Get total unpaid
+totalUnpaidButton.addEventListener("click", async () => {
+//To make the user have instant feedback
+    mcpOutput.textContent ="trying to get total unpaid bills please wait.";
+
+    try {
+
+        const response = await fetch("http://127.0.0.1:5004/mcp/total-unpaid");
+        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result.error);
+        }
+
+        mcpOutput.textContent ="Total unpaid: $" + result.total_unpaid;
+
+    } catch (error) {
+
+        console.error("MCP error:", error);
+
+        mcpOutput.textContent ="Error getting total unpaid. Error was:"+ error;
+
+    }
+
+});
 
 </script>
 </body>

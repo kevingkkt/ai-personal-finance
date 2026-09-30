@@ -1,5 +1,8 @@
+import os
+import requests
 from mcp.server import MCPServer
 from mcp.server.transport_security import TransportSecuritySettings
+BILLS_API_URL = os.environ.get("BILLS_API_URL","http://localhost:5004")
 
 
 mcp = MCPServer("AI Personal Finance MCP Server")
@@ -54,6 +57,70 @@ def calculate_income_expense_summary(
         ),
         "status": status
     }
+#Luke Section
+#first we get the info from here
+
+@mcp.tool()
+def get_all_bills() -> dict[str, object]:
+    """
+    Get all the bills data.
+    """
+    response = requests.get(
+        f"{BILLS_API_URL}/bills",
+        timeout=10
+    )
+    response.raise_for_status()
+
+    return response.json()
+
+
+@mcp.tool()
+def get_paid_bills() -> dict[str, object]:
+    """
+    Get all of the paid bills.
+    """
+    response = requests.get(
+        f"{BILLS_API_URL}/bills/paid",
+        timeout=10
+    )
+    response.raise_for_status()
+
+    return response.json()
+
+
+@mcp.tool()
+def get_unpaid_bills() -> dict[str, object]:
+    """
+    Get all unpaid bills  
+    """
+    response = requests.get(
+        f"{BILLS_API_URL}/bills/unpaid",
+        timeout=10
+    )
+    response.raise_for_status()
+
+    return response.json()
+
+#The actual useful tool case.
+@mcp.tool()
+def get_total_unpaid() -> dict[str, float]:
+    """
+    Go get the total number of all the bills which are unpaid.
+    """
+    response = requests.get(
+        f"{BILLS_API_URL}/bills/unpaid",
+        timeout=10
+    )
+    response.raise_for_status()
+
+    bills = response.json()
+
+    total = sum(float(bill["amount"]) for bill in bills)
+
+    return {
+        "total_unpaid": total
+    }
+
 
 
 if __name__ == "__main__":
