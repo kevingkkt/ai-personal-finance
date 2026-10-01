@@ -108,3 +108,9 @@ jobs:
         with:
           name: budget-manager-report
           path: reports
+
+      - name: Confirm MCP and RAG disabled in CI
+        run: |
+          echo "MCP_ENABLED=$MCP_ENABLED"
+          echo "RAG_ENABLED=$RAG_ENABLED"
+          echo "MCP and RAG remain local services and are not started in CI."
