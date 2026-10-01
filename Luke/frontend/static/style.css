@@ -70,3 +70,42 @@ h1 {
     margin-bottom: 12px;
     text-align: center;
 }
+
+.RAG{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+.MCP{
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+}
+
+h2 {
+    font-size: 28px;
+    margin-bottom: 12px;
+}
+
+#mcpOutput, 
+#ragOutput
+{
+    white-space: pre-wrap;
+    background: #f4f7fb;
+    padding: 20px;
+    margin-bottom: 25px;
+    border-radius: 8px;
+    line-height: 1.6;
+}
+
+#totalUpaidButton,
+#ragButton {
+    padding: 10px 20px;
+    font-size: 16px;
+    background-color: #b0ceee;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+}
