@@ -14,9 +14,9 @@ const submitButton = document.getElementById("submitButton");
 let editingId = null;
 
 
-// ----------------------------------
+
 // DATE FORMAT
-// ----------------------------------
+
 
 function convertToDisplayDate(date) {
     if (!date) {
@@ -44,9 +44,9 @@ function convertToDatabaseDate(date) {
 }
 
 
-// ----------------------------------
+
 // AMOUNT VALIDATION
-// ----------------------------------
+
 
 function validAmount(value) {
     const number = Number(value);
@@ -77,9 +77,9 @@ amountInput.addEventListener("input", function () {
 });
 
 
-// ----------------------------------
+
 // DATE VALIDATION
-// ----------------------------------
+
 
 function validDate(value) {
 
@@ -106,7 +106,7 @@ function validDate(value) {
 }
 
 
-// Auto change 28082026 to 28/08/2026
+
 dateInput.addEventListener("input", function () {
 
     let numbers =
@@ -147,9 +147,9 @@ dateInput.addEventListener("input", function () {
 });
 
 
-// ----------------------------------
+
 // LOAD TRANSACTIONS
-// ----------------------------------
+
 
 async function loadTransactions() {
 
@@ -202,9 +202,9 @@ async function loadTransactions() {
 }
 
 
-// ----------------------------------
+
 // ADD / UPDATE
-// ----------------------------------
+
 
 form.addEventListener("submit", async function (event) {
 
@@ -337,9 +337,9 @@ form.addEventListener("submit", async function (event) {
 });
 
 
-// ----------------------------------
+
 // EDIT
-// ----------------------------------
+
 
 async function editTransaction(id) {
 
@@ -382,9 +382,9 @@ async function editTransaction(id) {
 }
 
 
-// ----------------------------------
+
 // DELETE
-// ----------------------------------
+
 
 async function deleteTransaction(id) {
 
@@ -414,9 +414,9 @@ async function deleteTransaction(id) {
 }
 
 
-// ----------------------------------
+
 // AI
-// ----------------------------------
+
 
 const aiButton =
     document.getElementById("aiButton");
@@ -462,9 +462,10 @@ aiButton.addEventListener(
     }
 );
 
-// ----------------------------------
+
 // MCP
-// ----------------------------------
+
+const mcpEnable = document.getElementById("mcpEnable");
 
 const mcpButton =
     document.getElementById("mcpButton");
@@ -476,6 +477,12 @@ const mcpResult =
 mcpButton.addEventListener(
     "click",
     async function () {
+
+        if (!mcpEnable.checked) {
+            mcpResult.textContent =
+                "MCP is currently disabled. Enable MCP to use the income and expense summary.";
+            return;
+        }
 
         mcpResult.textContent =
             "Calling shared MCP server...";
@@ -517,9 +524,11 @@ mcpButton.addEventListener(
     }
 );
 
-// ----------------------------------
+
 // RAG
-// ----------------------------------
+
+const ragEnable =
+    document.getElementById("ragEnable");
 
 const ragButton =
     document.getElementById("ragButton");
@@ -534,7 +543,12 @@ const ragResult =
 ragButton.addEventListener(
     "click",
     async function () {
-
+        if (!ragEnable.checked) {
+            ragResult.textContent =
+                "RAG is currently disabled. Enable RAG to ask questions using the project knowledge base.";
+            return;
+        }
+        
         const question =
             ragQuestion.value.trim();
 
