@@ -52,12 +52,13 @@
         </div>
         <div class="MCP">
             <h2>MCP</h2>
+            <p>Click the button to get the total of unpaid bills.</p>
             <label>
                 <input type="checkbox" id="mcpOnOff">
                 Enable MCP
                 <!--also want when off the buttons to turn off in front end-->
             </label>
-            <p>Click the button to get the total of unpaid bills.</p>
+            
             <button id="totalUnpaidButton">
                 Get Total Unpaid
             </button>
@@ -85,7 +86,7 @@
             <input type="text" id="ragQuestion" name="question" placeholder="Ask RAG for more specific advice.">
             </input>
             <button id="ragButton">
-                Get Total Unpaid
+                Begin RAG
             </button>
             <!--Pretty sure you dont see this text as itll be edited more or less out in Javscript but its there-->
             <div id="ragOutput">
@@ -261,9 +262,11 @@ function isRagEnabled() {
 function renderRagState() {
     if (isRagEnabled()) {
         ragButton.disabled = false;
+        ragQuestion.disabled = false;
         ragOutput.textContent = "RAG is ON.ask your question when ready";
     } else {
         ragButton.disabled = true;
+        ragQuestion.disabled = true;
         ragOutput.textContent = "RAG is OFF. click on the check to enable rag";
     }
 }
