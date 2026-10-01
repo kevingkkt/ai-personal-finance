@@ -10,9 +10,9 @@ MCP_URL = "http://localhost:7001/mcp"
 RAG_URL = "http://localhost:7002/rag"
 
 
-# ----------------------------------
+
 # MCP validation mode
-# ----------------------------------
+
 
 async def validate_mcp():
 
@@ -158,9 +158,9 @@ async def validate_mcp():
         return False
 
 
-# ----------------------------------
+
 # RAG validation mode
-# ----------------------------------
+
 
 def validate_rag():
 
@@ -190,9 +190,9 @@ def validate_rag():
 
     try:
 
-        # ----------------------------------
+        
         # Supported question
-        # ----------------------------------
+        
 
         supported_response = requests.post(
             RAG_URL,
@@ -210,9 +210,9 @@ def validate_rag():
         )
 
 
-        # ----------------------------------
+        
         # Unsupported question
-        # ----------------------------------
+        
 
         unsupported_response = requests.post(
             RAG_URL,
@@ -289,9 +289,9 @@ def validate_rag():
         )
 
 
-        # ----------------------------------
+        
         # Validate supported response
-        # ----------------------------------
+        
 
         supported_valid = (
             supported_data.get(
@@ -312,9 +312,9 @@ def validate_rag():
         )
 
 
-        # ----------------------------------
+        
         # Validate insufficient context
-        # ----------------------------------
+      
 
         unsupported_valid = (
             unsupported_data.get(
@@ -397,9 +397,9 @@ def validate_rag():
         return False
 
 
-# ----------------------------------
+
 # Main
-# ----------------------------------
+
 
 def main():
 

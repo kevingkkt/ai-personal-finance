@@ -11,9 +11,9 @@ app = Flask(__name__)
 CORS(app)
 
 
-# ----------------------------------
+
 # Configuration
-# ----------------------------------
+
 
 BASE_DIR = Path(__file__).resolve().parent
 KNOWLEDGE_DIR = BASE_DIR / "knowledge"
@@ -29,9 +29,9 @@ RAG_MODEL = os.environ.get(
 )
 
 
-# ----------------------------------
+
 # Load knowledge
-# ----------------------------------
+
 
 def load_knowledge():
     chunks = []
@@ -59,9 +59,9 @@ def load_knowledge():
     return chunks
 
 
-# ----------------------------------
+
 # Retrieve relevant context
-# ----------------------------------
+
 
 def retrieve_context(query):
 
@@ -117,9 +117,8 @@ def retrieve_context(query):
     }
 
 
-# ----------------------------------
 # Generate grounded answer
-# ----------------------------------
+
 
 def generate_grounded_answer(
     query,
@@ -171,9 +170,9 @@ ANSWER:
     ).strip()
 
 
-# ----------------------------------
+
 # Health endpoint
-# ----------------------------------
+
 
 @app.route(
     "/health",
@@ -195,9 +194,9 @@ def health():
     })
 
 
-# ----------------------------------
+
 # RAG endpoint
-# ----------------------------------
+
 
 @app.route(
     "/rag",
@@ -225,7 +224,7 @@ def rag():
             query
         )
 
-        # Required insufficient-context behaviour
+        
         if retrieved is None:
 
             return jsonify({
@@ -272,9 +271,7 @@ def rag():
         }), 500
 
 
-# ----------------------------------
-# Start local RAG server
-# ----------------------------------
+
 
 if __name__ == "__main__":
 
