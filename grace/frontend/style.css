@@ -71,6 +71,7 @@ label {
 }
 
 input,
+select,
 textarea {
     width: 100%;
     padding: 10px;
@@ -81,6 +82,7 @@ textarea {
 }
 
 input:focus,
+select:focus,
 textarea:focus {
     outline: none;
     border-color: #2563eb;
@@ -212,4 +214,48 @@ tr:hover {
 }
 .release-one .result { white-space: pre-wrap; overflow-wrap: anywhere; }
 .release-one button { margin-top: 0.75rem; }
-.release-one button:disabled { opacity: 0.6; cursor: wait; }
+.release-one button:disabled { opacity: 0.6; cursor: not-allowed; }
+
+.mode-switches {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px 40px;
+    margin-top: 20px;
+}
+
+.mode-switch {
+    display: inline-flex;
+    align-items: center;
+    gap: 12px;
+    cursor: pointer;
+}
+
+.mode-switch input {
+    appearance: none;
+    width: 48px;
+    height: 28px;
+    padding: 3px;
+    border: 2px solid #6b7280;
+    border-radius: 20px;
+    background: #6b7280;
+    cursor: pointer;
+}
+
+.mode-switch input::before {
+    content: "";
+    display: block;
+    width: 18px;
+    height: 18px;
+    border-radius: 50%;
+    background: white;
+}
+
+.mode-switch input:checked {
+    background: #2563eb;
+    border-color: #2563eb;
+}
+
+.mode-switch input:checked::before { transform: translateX(20px); }
+.mode-switch input:focus-visible { outline: 3px solid #1f2937; outline-offset: 3px; }
+.release-one textarea:disabled,
+.release-one select:disabled { background: #f3f4f6; cursor: not-allowed; }

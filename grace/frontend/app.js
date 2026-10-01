@@ -131,6 +131,7 @@ function progress(goal) {
 
 
 function renderGoals() {
+    renderMcpGoals();
     const goalsBody = getElement("#goals-body");
 
     if (state.goals.length === 0) {
@@ -293,7 +294,6 @@ async function loadGoals() {
 
 async function selectGoal(id) {
     state.goalId = id;
-    document.getElementById("savings-mcp-result").textContent = "";
 
     state.contributions = await call(
         `/goals/${id}/contributions`
@@ -766,28 +766,120 @@ getElement("#detail-close").addEventListener(
 );
 
 
-loadGoals();
 // Release 1 requests always go through the savings backend.
+function createSavingsMode(name, button, result, inputs = [], canRun = () => true) {
+    const prefix = `savings-${name.toLowerCase()}`;
+    const toggle = document.getElementById(`${prefix}-toggle`);
+    const label = document.getElementById(`${prefix}-state`);
+    const storageKey = `${prefix}-enabled`;
+    let activeRequest = null;
+
+    // Storage may be unavailable in private or restricted browser sessions.
+    try {
+        toggle.checked = localStorage.getItem(storageKey) !== "false";
+    } catch (_) { /* Keep the default setting for this page. */ }
+
+    function updateControls() {
+        label.textContent = toggle.checked ? "On" : "Off";
+        button.disabled = !toggle.checked || activeRequest !== null || !canRun();
+        inputs.forEach(input => { input.disabled = !toggle.checked; });
+    }
+
+    function offMessage() {
+        return `${name} mode is off. Turn it on above to use this feature.`;
+    }
+
+    toggle.addEventListener("change", () => {
+        if (!toggle.checked) {
+            activeRequest?.abort();
+            activeRequest = null;
+        }
+        result.textContent = toggle.checked ? "" : offMessage();
+        try {
+            localStorage.setItem(storageKey, String(toggle.checked));
+        } catch (_) { /* The switch still works without saved preferences. */ }
+        updateControls();
+    });
+    updateControls();
+    if (!toggle.checked) result.textContent = offMessage();
+
+    return {
+        get enabled() { return toggle.checked; },
+        reset() {
+            activeRequest?.abort();
+            activeRequest = null;
+            result.textContent = toggle.checked ? "" : offMessage();
+            updateControls();
+        },
+        async run(loadingMessage, timeout, request) {
+            if (!toggle.checked || activeRequest !== null || !canRun()) return;
+            const controller = new AbortController();
+            activeRequest = controller;
+            const timer = setTimeout(() => controller.abort(
+                new DOMException("The request timed out. Try again.", "TimeoutError")
+            ), timeout);
+            updateControls();
+            result.textContent = loadingMessage;
+            try {
+                const text = await request(controller.signal);
+                if (activeRequest === controller && toggle.checked) {
+                    result.textContent = text;
+                }
+            } catch (error) {
+                if (activeRequest === controller && toggle.checked) {
+                    result.textContent = error.name === "TimeoutError"
+                        ? "The request timed out. Try again." : error.message;
+                }
+            } finally {
+                clearTimeout(timer);
+                if (activeRequest === controller) {
+                    activeRequest = null;
+                    updateControls();
+                }
+            }
+        }
+    };
+}
+
 const savingsMcpButton = document.getElementById("savings-mcp-button");
 const savingsMcpResult = document.getElementById("savings-mcp-result");
+const savingsMcpGoal = document.getElementById("savings-mcp-goal");
+const savingsMcpMode = createSavingsMode("MCP", savingsMcpButton, savingsMcpResult,
+    [savingsMcpGoal], () => state.goals.some(goal => String(goal.id) === savingsMcpGoal.value));
+
+function renderMcpGoals() {
+    const selectedId = savingsMcpGoal.value;
+    const placeholder = document.createElement("option");
+    placeholder.value = "";
+    placeholder.textContent = state.goals.length ? "Choose a goal…" : "No goals yet — add a savings goal above";
+    savingsMcpGoal.replaceChildren(placeholder);
+    state.goals.forEach(goal => {
+        const option = document.createElement("option");
+        option.value = String(goal.id);
+        option.textContent = `${goal.goal_name} — ${money(goal.target_amount)} — ${goal.target_date} (ID ${goal.id})`;
+        savingsMcpGoal.appendChild(option);
+    });
+    savingsMcpGoal.value = state.goals.some(goal => String(goal.id) === selectedId) ? selectedId : "";
+    savingsMcpMode.reset();
+}
+
+savingsMcpGoal.addEventListener("change", () => savingsMcpMode.reset());
 savingsMcpButton.addEventListener("click", async () => {
-    const requestedGoalId = state.goalId;
+    if (!savingsMcpMode.enabled) return;
+    const requestedGoalId = savingsMcpGoal.value;
     if (!requestedGoalId) {
         savingsMcpResult.textContent = "Select a savings goal first.";
         return;
     }
-    savingsMcpButton.disabled = true;
-    savingsMcpResult.textContent = "Calculating...";
-    try {
+    await savingsMcpMode.run("Calculating...", 35000, async signal => {
         const data = await call(`/goals/${requestedGoalId}/mcp-summary`, {
-            method: "POST", signal: AbortSignal.timeout(35000)
+            method: "POST", signal
         });
-        if (state.goalId !== requestedGoalId) {
-            savingsMcpResult.textContent = "Goal selection changed. Calculate again.";
-            return;
+        if (savingsMcpGoal.value !== requestedGoalId) {
+            return "Goal selection changed. Calculate again.";
         }
         const result = data.result;
-        savingsMcpResult.textContent = [
+        return [
             `Goal: ${data.goal_name}`,
             `Saved: ${money(result.current_amount)}`,
             `Target: ${money(result.target_amount)}`,
@@ -797,42 +889,34 @@ savingsMcpButton.addEventListener("click", async () => {
             `Status: ${result.status}`,
             `Calculated as of: ${result.reference_date}`
         ].join("\n");
-    } catch (error) {
-        savingsMcpResult.textContent = error.message;
-    } finally {
-        savingsMcpButton.disabled = false;
-    }
+    });
 });
 
 const savingsRagButton = document.getElementById("savings-rag-button");
 const savingsRagResult = document.getElementById("savings-rag-result");
 const savingsRagQuestion = document.getElementById("savings-rag-question");
+const savingsRagMode = createSavingsMode("RAG", savingsRagButton, savingsRagResult, [savingsRagQuestion]);
 savingsRagButton.addEventListener("click", async () => {
+    if (!savingsRagMode.enabled) return;
     const query = savingsRagQuestion.value.trim();
     if (!query) {
         savingsRagResult.textContent = "Enter a question first.";
         return;
     }
-    savingsRagButton.disabled = true;
-    savingsRagResult.textContent = "Searching the savings guide...";
-    try {
+    await savingsRagMode.run("Searching the savings guide...", 145000, async signal => {
         const data = await call("/rag-query", {
             method: "POST", body: JSON.stringify({ query }),
-            signal: AbortSignal.timeout(145000)
+            signal
         });
         if (data.status === "insufficient_context") {
-            savingsRagResult.textContent = `${data.answer}\nConfidence: Insufficient`;
-            return;
+            return `${data.answer}\nConfidence: Insufficient`;
         }
         const citations = data.citations.map(c =>
             `${c.source} — ${c.section} (version ${c.version})`);
-        savingsRagResult.textContent = [data.answer, "",
+        return [data.answer, "",
             `Evidence confidence: ${data.confidence}`,
             `Source: ${citations.join("; ")}`].join("\n");
-    } catch (error) {
-        savingsRagResult.textContent = error.name === "TimeoutError"
-            ? "The request timed out. Try again." : error.message;
-    } finally {
-        savingsRagButton.disabled = false;
-    }
+    });
 });
+
+loadGoals();
