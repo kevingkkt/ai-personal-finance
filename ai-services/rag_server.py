@@ -18,15 +18,9 @@ CORS(app)
 BASE_DIR = Path(__file__).resolve().parent
 KNOWLEDGE_DIR = BASE_DIR / "knowledge"
 
-OLLAMA_URL = os.environ.get(
-    "OLLAMA_URL",
-    "http://localhost:11434/api/generate"
-)
+OLLAMA_URL = os.environ.get("OLLAMA_URL","http://localhost:11434/api/generate")
 
-RAG_MODEL = os.environ.get(
-    "RAG_MODEL",
-    "qwen2.5:0.5b"
-)
+RAG_MODEL = os.environ.get("RAG_MODEL","qwen2.5:0.5b")
 
 
 # ----------------------------------
@@ -119,7 +113,7 @@ def retrieve_context(query):
 
 # ----------------------------------
 # Generate grounded answer
-# ----------------------------------
+# ---------------------------------
 
 def generate_grounded_answer(
     query,
@@ -171,9 +165,9 @@ ANSWER:
     ).strip()
 
 
-# ----------------------------------
+# ---------------
 # Health endpoint
-# ----------------------------------
+# ------------------------------
 
 @app.route(
     "/health",

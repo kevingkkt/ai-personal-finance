@@ -175,6 +175,55 @@ def delete_bill(bill_id):
         return jsonify({
             "error": "Could not connect to database service"
         }), 500
+        
+        
+###########
+#raf
+###########
+
+
+@app.route(
+    "/rag-query",
+    methods=["POST"]
+)
+def rag_query():
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    query = str(data.get("query", "")).strip()
+
+    if not query:
+        return jsonify({
+            "error":
+                "A RAG question is required."
+        }), 400
+    try:
+        response = requests.post(
+            RAG_URL,
+            json={
+                "query":
+                    query
+            },
+            timeout=120
+        )
+
+        response.raise_for_status()
+
+        return jsonify(
+            response.json()
+        )
+
+    except requests.exceptions.RequestException as error:
+
+        return jsonify({
+            "error":
+                "Could not connect to RAG server.",
+
+            "details":
+                str(error)
+        }), 503
 
 @app.route("/ai-insights", methods=["POST"])
 def ai_insights():

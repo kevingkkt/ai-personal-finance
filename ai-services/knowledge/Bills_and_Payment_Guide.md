@@ -2,7 +2,7 @@
 
 ## pending
 
-this is a bill which has not been paid yet and has to be delt with befoce the due date.
+this is a bill which has not been paid yet and has to be dealt with befoce the due date.
 
 ## paid
 
@@ -19,8 +19,8 @@ That Amount which is owed or was owed if paid.
 
 ## unpaid Bill
 
-this is a bill which has not been paid yet and has to be delt with befoce the due date.
+this is a bill which has not been paid yet and has to be delt with before the due date.
 
 ## Paid Bill
 
-Paid means that the bill is payed and isn't a problem to deal with.
+Paid means that the bill is paied and isn't a problem to deal with.

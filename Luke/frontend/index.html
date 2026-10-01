@@ -82,8 +82,9 @@
                 Enable RAG
                 <!--also want when off the buttons to turn off in front end-->
             </label>
-
-            <button id="totalUnpaidButton">
+            <input type="text" id="ragQuestion" name="question" placeholder="Ask RAG for more specific advice.">
+            </input>
+            <button id="ragButton">
                 Get Total Unpaid
             </button>
             <!--Pretty sure you dont see this text as itll be edited more or less out in Javscript but its there-->
@@ -243,6 +244,116 @@ totalUnpaidButton.addEventListener("click", async () => {
     }
 
 });
+
+/////////////////////////////////////////////////
+//////////RAG AREA////////////////////////
+///////////////////////////////////////////
+const ragOutput = document.getElementById("ragOutput");
+const ragOnOff = document.getElementById("ragOnOff");
+const ragQuestion = document.getElementById("ragQuestion");
+const ragButton = document.getElementById("ragButton");
+
+function isRagEnabled() {
+    return ragOnOff.checked;
+}
+
+//same as mcp
+function renderRagState() {
+    if (isRagEnabled()) {
+        ragButton.disabled = false;
+        ragOutput.textContent = "RAG is ON.ask your question when ready";
+    } else {
+        ragButton.disabled = true;
+        ragOutput.textContent = "RAG is OFF. click on the check to enable rag";
+    }
+}
+
+//event
+ragOnOff.addEventListener("change", () => {
+    renderRagState();
+});
+
+//the actual rag part
+// Ask RAG
+ragButton.addEventListener(
+    "click",
+    async function () {
+
+        const question =
+            ragQuestion.value.trim();
+
+        if (!question) {
+
+            ragOutput.textContent =
+                "Sorry You didn't enter anything as a question. please add something to the text box above";
+
+            return;
+        }
+
+        ragOutput.textContent =
+            "Calling RAG please wait";
+
+        try {
+
+            const response =
+                await fetch(
+                    "http://127.0.0.1:5004/rag-query",{
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            query: question
+                        })
+                    }
+                );
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "RAG request failed"
+                );
+            }
+
+//do same as kevin
+            if (data.grounded === false) {
+
+                ragOutput.textContent =
+                    `${data.answer}\n` +
+                    `Confidence: ${data.confidence}`;
+
+                return;
+            }
+
+
+            const sources =
+                data.sources.join(", ");
+
+
+            ragOutput.textContent =
+                `Answer: ${data.answer}\n\n` +
+                `Source: ${sources}\n` +
+                `Confidence: ${data.confidence}`;
+        } catch (error) {
+            console.error(error);
+            ragOutput.textContent =
+                "Failed to connect to Rag.";
+        }
+    }
+);
+//run this so it checks on open
+renderRagState();
+
+
+
 
 </script>
 </body>
