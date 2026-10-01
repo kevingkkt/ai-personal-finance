@@ -1,5 +1,9 @@
 ## Bills and Payment Guide
 
+## Bill
+
+This is a payment that needs to be made or has been made.
+
 ## pending
 
 this is a bill which has not been paid yet and has to be dealt with befoce the due date.

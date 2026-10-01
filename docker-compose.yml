@@ -103,6 +103,7 @@ services:
       - "5004:5001"
     environment:
       - MCP_URL=http://host.docker.internal:7001/mcp
+      - RAG_URL=http://host.docker.internal:7002/rag
       - DATABASE_API_URL=http://bills-database:5002
       - OLLAMA_URL=http://host.docker.internal:11434/api/generate
     depends_on:
