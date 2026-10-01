@@ -2,6 +2,10 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
 import requests
+import asyncio
+import json
+from datetime import datetime
+from zoneinfo import ZoneInfo
 
 app = Flask(__name__)
 CORS(app)
@@ -20,6 +24,23 @@ AI_ADVICE_MODEL = os.environ.get(
     "AI_ADVICE_MODEL",
     "deepseek-r1:1.5b"
 )
+
+def env_enabled(name):
+    return os.getenv(name, "true").strip().lower() == "true"
+
+
+app.config.update(
+    AI_MODE_ENABLED=env_enabled("AI_MODE_ENABLED"),
+    MCP_ENABLED=env_enabled("MCP_ENABLED"),
+    RAG_ENABLED=env_enabled("RAG_ENABLED"),
+)
+MCP_URL = os.getenv("MCP_URL", "http://localhost:7001/mcp")
+RAG_URL = os.getenv("RAG_URL", "http://localhost:7002/rag")
+
+
+def mode_disabled(mode):
+    return jsonify(status="disabled", error=f"{mode} is disabled in this environment"), 503
+
 
 @app.route("/goals", methods=["GET"])
 def get_goals():
@@ -205,6 +226,9 @@ def delete_contribution(contribution_id):
     
 @app.route("/ai-insights", methods=["POST"])
 def ai_insights():
+    if not app.config["AI_MODE_ENABLED"]:
+        return mode_disabled("AI-Mode")
+
     input_data = request.get_json(silent=True)
 
     if not isinstance(input_data, dict):
@@ -464,9 +488,93 @@ def health():
         "service": "Savings Goals Backend API"
     })
 
+async def invoke_savings_tool(arguments):
+    from mcp import Client
+
+    async def execute():
+        async with Client(MCP_URL) as client:
+            result = await client.call_tool('calculate_savings_goal_progress', arguments)
+            if result.is_error:
+                raise ValueError('Savings tool rejected the request')
+            data = result.structured_content
+            if not isinstance(data, dict):
+                text = next((item.text for item in result.content
+                             if getattr(item, 'type', None) == 'text'), None)
+                data = json.loads(text) if text else None
+            required = {'remaining_amount', 'progress_percentage', 'days_remaining', 'status'}
+            if not isinstance(data, dict) or not required.issubset(data):
+                raise ValueError('Invalid MCP result')
+            return data
+    return await asyncio.wait_for(execute(), timeout=20)
+
+
+@app.post('/goals/<int:goal_id>/mcp-summary')
+def savings_mcp_summary(goal_id):
+    if not app.config['MCP_ENABLED']:
+        return mode_disabled('MCP')
+    try:
+        response = requests.get(f'{DATABASE_API_URL}/goals/{goal_id}', timeout=(3, 10))
+        if response.status_code == 404:
+            return jsonify(error='Savings goal not found'), 404
+        response.raise_for_status()
+        goal = response.json()
+    except requests.Timeout:
+        return jsonify(error='Database request timed out'), 504
+    except (requests.RequestException, ValueError):
+        return jsonify(error='Could not load the savings goal'), 502
+    try:
+        # current_amount already includes contributions, never add them twice
+        arguments = {
+            'target_amount': goal['target_amount'],
+            'current_amount': goal['current_amount'],
+            'target_date': goal['target_date'],
+            'reference_date': datetime.now(ZoneInfo('Australia/Sydney')).strftime('%d-%m-%Y'),
+        }
+        result = asyncio.run(invoke_savings_tool(arguments))
+        return jsonify(goal_id=goal_id, goal_name=goal['goal_name'],
+                       source='Shared MCP Server', result=result)
+    except TimeoutError:
+        return jsonify(error='MCP request timed out'), 504
+    except Exception:
+        app.logger.exception('Savings MCP request failed')
+        return jsonify(error='Could not calculate savings progress'), 502
+
+
+@app.post('/rag-query')
+def savings_rag_query():
+    if not app.config['RAG_ENABLED']:
+        return mode_disabled('RAG')
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify(error='A JSON object is required'), 400
+    query = data.get('query')
+    if not isinstance(query, str) or not query.strip():
+        return jsonify(error='query must be nonempty text'), 400
+    query = query.strip()
+    if len(query) > 1000:
+        return jsonify(error='query must be at most 1000 characters'), 400
+    try:
+        response = requests.post(RAG_URL, json={'query': query, 'feature': 'savings'},
+                                 timeout=(5, 135))
+        if response.status_code != 200:
+            code = response.status_code
+            return jsonify(error='The knowledge service could not answer the request'), (
+                code if code in {400, 502, 503, 504} else 502)
+        result = response.json()
+        if not isinstance(result, dict) or result.get('status') not in {
+            'answered', 'insufficient_context'
+        }:
+            raise ValueError('Invalid RAG response')
+        return jsonify(result)
+    except requests.Timeout:
+        return jsonify(error='Knowledge request timed out'), 504
+    except (requests.RequestException, ValueError):
+        return jsonify(error='Knowledge service is unavailable'), 502
+
+
 if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
-        debug=True,
+        debug=False,
         port=5003
     )

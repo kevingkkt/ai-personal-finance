@@ -210,3 +210,6 @@ tr:hover {
         width: 100%;
     }
 }
+.release-one .result { white-space: pre-wrap; overflow-wrap: anywhere; }
+.release-one button { margin-top: 0.75rem; }
+.release-one button:disabled { opacity: 0.6; cursor: wait; }

@@ -293,6 +293,7 @@ async function loadGoals() {
 
 async function selectGoal(id) {
     state.goalId = id;
+    document.getElementById("savings-mcp-result").textContent = "";
 
     state.contributions = await call(
         `/goals/${id}/contributions`
@@ -766,3 +767,72 @@ getElement("#detail-close").addEventListener(
 
 
 loadGoals();
+// Release 1 requests always go through the savings backend.
+const savingsMcpButton = document.getElementById("savings-mcp-button");
+const savingsMcpResult = document.getElementById("savings-mcp-result");
+savingsMcpButton.addEventListener("click", async () => {
+    const requestedGoalId = state.goalId;
+    if (!requestedGoalId) {
+        savingsMcpResult.textContent = "Select a savings goal first.";
+        return;
+    }
+    savingsMcpButton.disabled = true;
+    savingsMcpResult.textContent = "Calculating...";
+    try {
+        const data = await call(`/goals/${requestedGoalId}/mcp-summary`, {
+            method: "POST", signal: AbortSignal.timeout(35000)
+        });
+        if (state.goalId !== requestedGoalId) {
+            savingsMcpResult.textContent = "Goal selection changed. Calculate again.";
+            return;
+        }
+        const result = data.result;
+        savingsMcpResult.textContent = [
+            `Goal: ${data.goal_name}`,
+            `Saved: ${money(result.current_amount)}`,
+            `Target: ${money(result.target_amount)}`,
+            `Remaining: ${money(result.remaining_amount)}`,
+            `Progress: ${result.progress_percentage}%`,
+            `Days remaining: ${result.days_remaining}`,
+            `Status: ${result.status}`,
+            `Calculated as of: ${result.reference_date}`
+        ].join("\n");
+    } catch (error) {
+        savingsMcpResult.textContent = error.message;
+    } finally {
+        savingsMcpButton.disabled = false;
+    }
+});
+
+const savingsRagButton = document.getElementById("savings-rag-button");
+const savingsRagResult = document.getElementById("savings-rag-result");
+const savingsRagQuestion = document.getElementById("savings-rag-question");
+savingsRagButton.addEventListener("click", async () => {
+    const query = savingsRagQuestion.value.trim();
+    if (!query) {
+        savingsRagResult.textContent = "Enter a question first.";
+        return;
+    }
+    savingsRagButton.disabled = true;
+    savingsRagResult.textContent = "Searching the savings guide...";
+    try {
+        const data = await call("/rag-query", {
+            method: "POST", body: JSON.stringify({ query }),
+            signal: AbortSignal.timeout(145000)
+        });
+        if (data.status === "insufficient_context") {
+            savingsRagResult.textContent = `${data.answer}\nConfidence: Insufficient`;
+            return;
+        }
+        const citations = data.citations.map(c =>
+            `${c.source} — ${c.section} (version ${c.version})`);
+        savingsRagResult.textContent = [data.answer, "",
+            `Evidence confidence: ${data.confidence}`,
+            `Source: ${citations.join("; ")}`].join("\n");
+    } catch (error) {
+        savingsRagResult.textContent = error.name === "TimeoutError"
+            ? "The request timed out. Try again." : error.message;
+    } finally {
+        savingsRagButton.disabled = false;
+    }
+});
