@@ -13,7 +13,6 @@ BILLS_API_URL = os.environ.get("BILLS_API_URL","http://localhost:5004")
 
 
 mcp = MCPServer("AI Personal Finance MCP Server")
-python .\ai-services\mcp_server.py
 
 @mcp.tool(structured_output=True)
 def calculate_income_expense_summary(
