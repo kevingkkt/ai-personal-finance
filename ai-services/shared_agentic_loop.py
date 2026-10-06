@@ -428,6 +428,45 @@ def validate_savings_mcp():
     require(payload['goal_id'] == goal['id'], 'Wrong goal returned')
     return True
 
+Bills_URL = os.getenv('BILLS_BACKEND_URL', 'http://127.0.0.1:5004')
+
+def validate_bills_mcp():
+    response = requests.get(f"{Bills_URL}/bills/unpaid", timeout=(5, 15))
+    response.raise_for_status()
+    bills = response.json()
+    total = sum(float(bill["amount"]) for bill in bills)
+    response = requests.get(f"{Bills_URL}/mcp/total-unpaid", timeout=(5, 30))
+    response.raise_for_status()
+    payload = response.json()
+    print(json.dumps(payload, indent=2))
+    require(abs(payload['result']['total_unpaid'] - total) < .005, 'Incorrect total unpaid amount')
+    return True
+
+def validate_bills_rag():
+    cases = [("Totalunpaid bills amount?", "answered"), ("What is the weather today?", "insufficient_context")]
+    for query, expected in cases:
+        response = requests.post(f"{Bills_URL}/rag-query", json={'query': query}, timeout=(5, 150))
+        response.raise_for_status()
+        data = response.json()
+        print(json.dumps({'query': query, 'response': data}, indent=2))
+        require(data.get('status') == expected, f'Unexpected result for: {query}')
+        if expected == 'answered':
+            require(data.get('grounded') is True, 'Answer not grounded')
+            require(bool(data.get('answer')), 'Empty answer')
+            require(bool(data.get('citations')), 'Missing citations')
+            require(data.get('confidence') in {'High', 'Medium', 'Low'}, 'Invalid confidence')
+            evidence = {item['source_id']: item for item in data.get('retrieval_evidence', [])}
+            for citation in data['citations']:
+                source = evidence.get(citation['source_id'])
+                require(source is not None, 'Citation was not retrieved')
+                require(' '.join(citation['quote'].split()) in ' '.join(source['text'].split()),
+                        'Citation quote is not supported')
+            answer = data['answer'].lower()
+            require('total' in answer or 'unpaid' in answer, 'Expected formula not explained')
+        else:
+            require(data.get('grounded') is False, 'Refusal marked grounded')
+            require(data.get('sources') == [], 'Refusal has sources')
+            require(data.get('confidence') == 'Insufficient', 'Invalid refusal confidence')
 
 def validate_savings_rag():
     cases = [
@@ -582,12 +621,14 @@ def main():
             ('income-expense-mcp', lambda: asyncio.run(validate_mcp())),
             ('income-expense-mcp-backend', validate_kevin_mcp_backend),
             ('savings-mcp-backend', validate_savings_mcp),
+            ('Bills-MCP', validate_bills_mcp)
         ])
     if args.mode in {'rag', 'both'}:
         checks.extend([
             ('income-expense-rag', validate_rag),
             ('income-expense-rag-backend', validate_kevin_rag_backend),
             ('savings-rag-backend', validate_savings_rag),
+            ('Bills-Rag', validate_bills_rag)
         ])
     results = []
     for name, check in checks:

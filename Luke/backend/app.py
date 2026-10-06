@@ -203,8 +203,8 @@ def rag_query():
         response = requests.post(
             RAG_URL,
             json={
-                "query":
-                    query
+                "query": query,
+                "feature": "bills"
             },
             timeout=120
         )
