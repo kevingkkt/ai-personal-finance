@@ -50,6 +50,50 @@
                 <div id="aiResponse"></div>
             </div>
         </div>
+        <div class="MCP">
+            <h2>MCP</h2>
+            <p>Click the button to get the total of unpaid bills.</p>
+            <label>
+                <input type="checkbox" id="mcpOnOff">
+                Enable MCP
+                <!--also want when off the buttons to turn off in front end-->
+            </label>
+            
+            <button id="totalUnpaidButton">
+                Get Total Unpaid
+            </button>
+
+            <div id="mcpOutput">
+                Awaiting use of MCP
+            </div>
+            <!--Changed mind we only doing the get total unpaid as its enough and I dont care enough to do better-->
+            <!--    Need on off switch first then text box then -->
+
+            <!--slider for showing paid and not paid-->
+
+            <!--button for getting total unpaid costs-->
+            
+        </div>
+        <!--Rag nOW-->
+        <div class="RAG">
+            <h2>RAG Mode</h2>
+            <p>Refresh corpus and generate a answer with citations</p>
+            <label>
+                <input type="checkbox" id="ragOnOff">
+                Enable RAG
+                <!--also want when off the buttons to turn off in front end-->
+            </label>
+            <input type="text" id="ragQuestion" name="question" placeholder="Ask RAG for more specific advice.">
+            </input>
+            <button id="ragButton">
+                Begin RAG
+            </button>
+            <!--Pretty sure you dont see this text as itll be edited more or less out in Javscript but its there-->
+            <div id="ragOutput">
+                Awaiting use of RAG
+            </div>
+        </div>
+
     </div>
     
 <script >
@@ -120,6 +164,199 @@
             AIresponse.innerHTML = "Error fetching AI insights. Please try again later.";
         }
     });
+
+
+    //MCP area
+    const mcpOnOff = document.getElementById("mcpOnOff");
+    const totalUnpaidButton = document.getElementById("totalUnpaidButton");
+    const mcpOutput = document.getElementById("mcpOutput");
+
+    //we want default set up 
+    //same as lab
+    function isMcpEnabled() {
+        return mcpOnOff.checked;
+    }
+    function renderMcpState() {
+
+        if (isMcpEnabled()) {
+            //we also want to change this to be 
+            totalUnpaidButton.disabled = false;
+            mcpOutput.textContent ="MCP is ON Feel free to use as you please";
+        } else {
+            //adding button toggle
+            totalUnpaidButton.disabled =true;
+            mcpOutput.textContent = "MCP is OFF";
+
+            //tell them to turn it off
+        
+        }
+
+    }
+
+
+
+// When checkbox is changed
+mcpOnOff.addEventListener("change", () => {
+
+    renderMcpState();
+
+    if (!isMcpEnabled()) {
+         //tell them to turn it off
+        mcpOutput.textContent ="MCP is OFF. Enable MCP to use the tool.";
+    }
+    else
+    {
+         mcpOutput.textContent ="MCP is ON Feel free to use as you please";
+    }
+
+});
+//default setting these upp than event listener deals with it
+
+    renderMcpState();
+
+    if (!isMcpEnabled()) {
+
+         mcpOutput.textContent ="MCP is OFF. Enable MCP to use the tool.";
+
+    }
+
+//Now the set up for on button click we run the main function
+// Get total unpaid
+totalUnpaidButton.addEventListener("click", async () => {
+//To make the user have instant feedback
+    mcpOutput.textContent ="trying to get total unpaid bills please wait.";
+
+    try {
+
+        const response = await fetch("http://127.0.0.1:5004/mcp/total-unpaid");
+        const result = await response.json();
+        if (!response.ok) {
+            throw new Error(result.error);
+        }
+
+        mcpOutput.textContent ="Total unpaid: $" + result.result.total_unpaid;
+
+    } catch (error) {
+
+        console.error("MCP error:", error);
+
+        mcpOutput.textContent ="Error getting total unpaid. Error was:"+ error;
+
+    }
+
+});
+
+/////////////////////////////////////////////////
+//////////RAG AREA////////////////////////
+///////////////////////////////////////////
+const ragOutput = document.getElementById("ragOutput");
+const ragOnOff = document.getElementById("ragOnOff");
+const ragQuestion = document.getElementById("ragQuestion");
+const ragButton = document.getElementById("ragButton");
+
+function isRagEnabled() {
+    return ragOnOff.checked;
+}
+
+//same as mcp
+function renderRagState() {
+    if (isRagEnabled()) {
+        ragButton.disabled = false;
+        ragQuestion.disabled = false;
+        ragOutput.textContent = "RAG is ON.ask your question when ready";
+    } else {
+        ragButton.disabled = true;
+        ragQuestion.disabled = true;
+        ragOutput.textContent = "RAG is OFF. click on the check to enable rag";
+    }
+}
+
+//event
+ragOnOff.addEventListener("change", () => {
+    renderRagState();
+});
+
+//the actual rag part
+// Ask RAG
+ragButton.addEventListener(
+    "click",
+    async function () {
+
+        const question =
+            ragQuestion.value.trim();
+
+        if (!question) {
+
+            ragOutput.textContent =
+                "Sorry You didn't enter anything as a question. please add something to the text box above";
+
+            return;
+        }
+
+        ragOutput.textContent =
+            "Calling RAG please wait";
+
+        try {
+
+            const response =
+                await fetch(
+                    "http://127.0.0.1:5004/rag-query",{
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            query: question
+                        })
+                    }
+                );
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "RAG request failed"
+                );
+            }
+
+//do same as kevin
+            if (data.grounded === false) {
+
+                ragOutput.textContent =
+                    `${data.answer}\n` +
+                    `Confidence: ${data.confidence}`;
+
+                return;
+            }
+
+
+            const sources =
+                data.sources.join(", ");
+
+
+            ragOutput.textContent =
+                `Answer: ${data.answer}\n\n` +
+                `Source: ${sources}\n` +
+                `Confidence: ${data.confidence}`;
+        } catch (error) {
+            console.error(error);
+            ragOutput.textContent =
+                "Failed to connect to Rag.";
+        }
+    }
+);
+//run this so it checks on open
+renderRagState();
+
+
+
 
 </script>
 </body>

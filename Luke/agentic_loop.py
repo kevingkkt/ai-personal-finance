@@ -1,6 +1,9 @@
 import requests
 import sqlite3
 import os
+#new for mcp
+import asyncio
+from mcp import Client
 
 #stuff from sample but I plan to not do all that
 from pathlib import Path
@@ -76,10 +79,12 @@ def main():
         print("1. Get AI review of database data")
         print("2. Get AI to review endpoints")
         print("3. Get AI to review architecture")
+        print("4. MCP")
+        print("5. Rag")
         print("0. Exit Loop")
         user_input = input("Enter your choice: ")
-        while user_input not in ["0", "1", "2", "3"]:
-            print("Please Only Choose 1, 2, 3 or 0.")
+        while user_input not in ["0", "1", "2", "3","4","5"]:
+            print("Please Only Choose 1, 2, 3, 4, 5 or 0.")
             user_input = input("Enter your choice: ")
         match user_input:
             case "0":
@@ -103,9 +108,22 @@ def main():
                 print("phase 2: ACT")
                 print("Getting AI review of architecture")
                 architecture_data = get_architecture()
+                print("phase 3: Observe")
                 get_ai_response(architecture_data)
                 print("Phase 4: ADAPT phase")
                 print("Think about if the AI review has valuable insights for the system to be adapted to.")
+            case "4":
+                print("starting up")
+                print("phase 2: Act getting MCP tools")
+                
+                print("phase 2 complete")
+                print("phase 3: Observe")
+                
+                
+                print("Phase 4: ADAPT phase")
+                print("Think about if the AI review has valuable insights for the system to be adapted to.")
+            case "5":
+                
     
 if __name__ == "__main__":
     main()
