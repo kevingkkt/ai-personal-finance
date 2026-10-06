@@ -3,6 +3,7 @@ name: Kevin CI
 on:
   push:
     branches:
+      - main
       - kevin
       - kevin-release1
 
@@ -33,9 +34,7 @@ jobs:
           python-version: "3.11"
 
 
-      # ----------------------------------
-      # Install dependencies
-      # ----------------------------------
+
 
       - name: Install Kevin backend dependencies
         run: |
@@ -52,9 +51,7 @@ jobs:
           pip install -r ai-services/requirements.txt
 
 
-      # ----------------------------------
-      # Python validation
-      # ----------------------------------
+
 
       - name: Check Kevin Python files
         run: |
@@ -73,9 +70,6 @@ jobs:
           python -m py_compile ai-services/shared_agentic_loop.py
 
 
-      # ----------------------------------
-      # Docker builds
-      # ----------------------------------
 
       - name: Build Kevin backend Docker image
         run: |
@@ -92,9 +86,7 @@ jobs:
           docker build -t kevin-frontend ./kevin/frontend
 
 
-      # ----------------------------------
-      # Release 1 CI confirmation
-      # ----------------------------------
+ 
 
       - name: Confirm MCP and RAG disabled in CI
         run: |
