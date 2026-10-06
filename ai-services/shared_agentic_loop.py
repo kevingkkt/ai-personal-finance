@@ -15,7 +15,7 @@ MCP_URL = os.getenv("MCP_URL", "http://localhost:7001/mcp")
 RAG_URL = os.getenv("RAG_URL", "http://localhost:7002/rag")
 
 
-# ----------------------------------
+# ------------------------------------
 # MCP validation mode
 # ----------------------------------
 
