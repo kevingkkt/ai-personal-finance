@@ -16,9 +16,7 @@ RAG_URL = "http://localhost:7002/rag"
 
 async def validate_mcp():
 
-    print("=" * 60)
     print("SHARED AGENTIC LOOP - MCP VALIDATION MODE")
-    print("=" * 60)
 
     print("\nPLAN")
     print(
@@ -164,9 +162,7 @@ async def validate_mcp():
 
 def validate_rag():
 
-    print("=" * 60)
     print("SHARED AGENTIC LOOP - RAG VALIDATION MODE")
-    print("=" * 60)
 
     print("\nPLAN")
     print(
@@ -454,7 +450,7 @@ def main():
         )
 
 
-    print("\n" + "=" * 60)
+    
 
     if passed:
 
@@ -468,7 +464,7 @@ def main():
             "AGENTIC VALIDATION COMPLETE - FAIL"
         )
 
-    print("=" * 60)
+
 
 
 if __name__ == "__main__":
