@@ -1,5 +1,5 @@
 {
-  "timestamp": "2026-10-06T10:49:13.753973+00:00",
+  "timestamp": "2026-10-06T11:14:59.020805+00:00",
   "mode": "both",
   "passed": false,
   "results": [
@@ -41,7 +41,7 @@
     {
       "check": "Bills-Rag",
       "passed": false,
-      "error": "Expected formula not explained"
+      "error": "503 Server Error: SERVICE UNAVAILABLE for url: http://127.0.0.1:5004/rag-query"
     }
   ],
   "coverage": [

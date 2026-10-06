@@ -23,7 +23,7 @@ KNOWLEDGE_FILES = {
     'income_expense': 'income_expense_guide.md',
     'savings': 'savings_goals_guide.md',
     'budget': 'budget_guide.md',
-    'bills': 'bills_guide.md',
+    'bills': 'Bills_and_Payment_Guide.md',
 }
 
 
@@ -225,4 +225,4 @@ def rag():
 
 
 if __name__ == '__main__':
-    app.run(host=os.getenv('RAG_BIND_HOST', '127.0.0.1'), port=7002, debug=False)
+    app.run(host=os.getenv('RAG_BIND_HOST', '0.0.0.0'), port=7002, debug=False)

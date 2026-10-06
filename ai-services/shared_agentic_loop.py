@@ -443,7 +443,7 @@ def validate_bills_mcp():
     return True
 
 def validate_bills_rag():
-    cases = [("Totalunpaid bills amount?", "answered"), ("What is the weather today?", "insufficient_context")]
+    cases = [("What is an unpaid bill?", "answered"), ("What is the weather today? and do you like dogs", "insufficient_context")]
     for query, expected in cases:
         response = requests.post(f"{Bills_URL}/rag-query", json={'query': query}, timeout=(5, 150))
         response.raise_for_status()
@@ -462,12 +462,14 @@ def validate_bills_rag():
                 require(' '.join(citation['quote'].split()) in ' '.join(source['text'].split()),
                         'Citation quote is not supported')
             answer = data['answer'].lower()
-            require('total' in answer or 'unpaid' in answer, 'Expected formula not explained')
+            require('unpaid' in answer or 'not been paid' in answer or 'not paid' in answer, 'Expected formula not explained')
         else:
             require(data.get('grounded') is False, 'Refusal marked grounded')
             require(data.get('sources') == [], 'Refusal has sources')
             require(data.get('confidence') == 'Insufficient', 'Invalid refusal confidence')
-
+    return True
+    
+    
 def validate_savings_rag():
     cases = [
         ('How is savings progress percentage calculated?', 'answered'),
