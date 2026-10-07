@@ -4,12 +4,29 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Savings Goals</title>
-  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="style.css?v=release1-theme-1">
 </head>
 <body>
   <header><div><h1>Savings Goals</h1><p>Create goals and track contributions.</p></div><a href="http://localhost:8080">Back to home</a></header>
   <main>
     <p id="status" class="notice">Checking backend...</p>
+
+    <section class="mode-settings" aria-labelledby="mode-settings-title">
+      <h2 id="mode-settings-title">Savings assistant modes</h2>
+      <p id="mode-settings-help">Turn each mode on or off for this page. Your choices are saved in this browser.</p>
+      <div class="mode-switches">
+        <label class="mode-switch" for="savings-mcp-toggle">
+          <span>MCP mode</span>
+          <input id="savings-mcp-toggle" type="checkbox" role="switch" checked aria-describedby="mode-settings-help">
+          <span id="savings-mcp-state" aria-hidden="true">On</span>
+        </label>
+        <label class="mode-switch" for="savings-rag-toggle">
+          <span>RAG mode</span>
+          <input id="savings-rag-toggle" type="checkbox" role="switch" checked aria-describedby="mode-settings-help">
+          <span id="savings-rag-state" aria-hidden="true">On</span>
+        </label>
+      </div>
+    </section>
 
     <section>
       <h2 id="goal-form-title">Add a savings goal</h2>
@@ -43,7 +60,7 @@
 
     <!-- AI insights are separate from the hidden goal details. -->
     <section class="ai">
-      <h3>AI savings insights</h3>
+      <h2>AI savings insights</h2>
 
       <p>
         Leave the goal name blank for overall insights.
@@ -90,8 +107,28 @@
       ></p>
     </section>
 
+    <section class="release-one" aria-labelledby="savings-mcp-title">
+      <h2 id="savings-mcp-title">MCP goal progress</h2>
+      <label for="savings-mcp-goal">Select a savings goal</label>
+      <select id="savings-mcp-goal">
+        <option value="">Choose a goal…</option>
+      </select>
+      <button id="savings-mcp-button" type="button" disabled>Calculate progress with MCP</button>
+      <p id="savings-mcp-result" class="result" aria-live="polite"></p>
+    </section>
+
+    <section class="release-one">
+      <h2>RAG savings knowledge</h2>
+      <p>Ask about the application's savings rules. Answers include their source and evidence confidence.</p>
+      <label for="savings-rag-question">Question</label>
+      <textarea id="savings-rag-question" rows="3" maxlength="1000"
+        placeholder="How is savings progress calculated?"></textarea>
+      <button id="savings-rag-button" type="button">Ask savings knowledge with RAG</button>
+      <p id="savings-rag-result" class="result" aria-live="polite"></p>
+    </section>
+
     <p id="message" class="notice hidden"></p>
   </main>
-  <script src="app.js"></script>
+  <script src="app.js?v=release1-mcp-goals-1"></script>
 </body>
 </html>

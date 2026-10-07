@@ -70,3 +70,54 @@ h1 {
     margin-bottom: 12px;
     text-align: center;
 }
+
+.MCP,
+.RAG {
+    margin-top: 30px;
+    padding: 25px;
+
+    background: white;
+    border: 1px solid #e0dede;
+    border-radius: 12px;
+
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+#totalUnpaidButton {
+    width: 100%;
+    margin: 20px 0;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#ragButton {
+    width: 100%;
+    margin: 15px 0;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#mcpOutput,
+#ragOutput {
+    white-space: pre-wrap;
+    background: #f4f7fb;
+    padding: 20px;
+    margin-bottom: 25px;
+    border-radius: 8px;
+    line-height: 1.6;
+}
+
+#ragQuestion {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    box-sizing: border-box;
+}
+
+.MCP p,
+.RAG p {
+    gap: 10px;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}

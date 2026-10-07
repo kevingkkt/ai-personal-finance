@@ -2,6 +2,9 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 import os
 import requests
+import asyncio
+import json
+from mcp import Client
 
 app = Flask(__name__)
 CORS(app)
@@ -10,6 +13,9 @@ DATABASE_API_URL = os.environ.get("DATABASE_API_URL", "http://127.0.0.1:5002")
 
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434/api/generate")
 
+MCP_URL = os.environ.get("MCP_URL","http://localhost:7001/mcp")
+
+RAG_URL = os.environ.get("RAG_URL","http://localhost:7002/rag")
 #get all the bills
 @app.route("/bills", methods=["GET"])
 def get_bills():
@@ -40,6 +46,84 @@ def get_bill(bill_id):
     except requests.exceptions.RequestException:
         return jsonify({
             "error": "Could not connect to database service"
+        }), 500
+# for paid bills
+@app.route("/bills/paid", methods=["GET"])
+def get_paid_bills():
+    try:
+        response = requests.get(
+            f"{DATABASE_API_URL}/bills/by-status",
+            params={"payment_status": 1},
+            timeout=10
+        )
+
+        return jsonify(response.json()), response.status_code
+
+    except requests.exceptions.RequestException:
+        return jsonify({
+            "error": "Could not connect to database service"
+        }), 500
+
+
+# for unpaid bills
+@app.route("/bills/unpaid", methods=["GET"])
+def get_unpaid_bills():
+    try:
+        response = requests.get(
+            f"{DATABASE_API_URL}/bills/by-status",
+            params={"payment_status": 0},
+            timeout=10
+        )
+
+        return jsonify(response.json()), response.status_code
+
+    except requests.exceptions.RequestException:
+        return jsonify({
+            "error": "Could not connect to database service"
+        }), 500
+#MCP
+async def call_total_unpaid_mcp():
+    async with Client(MCP_URL) as client:
+
+        result = await client.call_tool(
+            "get_total_unpaid",
+            {}
+        )
+
+        if result.is_error:
+            raise Exception("MCP tool returned an error")
+
+        if not result.content:
+            raise Exception("MCP tool returned no content")
+        return json.loads(result.content[0].text)
+#now setup is done
+@app.route(
+    "/mcp/total-unpaid",
+    methods=["GET"]
+)
+def mcp_total_unpaid():
+    try:
+        mcp_result = asyncio.run(
+            call_total_unpaid_mcp()
+        )
+
+        return jsonify({
+            "source":"Shared MCP Server",
+
+            "tool":"get_total_unpaid",
+
+            "result":mcp_result
+        })
+
+
+    except Exception as error:
+
+        return jsonify({
+            "error":
+                "Could not connect to MCP server",
+
+            "details":
+                str(error)
         }), 500
 
 
@@ -91,6 +175,55 @@ def delete_bill(bill_id):
         return jsonify({
             "error": "Could not connect to database service"
         }), 500
+        
+        
+###########
+#raf
+###########
+
+
+@app.route(
+    "/rag-query",
+    methods=["POST"]
+)
+def rag_query():
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    query = str(data.get("query", "")).strip()
+
+    if not query:
+        return jsonify({
+            "error":
+                "A RAG question is required."
+        }), 400
+    try:
+        response = requests.post(
+            RAG_URL,
+            json={
+                "query": query,
+                "feature": "bills"
+            },
+            timeout=120
+        )
+
+        response.raise_for_status()
+
+        return jsonify(
+            response.json()
+        )
+
+    except requests.exceptions.RequestException as error:
+
+        return jsonify({
+            "error":
+                "Could not connect to RAG server.",
+
+            "details":
+                str(error)
+        }), 503
 
 @app.route("/ai-insights", methods=["POST"])
 def ai_insights():

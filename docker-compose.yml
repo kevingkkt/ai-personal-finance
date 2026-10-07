@@ -34,6 +34,11 @@ services:
       OLLAMA_URL: http://host.docker.internal:11434/api/generate
       AI_ADVICE_MODEL: deepseek-r1:1.5b
       AGENTIC_MODEL: qwen2.5:1.5b
+      MCP_URL: http://host.docker.internal:7001/mcp
+      RAG_URL: http://host.docker.internal:7002/rag
+      AI_MODE_ENABLED: "${AI_MODE_ENABLED:-true}"
+      MCP_ENABLED: "${MCP_ENABLED:-true}"
+      RAG_ENABLED: "${RAG_ENABLED:-true}"
     depends_on:
       - grace-database
     restart: unless-stopped
@@ -72,6 +77,9 @@ services:
       - OLLAMA_URL=http://host.docker.internal:11434/api/generate
       - MCP_URL=http://host.docker.internal:7001/mcp
       - RAG_URL=http://host.docker.internal:7002/rag
+      - AI_MODE_ENABLED=${AI_MODE_ENABLED:-true}
+      - MCP_ENABLED=${MCP_ENABLED:-true}
+      - RAG_ENABLED=${RAG_ENABLED:-true}
     depends_on:
       - kevin-database
      
@@ -102,6 +110,8 @@ services:
     ports:
       - "5004:5001"
     environment:
+      - MCP_URL=http://host.docker.internal:7001/mcp
+      - RAG_URL=http://host.docker.internal:7002/rag
       - DATABASE_API_URL=http://bills-database:5002
       - OLLAMA_URL=http://host.docker.internal:11434/api/generate
     depends_on:
