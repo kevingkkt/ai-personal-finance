@@ -22,7 +22,7 @@ TOP_K = 3
 KNOWLEDGE_FILES = {
     'income_expense': 'income_expense_guide.md',
     'savings': 'savings_goals_guide.md',
-    'budget': 'budget_guide.md',
+    'budget': 'budgets_guide.md',
     'bills': 'Bills_and_Payment_Guide.md',
 }
 
