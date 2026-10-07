@@ -224,7 +224,7 @@ ragButton.addEventListener("click",
                     headers: {
                         "Content-Type": "application/json"
                     },
-                    body: JSON.stringify({query: question})
+                    body: JSON.stringify({query: question, feature: "budget"})
                 }
             );
             const data = await response.json();

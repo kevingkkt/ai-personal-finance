@@ -548,13 +548,16 @@ def savings_rag_query():
     if not isinstance(data, dict):
         return jsonify(error='A JSON object is required'), 400
     query = data.get('query')
+    feature = data.get('feature', 'savings')
+    if not isinstance(feature, str) or not feature.strip():
+        feature = 'savings'
     if not isinstance(query, str) or not query.strip():
         return jsonify(error='query must be nonempty text'), 400
     query = query.strip()
     if len(query) > 1000:
         return jsonify(error='query must be at most 1000 characters'), 400
     try:
-        response = requests.post(RAG_URL, json={'query': query, 'feature': 'savings'},
+        response = requests.post(RAG_URL, json={'query': query, 'feature': feature},
                                  timeout=(5, 135))
         if response.status_code != 200:
             code = response.status_code

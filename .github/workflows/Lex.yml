@@ -68,6 +68,10 @@ jobs:
   evidence-pack:
     runs-on: ubuntu-latest
     needs: [smoke-check]
+    env:
+      AI_MODE_ENABLED: "false"
+      MCP_ENABLED: "false"
+      RAG_ENABLED: "false"
 
     steps:
       - uses: actions/checkout@v4

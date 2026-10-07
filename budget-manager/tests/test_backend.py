@@ -50,5 +50,6 @@ def test_ai_insights():
     data = response.json()
 
     assert "insight" in data
-    assert "Total Income:" in data["insight"]
-    assert "Total Expenses:" in data["insight"]
+    assert "Biggest category:" in data["insight"]
+    assert "Most likely trim target:" in data["insight"]
+    assert "Balance:" in data["insight"]

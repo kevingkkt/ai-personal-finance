@@ -590,7 +590,6 @@ def rag_query():
         silent=True
     ) or {}
 
-
     query = str(
         data.get(
             "query",
@@ -598,6 +597,9 @@ def rag_query():
         )
     ).strip()
 
+    feature = data.get("feature", "income_expense")
+    if not isinstance(feature, str) or not feature.strip():
+        feature = "income_expense"
 
     if not query:
 
@@ -612,8 +614,8 @@ def rag_query():
         response = requests.post(
             RAG_URL,
             json={
-                "query":
-                    query
+                "query": query,
+                "feature": feature
             },
             timeout=120
         )

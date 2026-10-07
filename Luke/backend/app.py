@@ -193,6 +193,9 @@ def rag_query():
     ) or {}
 
     query = str(data.get("query", "")).strip()
+    feature = data.get("feature", "bills")
+    if not isinstance(feature, str) or not feature.strip():
+        feature = "bills"
 
     if not query:
         return jsonify({
@@ -204,7 +207,7 @@ def rag_query():
             RAG_URL,
             json={
                 "query": query,
-                "feature": "bills"
+                "feature": feature
             },
             timeout=120
         )

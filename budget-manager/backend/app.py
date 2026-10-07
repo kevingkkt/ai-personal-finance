@@ -429,6 +429,9 @@ If no budget data is available, return:
 def rag_query():
     data = request.get_json(silent=True) or {}
     query = str(data.get("query", "")).strip()
+    feature = data.get("feature", "budget")
+    if not isinstance(feature, str) or not feature.strip():
+        feature = "budget"
 
     if not query:
         return jsonify({
@@ -438,7 +441,7 @@ def rag_query():
     try:
         response = requests.post(
             RAG_URL,
-            json={"query": query},
+            json={"query": query, "feature": feature},
             timeout=120
         )
         response.raise_for_status()
