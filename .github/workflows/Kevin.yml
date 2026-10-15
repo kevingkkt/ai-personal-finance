@@ -85,7 +85,8 @@ jobs:
         run: |
           docker build -t kevin-frontend ./kevin/frontend
 
-            - name: Start Kevin database and backend
+            
+      - name: Start Kevin database and backend
         run: |
           docker compose up -d kevin-database kevin-backend
 
