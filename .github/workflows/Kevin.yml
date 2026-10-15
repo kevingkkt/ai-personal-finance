@@ -85,7 +85,31 @@ jobs:
         run: |
           docker build -t kevin-frontend ./kevin/frontend
 
+            - name: Start Kevin database and backend
+        run: |
+          docker compose up -d kevin-database kevin-backend
 
+      - name: Wait for Kevin backend
+        run: |
+          for i in {1..20}; do
+            if curl -f http://localhost:5001/health; then
+              echo "Kevin backend is ready"
+              exit 0
+            fi
+            sleep 3
+          done
+
+          echo "Kevin backend did not start in time"
+          docker compose logs kevin-backend
+          exit 1
+
+      - name: Test Kevin health endpoint
+        run: |
+          curl -f http://localhost:5001/health
+
+      - name: Test Kevin transactions endpoint
+        run: |
+          curl -f http://localhost:5001/transactions
  
 
       - name: Confirm MCP and RAG disabled in CI
