@@ -11,9 +11,9 @@ app = Flask(__name__)
 CORS(app)
 
 
-# ----------------------------------
+
 # Configuration
-# ----------------------------------
+
 
 DATABASE_API_URL = os.environ.get(
     "DATABASE_API_URL",
@@ -36,9 +36,9 @@ RAG_URL = os.environ.get(
 )
 
 
-# ----------------------------------
+
 # GET all transactions
-# ----------------------------------
+
 
 @app.route("/transactions", methods=["GET"])
 def get_transactions():
@@ -60,9 +60,9 @@ def get_transactions():
         }), 500
 
 
-# ----------------------------------
+
 # GET one transaction
-# ----------------------------------
+
 
 @app.route(
     "/transactions/<int:transaction_id>",
@@ -87,9 +87,8 @@ def get_transaction(transaction_id):
         }), 500
 
 
-# ----------------------------------
 # CREATE transaction
-# ----------------------------------
+
 
 @app.route("/transactions", methods=["POST"])
 def create_transaction():
@@ -112,9 +111,8 @@ def create_transaction():
         }), 500
 
 
-# ----------------------------------
 # UPDATE transaction
-# ----------------------------------
+
 
 @app.route(
     "/transactions/<int:transaction_id>",
@@ -140,9 +138,9 @@ def update_transaction(transaction_id):
         }), 500
 
 
-# ----------------------------------
+
 # DELETE transaction
-# ----------------------------------
+
 
 @app.route(
     "/transactions/<int:transaction_id>",
@@ -167,9 +165,8 @@ def delete_transaction(transaction_id):
         }), 500
 
 
-# ----------------------------------
 # HTMX route
-# ----------------------------------
+
 
 @app.route(
     "/transactions-html",
@@ -234,9 +231,8 @@ def get_transactions_html():
         )
 
 
-# ----------------------------------
 # AI Spending Insights
-# ----------------------------------
+
 
 @app.route("/ai-insights", methods=["GET"])
 def ai_insights():
@@ -430,9 +426,7 @@ Keep the response short.
         }), 500
 
 
-# ----------------------------------
-# MCP helper
-# ----------------------------------
+
 
 async def call_income_expense_mcp(
     total_income,
@@ -479,9 +473,6 @@ async def call_income_expense_mcp(
         )
 
 
-# ----------------------------------
-# MCP Income & Expense Summary
-# ----------------------------------
 
 @app.route(
     "/mcp-income-expense-summary",
@@ -576,9 +567,7 @@ def mcp_income_expense_summary():
         }), 500
 
 
-# ----------------------------------
-# RAG
-# ----------------------------------
+
 
 @app.route(
     "/rag-query",
@@ -638,9 +627,6 @@ def rag_query():
         }), 503
 
 
-# ----------------------------------
-# Health
-# ----------------------------------
 
 @app.route(
     "/health",
@@ -657,14 +643,10 @@ def health():
     })
 
 
-# ----------------------------------
-# Run Flask
-# ----------------------------------
-
 if __name__ == "__main__":
 
     app.run(
-        host="0.0.0.0",
-        debug=True,
+        host="0.0.0.0", # noqa: S104
+        debug=False,
         port=5001
     )
