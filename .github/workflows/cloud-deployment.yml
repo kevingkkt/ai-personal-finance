@@ -1,0 +1,39 @@
+name: Azure Cloud Deployment
+
+on:
+  push:
+    branches:
+      - kevin-release1
+  workflow_dispatch:
+
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Configure SSH
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.AZURE_VM_SSH_KEY }}
+          VM_HOST: ${{ secrets.AZURE_VM_HOST }}
+        run: |
+          mkdir -p ~/.ssh
+          printf '%s\n' "$SSH_PRIVATE_KEY" > ~/.ssh/azure_vm_key
+          chmod 600 ~/.ssh/azure_vm_key
+          ssh-keyscan -H "$VM_HOST" >> ~/.ssh/known_hosts
+
+      - name: Deploy to Azure VM
+        env:
+          VM_HOST: ${{ secrets.AZURE_VM_HOST }}
+          VM_USER: ${{ secrets.AZURE_VM_USER }}
+        run: |
+          ssh -i ~/.ssh/azure_vm_key "$VM_USER@$VM_HOST" << 'EOF'
+            set -e
+            cd ~/ai-personal-finance
+
+            git fetch origin
+            git switch kevin-release1
+            git pull --ff-only origin kevin-release1
+
+            docker compose --env-file .env.cloud up -d --build
+            docker compose ps
+          EOF
