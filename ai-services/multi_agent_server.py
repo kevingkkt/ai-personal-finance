@@ -116,7 +116,7 @@ Give a concise and clear response.
                     "temperature": 0
                 }
             },
-            timeout=120
+            timeout=300
         )
 
         response.raise_for_status()

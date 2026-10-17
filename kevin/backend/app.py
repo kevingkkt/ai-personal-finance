@@ -725,7 +725,7 @@ def multi_agent_review():
                 "task": task,
                 "evidence": evidence
             },
-            timeout=180
+            timeout=900
         )
 
         return jsonify(

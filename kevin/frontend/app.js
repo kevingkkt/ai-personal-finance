@@ -739,9 +739,7 @@ multiAgentButton.addEventListener(
                 `Reviewer:\n` +
                 `${data.reviewer.output}\n\n` +
 
-                `Status: ${data.status}\n\n` +
-
-                `Workflow ID: ${data.workflow_id}`;
+                `Status: ${data.status}`;
 
 
             if (
