@@ -759,6 +759,7 @@ multiAgentButton.addEventListener(
             console.error(error);
 
             multiAgentResult.textContent =
+                error.message ||
                 "Could not connect to the Multi-Agent service.";
         }
     }
