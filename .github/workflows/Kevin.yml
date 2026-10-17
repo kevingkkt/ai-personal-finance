@@ -39,6 +39,7 @@ jobs:
       - name: Install Kevin backend dependencies
         run: |
           pip install -r kevin/backend/requirements.txt
+          pip install pytest
 
 
       - name: Install Kevin database dependencies
@@ -62,12 +63,13 @@ jobs:
           python -m py_compile kevin/tests/test_backend.py
 
 
-      - name: Check Release 1 AI service files
+      - name: Check AI service files
         run: |
           python -m py_compile ai-services/mcp_server.py
           python -m py_compile ai-services/mcp_test_client.py
           python -m py_compile ai-services/rag_server.py
           python -m py_compile ai-services/shared_agentic_loop.py
+          python -m py_compile ai-services/multi_agent_server.py
 
 
 
@@ -104,13 +106,12 @@ jobs:
           docker compose logs kevin-backend
           exit 1
 
-      - name: Test Kevin health endpoint
+      - name: Test Kevin backend endpoints with pytest
         run: |
-          curl -f http://localhost:5001/health
-
-      - name: Test Kevin transactions endpoint
-        run: |
-          curl -f http://localhost:5001/transactions
+          python -m pytest \
+            kevin/tests/test_backend.py::test_backend_health \
+            kevin/tests/test_backend.py::test_get_transactions \
+            -v
  
 
       - name: Confirm MCP and RAG disabled in CI

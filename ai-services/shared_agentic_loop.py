@@ -13,11 +13,14 @@ from mcp import Client
 
 MCP_URL = os.getenv("MCP_URL", "http://localhost:7001/mcp")
 RAG_URL = os.getenv("RAG_URL", "http://localhost:7002/rag")
+MULTI_AGENT_URL = os.getenv(
+    "MULTI_AGENT_URL",
+    "http://localhost:7003"
+)
 
 
-# ------------------------------------
 # MCP validation mode
-# ----------------------------------
+
 
 async def validate_mcp():
 
@@ -168,9 +171,8 @@ async def validate_mcp():
         return False
 
 
-# ----------------------------------
+
 # RAG validation mode
-# ----------------------------------
 
 def validate_rag():
 
@@ -199,11 +201,7 @@ def validate_rag():
     )
 
     try:
-
-        # ----------------------------------
         # Supported question
-        # ----------------------------------
-
         supported_response = requests.post(
             RAG_URL,
             json={
@@ -220,9 +218,8 @@ def validate_rag():
         )
 
 
-        # ----------------------------------
+
         # Unsupported question
-        # ----------------------------------
 
         unsupported_response = requests.post(
             RAG_URL,
@@ -298,11 +295,7 @@ def validate_rag():
             )
         )
 
-
-        # ----------------------------------
         # Validate supported response
-        # ----------------------------------
-
         supported_valid = (
             supported_data.get("status") == "answered"
             and supported_data.get("grounded") is True
@@ -392,10 +385,7 @@ def validate_rag():
         return False
 
 
-# ----------------------------------
 # Main
-# ----------------------------------
-
 ROOT = Path(__file__).resolve().parents[1]
 SAVINGS_URL = os.getenv('SAVINGS_BACKEND_URL', 'http://127.0.0.1:5003')
 
@@ -561,6 +551,245 @@ def validate_architecture():
 
 
 KEVIN_URL = os.getenv('KEVIN_BACKEND_URL', 'http://127.0.0.1:5001')
+KEVIN_DATABASE_URL = os.getenv(
+    'KEVIN_DATABASE_URL',
+    'http://127.0.0.1:6001'
+)
+
+def validate_kevin_database():
+    print()
+    print("KEVIN DATABASE VALIDATION")
+
+    # Check database microservice health
+    health_response = requests.get(
+        f"{KEVIN_DATABASE_URL}/health",
+        timeout=(5, 15)
+    )
+
+    health_response.raise_for_status()
+    health_data = health_response.json()
+
+    require(
+        health_data.get("status") == "ok",
+        "Kevin database health check failed"
+    )
+
+    print("Database health: PASS")
+
+    # Check transaction records can be retrieved directly
+    transactions_response = requests.get(
+        f"{KEVIN_DATABASE_URL}/transactions",
+        timeout=(5, 15)
+    )
+
+    transactions_response.raise_for_status()
+    transactions = transactions_response.json()
+
+    require(
+        isinstance(transactions, list),
+        "Database transactions response is not a list"
+    )
+
+    require(
+        len(transactions) > 0,
+        "Database contains no transaction records"
+    )
+
+    print(
+        f"Transaction records retrieved: PASS ({len(transactions)} records)"
+    )
+
+    # Validate transaction structure
+    required_fields = {
+        "id",
+        "type",
+        "category",
+        "amount",
+        "date",
+        "description"
+    }
+
+    first_transaction = transactions[0]
+
+    require(
+        required_fields.issubset(first_transaction.keys()),
+        "Transaction record is missing required fields"
+    )
+
+    print("Transaction field structure: PASS")
+
+    # Check one record can be retrieved by ID
+    transaction_id = first_transaction["id"]
+
+    single_response = requests.get(
+        f"{KEVIN_DATABASE_URL}/transactions/{transaction_id}",
+        timeout=(5, 15)
+    )
+
+    single_response.raise_for_status()
+    single_transaction = single_response.json()
+
+    require(
+        single_transaction.get("id") == transaction_id,
+        "Database returned the wrong transaction"
+    )
+
+    print("Single transaction retrieval: PASS")
+
+    print()
+    print("KEVIN DATABASE VALIDATION RESULT: PASS")
+
+    return True
+
+def validate_kevin_release0_crud():
+    print()
+    print("KEVIN RELEASE 0 CRUD REGRESSION")
+
+    transaction_id = None
+    deleted = False
+
+    try:
+        # ----------------------------------
+        # CREATE
+        # ----------------------------------
+
+        create_payload = {
+            "type": "Expense",
+            "category": "Regression Test",
+            "amount": 12.34,
+            "date": "2026-10-16",
+            "description": "Temporary Release 0 CRUD test"
+        }
+
+        create_response = requests.post(
+            f"{KEVIN_URL}/transactions",
+            json=create_payload,
+            timeout=(5, 15)
+        )
+
+        create_response.raise_for_status()
+        created = create_response.json()
+
+        transaction_id = created.get("id")
+
+        require(
+            transaction_id is not None,
+            "Created transaction did not return an ID"
+        )
+
+        print(
+            f"CREATE transaction: PASS (ID {transaction_id})"
+        )
+
+        # READ
+  
+        read_response = requests.get(
+            f"{KEVIN_URL}/transactions/{transaction_id}",
+            timeout=(5, 15)
+        )
+
+        read_response.raise_for_status()
+        transaction = read_response.json()
+
+        require(
+            transaction.get("id") == transaction_id,
+            "Created transaction could not be retrieved"
+        )
+
+        require(
+            transaction.get("category") == "Regression Test",
+            "Created transaction data is incorrect"
+        )
+
+        print("READ transaction: PASS")
+
+        # UPDATE
+
+        update_payload = {
+            "type": "Expense",
+            "category": "Regression Test Updated",
+            "amount": 56.78,
+            "date": "2026-10-16",
+            "description": "Updated Release 0 CRUD test"
+        }
+
+        update_response = requests.put(
+            f"{KEVIN_URL}/transactions/{transaction_id}",
+            json=update_payload,
+            timeout=(5, 15)
+        )
+
+        update_response.raise_for_status()
+
+        print("UPDATE transaction: PASS")
+
+        # READ UPDATED RECORD
+
+        updated_response = requests.get(
+            f"{KEVIN_URL}/transactions/{transaction_id}",
+            timeout=(5, 15)
+        )
+
+        updated_response.raise_for_status()
+        updated_transaction = updated_response.json()
+
+        require(
+            updated_transaction.get("category")
+            == "Regression Test Updated",
+            "Updated category was not saved"
+        )
+
+        require(
+            abs(
+                float(updated_transaction.get("amount", 0))
+                - 56.78
+            ) < 0.01,
+            "Updated amount was not saved"
+        )
+
+        print("READ updated transaction: PASS")
+
+        # DELETE
+
+        delete_response = requests.delete(
+            f"{KEVIN_URL}/transactions/{transaction_id}",
+            timeout=(5, 15)
+        )
+
+        delete_response.raise_for_status()
+        deleted = True
+
+        print("DELETE transaction: PASS")
+
+        # CONFIRM DELETE
+        missing_response = requests.get(
+            f"{KEVIN_URL}/transactions/{transaction_id}",
+            timeout=(5, 15)
+        )
+
+        require(
+            missing_response.status_code == 404,
+            "Deleted transaction still exists"
+        )
+
+        print("Deleted transaction returns 404: PASS")
+
+        print()
+        print("KEVIN RELEASE 0 CRUD REGRESSION RESULT: PASS")
+
+        return True
+
+    finally:
+        # Remove temporary test data if a failure happens
+        # before the normal DELETE step.
+        if transaction_id is not None and not deleted:
+            try:
+                requests.delete(
+                    f"{KEVIN_URL}/transactions/{transaction_id}",
+                    timeout=(5, 15)
+                )
+            except requests.RequestException:
+                pass
 
 
 def validate_kevin_mcp_backend():
@@ -606,11 +835,677 @@ def validate_kevin_rag_backend():
             require(data.get('confidence') == 'Insufficient', 'Invalid refusal confidence')
     return True
 
+def review_multi_agent_workflow():
+    print()
+    print("MULTI-AGENT WORKFLOW REVIEW")
+
+    try:
+        response = requests.get(
+            f"{MULTI_AGENT_URL}/multi-agent-history",
+            timeout=10
+        )
+
+        response.raise_for_status()
+
+        workflows = response.json()
+
+    except requests.RequestException as error:
+        print("Could not connect to Multi-Agent Server.")
+        print(f"Error: {error}")
+        return False
+
+    if not workflows:
+        print("No Multi-Agent workflow evidence was found.")
+        return False
+
+    latest_workflow = workflows[-1]
+
+    workflow_id = latest_workflow.get(
+        "workflow_id"
+    )
+
+    planner = latest_workflow.get(
+        "planner"
+    )
+
+    worker = latest_workflow.get(
+        "worker"
+    )
+
+    reviewer = latest_workflow.get(
+        "reviewer"
+    )
+
+    human_review = latest_workflow.get(
+        "human_review"
+    )
+
+    status = latest_workflow.get(
+        "status"
+    )
+
+    checks = {
+        "Planner output exists":
+            bool(planner and planner.get("output")),
+
+        "Worker output exists":
+            bool(worker and worker.get("output")),
+
+        "Reviewer output exists":
+            bool(reviewer and reviewer.get("output")),
+
+        "Human review exists":
+            bool(human_review),
+
+        "Workflow completed":
+            status != "AWAITING_HUMAN_REVIEW"
+    }
+
+    print(f"Workflow ID: {workflow_id}")
+    print()
+
+    all_passed = True
+
+    for check_name, passed in checks.items():
+
+        result = (
+            "PASS"
+            if passed
+            else "FAIL"
+        )
+
+        print(
+            f"{check_name}: {result}"
+        )
+
+        if not passed:
+            all_passed = False
+
+    recommendations = []
+
+    if not checks[
+        "Planner output exists"
+    ]:
+        recommendations.append(
+            "Planner output is missing."
+        )
+
+    if not checks[
+        "Worker output exists"
+    ]:
+        recommendations.append(
+            "Worker output is missing."
+        )
+
+    if not checks[
+        "Reviewer output exists"
+    ]:
+        recommendations.append(
+            "Reviewer output is missing."
+        )
+
+    if not checks[
+        "Human review exists"
+    ]:
+        recommendations.append(
+            "Human review must be completed."
+        )
+
+    if not checks[
+        "Workflow completed"
+    ]:
+        recommendations.append(
+            "The workflow is still waiting for a human decision."
+        )
+
+    if all_passed:
+        recommendations.append(
+            "The Multi-Agent workflow contains all required stages."
+        )
+
+    review_log = {
+        "review_type":
+            "Multi-Agent Workflow Review",
+
+        "workflow_id":
+            workflow_id,
+
+        "status":
+            status,
+
+        "checks":
+            checks,
+
+        "recommendations":
+            recommendations,
+
+        "validation_result":
+            "PASS"
+            if all_passed
+            else "FAIL"
+    }
+
+    log_directory = os.path.join(
+        os.path.dirname(__file__),
+        "logs"
+    )
+
+    os.makedirs(
+        log_directory,
+        exist_ok=True
+    )
+
+    log_path = os.path.join(
+        log_directory,
+        "multi_agent_review_validation.json"
+    )
+
+    with open(
+        log_path,
+        "w",
+        encoding="utf-8"
+    ) as log_file:
+
+        json.dump(
+            review_log,
+            log_file,
+            indent=2
+        )
+
+    print()
+    print("Recommendations:")
+
+    for recommendation in recommendations:
+        print(
+            f"- {recommendation}"
+        )
+
+    print()
+
+    print(
+        "MULTI-AGENT REVIEW RESULT:",
+        review_log["validation_result"]
+    )
+
+    print(
+        "Validation log:",
+        log_path
+    )
+
+    return all_passed
+
+
+
+def review_testing_report():
+    print()
+    print("TESTING REPORT REVIEW")
+
+    evidence_path = (
+        Path(__file__).parent
+        / "evidence"
+        / "kevin_testing_report.json"
+    )
+
+    if not evidence_path.exists():
+        print("Testing report evidence file was not found.")
+        return False
+
+    with evidence_path.open(
+        "r",
+        encoding="utf-8"
+    ) as file:
+        report = json.load(file)
+
+    pre_commit = report.get(
+        "pre_commit_security",
+        {}
+    )
+
+    post_commit = report.get(
+        "post_commit_ci",
+        {}
+    )
+
+    tested_endpoints = post_commit.get(
+        "tested_endpoints",
+        []
+    )
+
+    checks = {
+        "Ruff security passed":
+            pre_commit.get("ruff_security") == "PASS",
+
+        "Detect-secrets passed":
+            pre_commit.get("detect_secrets") == "PASS",
+
+        "Pip-audit passed":
+            pre_commit.get("pip_audit") == "PASS",
+
+        "CI workflow passed":
+            post_commit.get("status") == "PASS",
+
+        "Two endpoint tests exist":
+            len(tested_endpoints) >= 2
+    }
+
+    all_passed = True
+
+    for check_name, passed in checks.items():
+
+        result = (
+            "PASS"
+            if passed
+            else "FAIL"
+        )
+
+        print(
+            f"{check_name}: {result}"
+        )
+
+        if not passed:
+            all_passed = False
+
+    recommendations = []
+
+    if not checks["Ruff security passed"]:
+        recommendations.append(
+            "Resolve Ruff security findings."
+        )
+
+    if not checks["Detect-secrets passed"]:
+        recommendations.append(
+            "Resolve detected secret findings."
+        )
+
+    if not checks["Pip-audit passed"]:
+        recommendations.append(
+            "Resolve vulnerable Python dependencies."
+        )
+
+    if not checks["CI workflow passed"]:
+        recommendations.append(
+            "Fix the Kevin CI workflow."
+        )
+
+    if not checks["Two endpoint tests exist"]:
+        recommendations.append(
+            "Add tests for at least two Kevin backend endpoints."
+        )
+
+    if all_passed:
+        recommendations.append(
+            "Pre-commit security scans and post-commit "
+            "endpoint testing meet the required validation checks."
+        )
+
+    review_log = {
+        "review_type":
+            "Testing Report Review",
+
+        "student":
+            report.get("student"),
+
+        "feature":
+            report.get("feature"),
+
+        "checks":
+            checks,
+
+        "tested_endpoints":
+            tested_endpoints,
+
+        "recommendations":
+            recommendations,
+
+        "validation_result":
+            "PASS"
+            if all_passed
+            else "FAIL"
+    }
+
+    log_directory = (
+        Path(__file__).parent
+        / "logs"
+    )
+
+    log_directory.mkdir(
+        exist_ok=True
+    )
+
+    log_path = (
+        log_directory
+        / "testing_review_validation.json"
+    )
+
+    with log_path.open(
+        "w",
+        encoding="utf-8"
+    ) as log_file:
+
+        json.dump(
+            review_log,
+            log_file,
+            indent=2
+        )
+
+    print()
+    print("Recommendations:")
+
+    for recommendation in recommendations:
+        print(
+            f"- {recommendation}"
+        )
+
+    print()
+
+    print(
+        "TESTING REVIEW RESULT:",
+        review_log["validation_result"]
+    )
+
+    print(
+        "Validation log:",
+        log_path
+    )
+
+    return all_passed
+
+def review_cloud_deployment():
+
+    evidence_path = (
+        Path(__file__).parent
+        / "evidence"
+        / "cloud_deployment_report.json"
+    )
+
+    print()
+    print("CLOUD DEPLOYMENT REPORT REVIEW")
+
+    report = {}
+
+    if evidence_path.exists():
+
+        with evidence_path.open(
+            "r",
+            encoding="utf-8"
+        ) as evidence_file:
+
+            report = json.load(
+                evidence_file
+            )
+
+    platform = str(
+        report.get(
+            "platform",
+            ""
+        )
+    ).strip().lower()
+
+    deployment_status = str(
+        report.get(
+            "deployment_status",
+            ""
+        )
+    ).strip().upper()
+
+    human_release_decision = str(
+        report.get(
+            "human_release_decision",
+            ""
+        )
+    ).strip().lower()
+
+    checks = {
+        "Cloud deployment report exists":
+            evidence_path.exists(),
+
+        "Supported cloud platform selected":
+            platform in {
+                "azure",
+                "aws"
+            },
+
+        "Cloud deployment passed":
+            deployment_status == "PASS",
+
+        "Frontend accessible":
+            report.get(
+                "frontend_accessible"
+            ) is True,
+
+        "Backend accessible":
+            report.get(
+                "backend_accessible"
+            ) is True,
+
+        "Database operational":
+            report.get(
+                "database_operational"
+            ) is True,
+
+        "Core CRUD operational":
+            report.get(
+                "crud_operational"
+            ) is True,
+
+        "AI Mode disabled by default":
+            report.get(
+                "ai_mode_disabled"
+            ) is True,
+
+        "MCP disabled by default":
+            report.get(
+                "mcp_disabled"
+            ) is True,
+
+        "RAG disabled by default":
+            report.get(
+                "rag_disabled"
+            ) is True,
+
+        "Multi-Agent disabled by default":
+            report.get(
+                "multi_agent_disabled"
+            ) is True,
+
+        "Human release approved":
+            human_release_decision == "approve"
+    }
+
+    all_passed = True
+
+    for check_name, passed in checks.items():
+
+        result = (
+            "PASS"
+            if passed
+            else "FAIL"
+        )
+
+        print(
+            f"{check_name}: {result}"
+        )
+
+        if not passed:
+            all_passed = False
+
+    recommendations = []
+
+    if not evidence_path.exists():
+
+        recommendations.append(
+            "Complete the Azure or AWS deployment and create "
+            "cloud_deployment_report.json."
+        )
+
+    if (
+        evidence_path.exists()
+        and platform not in {
+            "azure",
+            "aws"
+        }
+    ):
+
+        recommendations.append(
+            "Record Azure or AWS as the selected cloud platform."
+        )
+
+    if (
+        evidence_path.exists()
+        and deployment_status != "PASS"
+    ):
+
+        recommendations.append(
+            "Complete and validate the cloud deployment."
+        )
+
+    if (
+        evidence_path.exists()
+        and report.get(
+            "crud_operational"
+        ) is not True
+    ):
+
+        recommendations.append(
+            "Validate the required cloud CRUD operations."
+        )
+
+    if (
+        evidence_path.exists()
+        and not all([
+            report.get(
+                "ai_mode_disabled"
+            ) is True,
+
+            report.get(
+                "mcp_disabled"
+            ) is True,
+
+            report.get(
+                "rag_disabled"
+            ) is True,
+
+            report.get(
+                "multi_agent_disabled"
+            ) is True
+        ])
+    ):
+
+        recommendations.append(
+            "Ensure AI Mode, MCP, RAG, and Multi-Agent "
+            "are disabled by default in the cloud deployment."
+        )
+
+    if (
+        evidence_path.exists()
+        and human_release_decision != "approve"
+    ):
+
+        recommendations.append(
+            "Record the final human release approval after "
+            "cloud validation is complete."
+        )
+
+    if all_passed:
+
+        recommendations.append(
+            "Cloud deployment evidence satisfies the "
+            "required validation checks."
+        )
+
+    review_log = {
+        "review_type":
+            "Cloud Deployment Report Review",
+
+        "platform":
+            report.get(
+                "platform"
+            ),
+
+        "checks":
+            checks,
+
+        "recommendations":
+            recommendations,
+
+        "human_release_decision":
+            report.get(
+                "human_release_decision"
+            ),
+
+        "validation_result":
+            "PASS"
+            if all_passed
+            else "FAIL"
+    }
+
+    log_directory = (
+        Path(__file__).parent
+        / "logs"
+    )
+
+    log_directory.mkdir(
+        exist_ok=True
+    )
+
+    log_path = (
+        log_directory
+        / "cloud_deployment_review_validation.json"
+    )
+
+    with log_path.open(
+        "w",
+        encoding="utf-8"
+    ) as log_file:
+
+        json.dump(
+            review_log,
+            log_file,
+            indent=2
+        )
+
+    print()
+    print("Recommendations:")
+
+    for recommendation in recommendations:
+
+        print(
+            f"- {recommendation}"
+        )
+
+    print()
+
+    print(
+        "CLOUD DEPLOYMENT REVIEW RESULT:",
+        review_log[
+            "validation_result"
+        ]
+    )
+
+    print(
+        "Validation log:",
+        log_path
+    )
+
+    return all_passed
+
 
 def main():
     parser = argparse.ArgumentParser(description='Shared local validation entry point')
     parser.add_argument('--mode', required=True, choices=[
-        'database', 'endpoints', 'architecture', 'release0', 'mcp', 'rag', 'both'])
+        'database',
+        'endpoints',
+        'architecture',
+        'release0',
+        'mcp',
+        'rag',
+        'both',
+        'multi-agent-review',
+        'testing-review',
+        'cloud-deployment-review',
+        'kevin-database',   
+        'kevin-release0'
+    ])
     parser.add_argument('--output', type=Path)
     args = parser.parse_args()
     checks = []
@@ -632,6 +1527,38 @@ def main():
             ('savings-rag-backend', validate_savings_rag),
             ('Bills-Rag', validate_bills_rag)
         ])
+    if args.mode == 'multi-agent-review':
+        checks.append(
+            ('multi-agent-workflow-review', review_multi_agent_workflow)
+        )
+    if args.mode == 'testing-review':
+        checks.append(
+            (
+                'testing-report-review',
+                review_testing_report
+            )
+        )
+    if args.mode == 'cloud-deployment-review':
+        checks.append(
+            (
+                'cloud-deployment-report-review',
+                review_cloud_deployment
+            )
+        )
+    if args.mode == 'kevin-database':
+        checks.append(
+            (
+                'kevin-database-validation',
+                validate_kevin_database
+            )
+        )
+    if args.mode == 'kevin-release0':
+        checks.append(
+            (
+                'kevin-release0-crud-regression',
+                validate_kevin_release0_crud
+            )
+        )
     results = []
     for name, check in checks:
         print(f'\nPLAN: {name}\nACT: Execute validation')

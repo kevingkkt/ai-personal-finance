@@ -35,6 +35,44 @@ RAG_URL = os.environ.get(
     "http://localhost:7002/rag"
 )
 
+MULTI_AGENT_URL = os.environ.get(
+    "MULTI_AGENT_URL",
+    "http://localhost:7003"
+)
+
+AI_MODE_ENABLED = (
+    os.environ.get(
+        "AI_MODE_ENABLED",
+        "false"
+    ).lower()
+    == "true"
+)
+
+MCP_ENABLED = (
+    os.environ.get(
+        "MCP_ENABLED",
+        "false"
+    ).lower()
+    == "true"
+)
+
+RAG_ENABLED = (
+    os.environ.get(
+        "RAG_ENABLED",
+        "false"
+    ).lower()
+    == "true"
+)
+
+
+MULTI_AGENT_ENABLED = (
+    os.environ.get(
+        "MULTI_AGENT_ENABLED",
+        "false"
+    ).lower()
+    == "true"
+)
+
 
 
 # GET all transactions
@@ -236,6 +274,11 @@ def get_transactions_html():
 
 @app.route("/ai-insights", methods=["GET"])
 def ai_insights():
+
+    if not AI_MODE_ENABLED:
+        return jsonify({
+            "error": "AI Mode is disabled"
+        }), 503
 
     try:
         database_response = requests.get(
@@ -480,6 +523,11 @@ async def call_income_expense_mcp(
 )
 def mcp_income_expense_summary():
 
+    if not MCP_ENABLED:
+        return jsonify({
+            "error": "MCP is disabled"
+        }), 503
+    
     try:
 
         database_response = requests.get(
@@ -575,6 +623,11 @@ def mcp_income_expense_summary():
 )
 def rag_query():
 
+    if not RAG_ENABLED:
+        return jsonify({
+            "error": "RAG is disabled"
+        }), 503
+
     data = request.get_json(
         silent=True
     ) or {}
@@ -628,7 +681,103 @@ def rag_query():
                 str(error)
         }), 503
 
+# Multi-Agent Workflow
 
+
+@app.route(
+    "/multi-agent-review",
+    methods=["POST"]
+)
+def multi_agent_review():
+
+    if not MULTI_AGENT_ENABLED:
+        return jsonify({
+            "error": "Multi-Agent is disabled"
+        }), 503
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    task = str(
+        data.get("task", "")
+    ).strip()
+
+    evidence = data.get(
+        "evidence",
+        ""
+    )
+
+    if not task:
+        return jsonify({
+            "error": "A task is required."
+        }), 400
+
+    try:
+
+        response = requests.post(
+            f"{MULTI_AGENT_URL}/multi-agent",
+            json={
+                "task": task,
+                "evidence": evidence
+            },
+            timeout=180
+        )
+
+        return jsonify(
+            response.json()
+        ), response.status_code
+
+    except requests.exceptions.RequestException as error:
+
+        return jsonify({
+            "error": "Could not connect to Multi-Agent server.",
+            "details": str(error)
+        }), 503
+
+
+
+# Multi-Agent Human Review
+
+
+@app.route(
+    "/multi-agent/<workflow_id>/human-review",
+    methods=["POST"]
+)
+def multi_agent_human_review(workflow_id):
+
+    if not MULTI_AGENT_ENABLED:
+        return jsonify({
+            "error": "Multi-Agent is disabled"
+        }), 503
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    try:
+
+        response = requests.post(
+            f"{MULTI_AGENT_URL}/multi-agent/"
+            f"{workflow_id}/human-review",
+            json=data,
+            timeout=30
+        )
+
+        return jsonify(
+            response.json()
+        ), response.status_code
+
+    except requests.exceptions.RequestException as error:
+
+        return jsonify({
+            "error": "Could not connect to Multi-Agent server.",
+            "details": str(error)
+        }), 503
 
 @app.route(
     "/health",

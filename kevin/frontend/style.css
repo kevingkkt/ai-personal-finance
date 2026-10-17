@@ -171,3 +171,39 @@ th {
         font-size: 14px;
     }
 }
+
+.multi-agent-section {
+    margin-top: 30px;
+    padding: 20px;
+    border: 1px solid #444;
+    border-radius: 10px;
+}
+
+.multi-agent-section input,
+.multi-agent-section textarea,
+.multi-agent-section select {
+    width: 100%;
+    box-sizing: border-box;
+    margin-top: 6px;
+    margin-bottom: 14px;
+    padding: 10px;
+}
+
+.multi-agent-section button {
+    margin-top: 10px;
+    padding: 10px 16px;
+    cursor: pointer;
+}
+
+#multiAgentResult,
+#humanReviewResult {
+    margin-top: 15px;
+    white-space: pre-wrap;
+    line-height: 1.5;
+}
+
+#humanReviewPanel {
+    margin-top: 20px;
+    padding-top: 15px;
+    border-top: 1px solid #555;
+}
