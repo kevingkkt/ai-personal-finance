@@ -1,0 +1,51 @@
+ai-personal-finance/
+│
+├── .github/
+│   └── workflows/
+│
+├── ai-services/
+│   ├── evidence/
+│   ├── knowledge/
+│   ├── logs/
+│   └── tests/
+│
+├── budget-manager/
+│   ├── backend/
+│   ├── database/
+│   ├── frontend/
+│   └── tests/
+│
+├── docs/
+│
+├── front-page/
+│   └── static/
+│
+├── grace/
+│   ├── backend/
+│   ├── database/
+│   ├── frontend/
+│   └── tests/
+│
+├── kevin/
+│   ├── backend/
+│   ├── database/
+│   ├── frontend/
+│   └── tests/
+│
+├── lex/
+│   ├── backend/
+│   ├── database/
+│   ├── frontend/
+│   └── tests/
+│
+├── luke/
+│   ├── backend/
+│   ├── database/
+│   ├── frontend/
+│   ├── Prompts/
+│   └── tests/
+│
+├── .gitignore
+├── .pre-commit-config.yaml
+├── docker-compose.yml
+└── README.md

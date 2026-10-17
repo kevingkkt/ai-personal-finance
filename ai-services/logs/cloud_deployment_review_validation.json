@@ -1,0 +1,23 @@
+{
+  "review_type": "Cloud Deployment Report Review",
+  "platform": "Azure",
+  "checks": {
+    "Cloud deployment report exists": true,
+    "Supported cloud platform selected": true,
+    "Cloud deployment passed": true,
+    "Frontend accessible": true,
+    "Backend accessible": true,
+    "Database operational": true,
+    "Core CRUD operational": true,
+    "AI Mode disabled by default": true,
+    "MCP disabled by default": true,
+    "RAG disabled by default": true,
+    "Multi-Agent disabled by default": true,
+    "Human release approved": true
+  },
+  "recommendations": [
+    "Cloud deployment evidence satisfies the required validation checks."
+  ],
+  "human_release_decision": "approve",
+  "validation_result": "PASS"
+}
