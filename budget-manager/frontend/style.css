@@ -77,3 +77,50 @@ th {
     border-radius: 8px;
     line-height: 1.6;
 }
+
+.service-toggle {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    margin: 15px 0;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.service-toggle input {
+    width: 18px;
+    height: 18px;
+    cursor: pointer;
+}
+
+
+#mcpButton,
+#ragButton {
+    width: 100%;
+    margin: 20px 0;
+    padding: 14px;
+    font-size: 16px;
+    font-weight: bold;
+}
+
+#mcpResult,
+#ragResult {
+    white-space: pre-wrap;
+    background: #f4f7fb;
+    padding: 20px;
+    margin-bottom: 25px;
+    border-radius: 8px;
+    line-height: 1.6;
+}
+
+.mcp-section,
+.rag-section {
+    margin-top: 30px;
+}
+
+#ragQuestion {
+    width: 100%;
+    padding: 12px;
+    margin-top: 15px;
+    box-sizing: border-box;
+}
