@@ -481,10 +481,7 @@ def start_multi_agent_workflow():
     ), 200
 
 
-# ----------------------------------
 # Human Review
-# ----------------------------------
-
 @app.post(
     "/multi-agent/<workflow_id>/human-review"
 )
@@ -636,10 +633,8 @@ def workflow_history():
     ), 200
 
 
-# ----------------------------------
-# Run server
-# ----------------------------------
 
+# Run server
 if __name__ == "__main__":
 
     print(
