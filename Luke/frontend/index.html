@@ -332,19 +332,31 @@ const multiResponse = document.getElementById("multiResponse");
 const humanReviewOutput = document.getElementById("humanReviewOutput");
 const humanReviewSection = document.querySelector(".Human Review");
 
-
+function isMultiEnabled() {
+        return multiOnOff.checked;
+    }
 
 //first want to disable the button and text box when its turned off
 multiOnOff.addEventListener("change", () => {
 
-    renderMultiState();
+    
 
-    if (!isMcpEnabled()) {
+    if (!isMultiEnabled()) {
          //tell them to turn it off
+         multiButton.disabled = true;
+         multiTask.disabled = true;
+         multiEvidence.disabled = true;
+         humanReviewButton.disabled = true;
+         humanDecision.disabled = true;
         multiOnOff.textContent ="Click the check box to enable Multi Agent Review. This will allow you to use the tool.";
     }
     else
     {
+        multiButton.disabled = false;
+         multiTask.disabled = false;
+         multiEvidence.disabled = false;
+         humanReviewButton.disabled = false;
+         humanDecision.disabled = false;
          multiOnOff.textContent ="Multi Agent Review is ON. Feel free to use as you please.";
     }
 
@@ -369,7 +381,7 @@ multiButton.addEventListener("click", async () => {
         return;
     }
 
-    multiOutput.textContent = "Running the Multi Agent Review should be reaady shortly.";
+    multiOutput.textContent = "Running the Multi Agent Review should be ready shortly.";
     //keep it hidden
     humanReviewSection.style.display = "none"; // Hide human review section initially
 
