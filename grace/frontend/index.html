@@ -4,7 +4,7 @@
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Savings Goals</title>
-  <link rel="stylesheet" href="style.css?v=release1-theme-1">
+  <link rel="stylesheet" href="style.css?v=release2-multi-agent-1">
 </head>
 <body>
   <header><div><h1>Savings Goals</h1><p>Create goals and track contributions.</p></div><a href="http://localhost:8080">Back to home</a></header>
@@ -24,6 +24,11 @@
           <span>RAG mode</span>
           <input id="savings-rag-toggle" type="checkbox" role="switch" checked aria-describedby="mode-settings-help">
           <span id="savings-rag-state" aria-hidden="true">On</span>
+        </label>
+        <label class="mode-switch" for="savings-multi-agent-toggle">
+          <span>Multi-Agent mode</span>
+          <input id="savings-multi-agent-toggle" type="checkbox" role="switch" checked aria-describedby="mode-settings-help">
+          <span id="savings-multi-agent-state" aria-hidden="true">On</span>
         </label>
       </div>
     </section>
@@ -127,8 +132,37 @@
       <p id="savings-rag-result" class="result" aria-live="polite"></p>
     </section>
 
+    <section class="release-one" aria-labelledby="savings-multi-agent-title">
+      <h2 id="savings-multi-agent-title">Multi-agent savings review</h2>
+      <p>The Planner, Worker and Reviewer agents review your saved goals and contributions. You make the final decision.</p>
+      <label for="savings-multi-agent-goal">Goal to review</label>
+      <select id="savings-multi-agent-goal">
+        <option value="">All goals</option>
+      </select>
+      <label for="savings-multi-agent-task">Task (optional)</label>
+      <textarea id="savings-multi-agent-task" rows="3" maxlength="1000"
+        placeholder="Review the savings goal progress, identify any goals at risk of missing their target date, and recommend next steps."></textarea>
+      <button id="savings-multi-agent-button" type="button">Run multi-agent review</button>
+      <p id="savings-multi-agent-result" class="result" aria-live="polite"></p>
+
+      <form id="savings-human-review" class="hidden">
+        <h3>Human review</h3>
+        <label for="savings-human-decision">Decision</label>
+        <select id="savings-human-decision">
+          <option value="approve">Approve</option>
+          <option value="partial">Partially accept</option>
+          <option value="correct">Needs correction</option>
+          <option value="reject">Reject</option>
+        </select>
+        <label for="savings-human-comments">Comments (required unless approving)</label>
+        <textarea id="savings-human-comments" rows="3" maxlength="2000"></textarea>
+        <button id="savings-human-submit" type="submit">Submit decision</button>
+        <p id="savings-human-result" class="result" aria-live="polite"></p>
+      </form>
+    </section>
+
     <p id="message" class="notice hidden"></p>
   </main>
-  <script src="app.js?v=release1-mcp-goals-1"></script>
+  <script src="app.js?v=release2-multi-agent-1"></script>
 </body>
 </html>
