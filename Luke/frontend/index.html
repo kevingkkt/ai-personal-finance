@@ -154,7 +154,9 @@
                     >
                         Submit Human Review
                     </button>
-
+                    <p id="humanReviewOutput">
+                        Human Review Output
+                    </p>
                 </div>
             </div>
             <!--beed abitger  on off feature-->
@@ -330,8 +332,14 @@ const fuloutput = document.getElementById("fuloutput");
 const multiResponse = document.getElementById("multiResponse");
 
 const humanReviewOutput = document.getElementById("humanReviewOutput");
-const humanReviewSection = document.querySelector(".Human Review");
+//const humanReviewSection = document.querySelector(".Human Review");
 
+//set to off on default
+multiButton.disabled = true;
+         multiTask.disabled = true;
+         multiEvidence.disabled = true;
+         humanReviewButton.disabled = true;
+         humanDecision.disabled = true;
 function isMultiEnabled() {
         return multiOnOff.checked;
     }
@@ -383,7 +391,7 @@ multiButton.addEventListener("click", async () => {
 
     multiOutput.textContent = "Running the Multi Agent Review should be ready shortly.";
     //keep it hidden
-    humanReviewSection.style.display = "none"; // Hide human review section initially
+    //humanReviewSection.style.display = "none"; // Hide human review section initially
 
     try {
         const response = await fetch("http://127.0.0.1:5001/multi-agent-review",
@@ -420,14 +428,7 @@ multiButton.addEventListener("click", async () => {
 
                 `Status: ${data.status}`;
         
-            if (
-                data.status ===
-                "AWAITING_HUMAN_REVIEW"
-            ) {
-
-                humanReviewPanel.style.display =
-                    "block";
-            }
+            //if (data.status ==="AWAITING_HUMAN_REVIEW") {   humanReviewPanel.style.display ="block"; }
 
 
         } catch (error) {
