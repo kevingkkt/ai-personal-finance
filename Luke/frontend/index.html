@@ -94,6 +94,67 @@
             </div>
         </div>
         <div class="multi">
+            <h2>Multi Agent Review</h2>
+            <p>Runs a shared multi agent Planner, Worker and Reviewer agents.</p>
+            <label>
+                <input type="checkbox" id="multiOnOff">
+                Enable Multi Agent Review
+                <!--also want when off the buttons to turn off in front end-->
+            </label>
+            <input type="text" id="multiQuestion" name="question" placeholder="Ask Multi Agent Review for more specific advice.">
+            </input>
+            <button id="multiButton">
+                Begin Multi Agent Review
+            </button>
+            <!--Pretty sure you dont see this text as itll be edited more or less out in Javscript but its there-->
+            <div id="fuloutput">
+                <div id="multiOutput">
+                    Awaiting use of Multi Agent Review This should not be seen I believe if things are working
+                </div>
+                <div class="Human Review">
+                    <h3>Human Review</h3>
+                    <!--Now we need the differt outcomes-->
+                    <label for="humanDecision">
+                        Decision
+                    </label>
+
+                    <select id="humanDecision">
+                        <option value="approve">
+                            Approve
+                        </option>
+
+                        <option value="partial">
+                            Partial Accept
+                        </option>
+
+                        <option value="correct">
+                            Correction Required
+                        </option>
+
+                        <option value="reject">
+                            Reject
+                        </option>
+                    </select>
+
+                    <label for="humanComments">
+                        Comments
+                    </label>
+
+                    <textarea
+                        id="humanComments"
+                        rows="3"
+                        placeholder="Enter any extra comments here..."
+                    ></textarea>
+
+                    <button
+                        type="button"
+                        id="humanReviewButton"
+                    >
+                        Submit Human Review
+                    </button>
+
+                </div>
+            </div>
             <!--beed abitger  on off feature-->
         </div>
 
@@ -248,6 +309,35 @@ totalUnpaidButton.addEventListener("click", async () => {
     }
 
 });
+/////////////////
+////////////multi agent stuff
+////////////////////
+
+const multiOnOff = document.getElementById("multiOnOff");
+
+//first want to disable the button and text box when its turned off
+multiOnOff.addEventListener("change", () => {
+
+    renderMcpState();
+
+    if (!isMcpEnabled()) {
+         //tell them to turn it off
+        multiOnOff.textContent ="Click the check box to enable Multi Agent Review. This will allow you to use the tool.";
+    }
+    else
+    {
+         multiOnOff.textContent ="Multi Agent Review is ON. Feel free to use as you please.";
+    }
+
+});
+
+
+
+
+
+
+
+
 
 /////////////////////////////////////////////////
 //////////RAG AREA////////////////////////
