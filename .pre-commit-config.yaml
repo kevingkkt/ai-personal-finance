@@ -18,3 +18,15 @@ repos:
         entry: python -m pip_audit -r kevin/backend/requirements.txt
         language: system
         pass_filenames: false
+      
+      - id: pip-audit-backend-bills
+        name: Pip audit Kevin backend bills
+        entry: python -m pip_audit -r Luke/backend/bills/requirements.txt
+        language: system
+        pass_filenames: false
+      
+      - id: ruff-secutiy-bills
+        name: Ruff security scan bills
+        entry: python -m ruff check Luke/backend/bills --select S --per-file-ignores "Luke/backend/bills/tests/*:S101"
+        language: system
+        pass_filenames: false
