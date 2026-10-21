@@ -699,7 +699,7 @@ def savings_multi_agent_history():
 
 if __name__ == "__main__":
     app.run(
-        host="0.0.0.0",
+        host="0.0.0.0",  # noqa: S104 - container must accept traffic from other services; Docker controls exposure
         debug=False,
         port=5003
     )

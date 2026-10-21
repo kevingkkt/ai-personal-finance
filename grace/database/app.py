@@ -479,7 +479,7 @@ def delete_contribution(contribution_id):
 
 if __name__ == "__main__":
     app.run(
-        host="0.0.0.0",
+        host="0.0.0.0",  # noqa: S104 - container must accept traffic from other services; Docker controls exposure
         port=6003,
-        debug=True
+        debug=False
     )
