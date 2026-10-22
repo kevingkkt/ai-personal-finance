@@ -124,7 +124,7 @@ h1 {
 }
 #multiQuestionTask,
 #multiQuestionEvidence {
-    width: 50%;
+    width: calc(50% - 8px);
     padding: 12px;
     margin-top: 15px;
     box-sizing: border-box;
