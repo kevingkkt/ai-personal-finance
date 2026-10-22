@@ -1,4 +1,5 @@
-const API_URL = "http://127.0.0.1:5001/transactions";
+const BACKEND_URL = `http://${window.location.hostname}:5001`;
+const API_URL = `${BACKEND_URL}/transactions`;
 
 const form = document.getElementById("transactionForm");
 const table = document.getElementById("transactionTable");
@@ -436,7 +437,7 @@ aiButton.addEventListener(
 
             const response =
                 await fetch(
-                    "http://127.0.0.1:5001/ai-insights"
+                    `${BACKEND_URL}/ai-insights`
                 );
 
             const data =
@@ -491,7 +492,7 @@ mcpButton.addEventListener(
 
             const response =
                 await fetch(
-                    "http://127.0.0.1:5001/mcp-income-expense-summary"
+                    `${BACKEND_URL}/mcp-income-expense-summary`
                 );
 
             const data =
@@ -565,7 +566,7 @@ ragButton.addEventListener(
 
             const response =
                 await fetch(
-                    "http://127.0.0.1:5001/rag-query",
+                    `${BACKEND_URL}/rag-query`,
                     {
                         method: "POST",
                         headers: {
@@ -695,7 +696,7 @@ multiAgentButton.addEventListener(
 
             const response =
                 await fetch(
-                    "http://127.0.0.1:5001/multi-agent-review",
+                    `${BACKEND_URL}/multi-agent-review`,
                     {
                         method: "POST",
 
@@ -794,7 +795,7 @@ humanReviewButton.addEventListener(
 
             const response =
                 await fetch(
-                    `http://127.0.0.1:5001/multi-agent/${currentWorkflowId}/human-review`,
+                    `${BACKEND_URL}/multi-agent/${currentWorkflowId}/human-review`,
                     {
                         method: "POST",
 
@@ -831,14 +832,27 @@ humanReviewButton.addEventListener(
 
 
         } catch (error) {
-
-            console.error(error);
-
             humanReviewResult.textContent =
                 "Could not submit the human review.";
         }
+
     }
 );
+
+document.addEventListener("DOMContentLoaded", () => {
+    const refreshButton = document.getElementById("refreshTransactionsButton");
+
+    if (refreshButton) {
+        refreshButton.setAttribute(
+            "hx-get",
+            `${BACKEND_URL}/transactions-html`
+        );
+
+        if (window.htmx) {
+            htmx.process(refreshButton);
+        }
+    }
+});
 
 
 // Load transactions when page opens
