@@ -19,7 +19,8 @@ def test_frontend_available():
 
 
 @live
-@pytest.mark.parametrize('path', ['/ai-insights', '/goals/1/mcp-summary', '/rag-query'])
+@pytest.mark.parametrize('path', ['/ai-insights', '/goals/1/mcp-summary', '/rag-query',
+                                  '/multi-agent-review'])
 def test_running_backend_modes_disabled(path):
     response = requests.post(BACKEND_URL + path, json={'query': 'test'}, timeout=10)
     assert response.status_code == 503
@@ -32,16 +33,17 @@ def test_disabled_modes_make_no_external_requests(monkeypatch):
     module = importlib.util.module_from_spec(spec)
     spec.loader.exec_module(module)
     module.app.config.update(TESTING=True, AI_MODE_ENABLED=False, MCP_ENABLED=False,
-                             RAG_ENABLED=False)
+                             RAG_ENABLED=False, MULTI_AGENT_ENABLED=False)
     def forbidden(*args, **kwargs):
         raise AssertionError('Disabled mode made an external request')
     monkeypatch.setattr(module.requests, 'get', forbidden)
     monkeypatch.setattr(module.requests, 'post', forbidden)
+    monkeypatch.setattr(module.requests, 'request', forbidden)
     async def forbidden_mcp(*args, **kwargs):
         raise AssertionError('Disabled mode invoked MCP')
     monkeypatch.setattr(module, 'invoke_savings_tool', forbidden_mcp)
     client = module.app.test_client()
-    for route in ['/ai-insights', '/goals/1/mcp-summary', '/rag-query']:
+    for route in ['/ai-insights', '/goals/1/mcp-summary', '/rag-query', '/multi-agent-review']:
         response = client.post(route, json={'query': 'test'})
         assert response.status_code == 503
         assert response.json['status'] == 'disabled'

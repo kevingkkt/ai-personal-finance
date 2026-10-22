@@ -1,0 +1,34 @@
+{
+  "student": "Grace",
+  "feature": "Savings Goal Manager",
+  "pre_commit_security": {
+    "ruff_security": "PASS",
+    "detect_secrets": "PASS",
+    "pip_audit": "PASS",
+    "hooks": [
+      "ruff-security-grace",
+      "detect-secrets-grace",
+      "pip-audit-grace-backend",
+      "pip-audit-grace-database"
+    ],
+    "findings_resolved": [
+      {
+        "rule": "S201",
+        "file": "grace/database/app.py",
+        "issue": "Flask debug=True exposes the interactive debugger on published port 6003",
+        "resolution": "Fixed: set debug=False"
+      },
+      {
+        "rule": "S104",
+        "file": "grace/backend/app.py, grace/database/app.py",
+        "issue": "Binding to 0.0.0.0",
+        "resolution": "Accepted with noqa: containers must accept traffic from other services; Docker controls port exposure"
+      }
+    ],
+    "log": "ai-services/logs/grace_pre_commit_security.log"
+  },
+  "post_commit_ci": {
+    "workflow": "Grace CI",
+    "status": "PENDING"
+  }
+}

@@ -14,6 +14,7 @@ jobs:
       AI_MODE_ENABLED: "false"
       MCP_ENABLED: "false"
       RAG_ENABLED: "false"
+      MULTI_AGENT_ENABLED: "false"
       RUN_SAVINGS_CI_INTEGRATION: "true"
     steps:
       - uses: actions/checkout@v4
