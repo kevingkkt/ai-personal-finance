@@ -3,7 +3,8 @@ name: Azure Cloud Deployment
 on:
   push:
     branches:
-      - kevin-release1
+      
+      - luke-release2
   workflow_dispatch:
 
 jobs:
@@ -31,8 +32,8 @@ jobs:
             cd ~/ai-personal-finance
 
             git fetch origin
-            git switch kevin-release1
-            git pull --ff-only origin kevin-release1
+            git switch luke-release2
+            git pull --ff-only origin luke-release2
 
             docker compose --env-file .env.cloud up -d --build
             docker compose ps
