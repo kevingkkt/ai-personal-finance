@@ -372,9 +372,9 @@ def multi_agent_review():
 
     try:
         response = requests.post(
-            f"{MULTI_AGENT_URL}/multi-agent-review",
+            f"{MULTI_AGENT_URL}/multi-agent",
             json=data,
-            timeout=30
+            timeout=167
         )
         return jsonify(response.json()),response.status_code
     except requests.exceptions.RequestException as error:
