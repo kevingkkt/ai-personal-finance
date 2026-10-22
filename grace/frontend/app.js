@@ -1,4 +1,6 @@
-const API_URL = "http://127.0.0.1:5003";
+// Use the host serving this page, so the same build works locally and on the Azure VM.
+const API_URL = `http://${window.location.hostname}:5003`;
+document.getElementById("home-link").href = `http://${window.location.hostname}:8080`;
 
 const state = {
     goals: [],
