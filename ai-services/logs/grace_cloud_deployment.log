@@ -1,0 +1,47 @@
+Grace - Savings Goal Manager: cloud deployment check
+Run at: 2026-10-22T15:00:47+00:00
+Frontend: http://20.213.19.132:3003   Backend: http://20.213.19.132:5003
+
+== Frontend and health
+[PASS] Frontend page served: GET http://20.213.19.132:3003/ -> 200 (expected 200, 0.1s)
+       <7798 bytes, Savings Goals page>
+[PASS] Backend health: GET http://20.213.19.132:5003/health -> 200 (expected 200, 0.1s)
+       {"service": "Savings Goals Backend API", "status": "ok"}
+
+== CRUD (temporary goal, removed at the end)
+[PASS] Read all goals: GET http://20.213.19.132:5003/goals -> 200 (expected 200, 0.1s)
+       [{"current_amount": 850.0, "goal_name": "Emergency fund", "id": 1, "target_amount": 10000.0, "target_date": "31-08-2027"}, {"current_amount": 550.0, "goal_name": "New laptop", "id": 2, "target_amount": 2500.0, "target_date": "15-12-2026"}, {"current_amount": 1000.0, "goal_name": "Japan holiday", "id
+[PASS] Create goal: POST http://20.213.19.132:5003/goals -> 201 (expected 201, 0.1s)
+       {"current_amount": 0.0, "goal_name": "Cloud deployment check goal", "id": 12, "target_amount": 1500.0, "target_date": "31-12-2027"}
+[PASS] Read one goal: GET http://20.213.19.132:5003/goals/12 -> 200 (expected 200, 0.1s)
+       {"current_amount": 0.0, "goal_name": "Cloud deployment check goal", "id": 12, "target_amount": 1500.0, "target_date": "31-12-2027"}
+[PASS] Update goal: PUT http://20.213.19.132:5003/goals/12 -> 200 (expected 200, 0.1s)
+       {"current_amount": 0.0, "goal_name": "Cloud deployment check goal (edited)", "id": 12, "target_amount": 2000.0, "target_date": "31-12-2027"}
+[PASS] Create contribution: POST http://20.213.19.132:5003/goals/12/contributions -> 201 (expected 201, 0.1s)
+       {"amount": 250.0, "contribution_date": "01-10-2026", "goal_id": 12, "id": 11}
+[PASS] Read contributions: GET http://20.213.19.132:5003/goals/12/contributions -> 200 (expected 200, 0.1s)
+       [{"amount": 250.0, "contribution_date": "01-10-2026", "goal_id": 12, "id": 11}]
+[PASS] Update contribution: PUT http://20.213.19.132:5003/contributions/11 -> 200 (expected 200, 0.1s)
+       {"amount": 300.0, "contribution_date": "02-10-2026", "goal_id": 12, "id": 11}
+[PASS] Goal total follows contributions: GET http://20.213.19.132:5003/goals/12 -> 200 (expected 200, 0.1s)
+       {"current_amount": 300.0, "goal_name": "Cloud deployment check goal (edited)", "id": 12, "target_amount": 2000.0, "target_date": "31-12-2027"}
+[PASS] Delete contribution: DELETE http://20.213.19.132:5003/contributions/11 -> 200 (expected 200, 0.1s)
+       {"message": "Contribution deleted successfully"}
+[PASS] Delete goal: DELETE http://20.213.19.132:5003/goals/12 -> 200 (expected 200, 0.1s)
+       {"message": "Savings goal deleted successfully"}
+[PASS] Deleted goal is gone: GET http://20.213.19.132:5003/goals/12 -> 404 (expected 404, 0.1s)
+       {"error": "Savings goal not found"}
+
+== AI services (must be disabled by default in the cloud)
+[PASS] AI-Mode disabled: POST http://20.213.19.132:5003/ai-insights -> 503 (expected 503, 0.1s)
+       {"error": "AI-Mode is disabled in this environment", "status": "disabled"}
+[PASS] MCP disabled: POST http://20.213.19.132:5003/goals/1/mcp-summary -> 503 (expected 503, 0.1s)
+       {"error": "MCP is disabled in this environment", "status": "disabled"}
+[PASS] RAG disabled: POST http://20.213.19.132:5003/rag-query -> 503 (expected 503, 0.1s)
+       {"error": "RAG is disabled in this environment", "status": "disabled"}
+[PASS] Multi-Agent disabled: POST http://20.213.19.132:5003/multi-agent-review -> 503 (expected 503, 0.1s)
+       {"error": "Multi-Agent is disabled in this environment", "status": "disabled"}
+[PASS] Multi-Agent history disabled: GET http://20.213.19.132:5003/multi-agent-history -> 503 (expected 503, 0.1s)
+       {"error": "Multi-Agent is disabled in this environment", "status": "disabled"}
+
+RESULT: PASS (18/18 checks)

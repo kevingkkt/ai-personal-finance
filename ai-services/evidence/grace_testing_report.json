@@ -29,6 +29,22 @@
   },
   "post_commit_ci": {
     "workflow": "Grace CI",
-    "status": "PENDING"
+    "workflow_file": ".github/workflows/Grace.yml",
+    "status": "PASS",
+    "commit": "b441209f98f1b57e490a7d427a0fb918b4897323",
+    "run_url": "https://github.com/kevingkkt/ai-personal-finance/actions/runs/39794671588",
+    "integrated_run_url": "https://github.com/kevingkkt/ai-personal-finance/actions/runs/39799016221",
+    "test_method": "pytest against the disposable Docker stack (AI, MCP, RAG and Multi-Agent disabled)",
+    "tested_endpoints": [
+      "GET /goals",
+      "POST /goals/<goal_id>/contributions"
+    ],
+    "tests": [
+      "test_get_goals_endpoint",
+      "test_create_contribution_endpoint",
+      "test_create_contribution_endpoint_rejects_invalid_input",
+      "test_create_contribution_endpoint_unknown_goal"
+    ],
+    "log": "ai-services/logs/grace_ci_endpoint_tests.log"
   }
 }

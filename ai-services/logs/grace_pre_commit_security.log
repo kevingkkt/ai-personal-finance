@@ -1,13 +1,13 @@
 Grace - Savings Goal Manager: pre-commit security scan log
-Generated: 2026-10-21T13:02:28Z  Branch: grace-release2  Base commit: 243f704
+Generated: 2026-10-22T15:03:59Z  Branch: grace-release2  Base commit: 78df8bc
 Tools: ruff 0.17.1, detect-secrets 1.5.0, pip-audit 2.10.1, pre-commit 4.7.0
 
-== 1. Ruff security rules (S) - initial findings before fixes (committed versions at 243f704)
+== 1. Ruff security rules (S) - initial findings before fixes (version at 243f704, before c6642c9)
 grace/backend/app.py:702:14: S104 Possible binding to all interfaces
 grace/database/app.py:482:14: S104 Possible binding to all interfaces
 grace/database/app.py:484:9: S201 Use of `debug=True` in Flask app detected
 
-== 2. Ruff security rules (S) - after fixes
+== 2. Ruff security rules (S) - current code
 $ ruff check grace --select S --per-file-ignores "grace/tests/*:S101"
 All checks passed!
 
@@ -16,14 +16,9 @@ $ detect-secrets scan grace
 Findings: 0
 
 == 4. detect-secrets hook blocks a planted fake AWS key (file deleted afterwards)
-Detect secrets (Grace)...................................................Failed
-- hook id: detect-secrets-grace
-- exit code: 1
-
 ERROR: Potential secrets about to be committed to git repo!
-
 Secret Type: AWS Access Key
-Location:    grace/leak_check_tmp.py:1
+Hook exit code: 1 (non-zero = commit blocked)
 
 == 5. pip-audit
 $ pip-audit -r grace/backend/requirements.txt
@@ -32,11 +27,21 @@ $ pip-audit -r grace/database/requirements.txt
 No known vulnerabilities found
 
 == 6. Full pre-commit run (all team hooks)
-$ pre-commit run --all-files
+$ SKIP=detect-secrets-grace pre-commit run --all-files
 Ruff security scan.......................................................Passed
 Detect secrets...........................................................Passed
 Pip audit Kevin backend..................................................Passed
 Ruff security scan (Grace)...............................................Passed
-Detect secrets (Grace)...................................................Passed
+Detect secrets (Grace)..................................................Skipped
 Pip audit Grace backend..................................................Passed
 Pip audit Grace database.................................................Passed
+Pip audit backend bills..................................................Passed
+Ruff security scan bills.................................................Passed
+
+detect-secrets-grace is run separately because the updated .secrets.baseline is not staged yet
+(the hook only accepts a staged baseline). Same check against the updated baseline:
+$ detect-secrets-hook --baseline .secrets.baseline <tracked grace/ files> ai-services/{evidence,logs}/grace_*
+Detect secrets (Grace)...................................................Passed
+
+Audited false positives recorded in .secrets.baseline (is_secret: false): git commit SHAs in the
+testing and cloud reports, and the JSON key "detect_secrets" in the testing reports.
