@@ -93,10 +93,81 @@
                 Awaiting use of RAG
             </div>
         </div>
+        <div class="multi">
+            <h2>Multi Agent Review</h2>
+            <p>Runs a shared multi agent Planner, Worker and Reviewer agents.</p>
+            <label>
+                <input type="checkbox" id="multiOnOff">
+                Enable Multi Agent Review
+                <!--also want when off the buttons to turn off in front end-->
+            </label>
+            <div class="MultiTwo">
+                <input type="text" id="multiQuestionTask" name="question" placeholder="Review the Bills feature feature.">
+                </input>
+                <input type="text" id="multiQuestionEvidence" name="question" placeholder="The feature tracks bills and whether they have been paid or not.">
+                </input>
+            </div>
+            <button id="multiButton">
+                Begin Multi Agent Review
+            </button>
+            <!--Pretty sure you dont see this text as itll be edited more or less out in Javscript but its there-->
+            <div id="fuloutput">
+                <div id="multiOutput">
+                    Awaiting use of Multi Agent Review This should not be seen I believe if things are working
+                </div>
+                <div class="HumanReview">
+                    <h3>Human Review</h3>
+                    <!--Now we need the differt outcomes-->
+                    <label for="humanDecision">
+                        Decision
+                    </label>
+
+                    <select id="humanDecision">
+                        <option value="approve">
+                            Approve
+                        </option>
+
+                        <option value="partial">
+                            Partial Accept
+                        </option>
+
+                        <option value="correct">
+                            Correction Required
+                        </option>
+
+                        <option value="reject">
+                            Reject
+                        </option>
+                    </select>
+<!--
+                    <label for="humanComments">
+                        Comments
+                    </label>-->
+
+                    <input type="text"
+                        id="humanComments"
+                        placeholder="Enter any extra comments here..."
+                    ></input>
+
+                    <button
+                        type="button"
+                        id="humanReviewButton"
+                    >
+                        Submit Human Review
+                    </button>
+                    <p id="humanReviewOutput">
+                        Human Review Output
+                    </p>
+                </div>
+            </div>
+            <!--beed abitger  on off feature-->
+        </div>
 
     </div>
     
 <script >
+    //a fix maybe
+    const API_BASE = `http://${window.location.hostname}:5004`;
     //Table scripts
     //calling backend 
     async function fetchBills() {
@@ -105,7 +176,7 @@
         billRows.innerHTML = `<tr><td colspan="5">Waiting for bills...</td></tr>`;
         try 
         {
-            const response = await fetch("http://127.0.0.1:5004/bills");
+            const response = await fetch(`${API_BASE}/bills`);
             if (!response.ok) 
             {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -145,7 +216,7 @@
         AIresponse.innerHTML = "Ai Has not responded yet";
         try {
             console.log("fetching AI insights with user input:", userinput);
-            const response = await fetch("http://127.0.0.1:5004/ai-insights", {
+            const response = await fetch(`${API_BASE}/ai-insights`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -228,7 +299,7 @@ totalUnpaidButton.addEventListener("click", async () => {
 
     try {
 
-        const response = await fetch("http://127.0.0.1:5004/mcp/total-unpaid");
+        const response = await fetch(`${API_BASE}/mcp/total-unpaid`);
         const result = await response.json();
         if (!response.ok) {
             throw new Error(result.error);
@@ -245,6 +316,197 @@ totalUnpaidButton.addEventListener("click", async () => {
     }
 
 });
+/////////////////
+////////////multi agent stuff
+////////////////////
+
+const multiOnOff = document.getElementById("multiOnOff");
+
+const multiButton = document.getElementById("multiButton");
+
+const multiOutput = document.getElementById("multiOutput");
+const multiTask = document.getElementById("multiQuestionTask");
+const multiEvidence = document.getElementById("multiQuestionEvidence");
+const humanDecision = document.getElementById("humanDecision");
+const humanComments = document.getElementById("humanComments");
+const humanReviewButton = document.getElementById("humanReviewButton");
+const fuloutput = document.getElementById("fuloutput");
+
+const multiResponse = document.getElementById("multiResponse");
+
+const humanReviewOutput = document.getElementById("humanReviewOutput");
+
+//ned to define human review so it can be nothing and work
+let currentWorkflowId = null; // Store the workflow ID for human review
+//const humanReviewSection = document.querySelector(".Human Review");
+
+//set to off on default
+multiButton.disabled = true;
+         multiTask.disabled = true;
+         multiEvidence.disabled = true;
+         humanReviewButton.disabled = true;
+         humanDecision.disabled = true;
+         humanComments.disabled = true;
+function isMultiEnabled() {
+        return multiOnOff.checked;
+    }
+
+//first want to disable the button and text box when its turned off
+multiOnOff.addEventListener("change", () => {
+
+    
+
+    if (!isMultiEnabled()) {
+         //tell them to turn it off
+         multiButton.disabled = true;
+         multiTask.disabled = true;
+         multiEvidence.disabled = true;
+         humanReviewButton.disabled = true;
+         humanDecision.disabled = true;
+         humanComments.disabled = true;
+        multiOnOff.textContent ="Click the check box to enable Multi Agent Review. This will allow you to use the tool.";
+    }
+    else
+    {
+        multiButton.disabled = false;
+         multiTask.disabled = false;
+         multiEvidence.disabled = false;
+         humanReviewButton.disabled = false;
+         humanDecision.disabled = false;
+         humanComments.disabled = false;
+         multiOnOff.textContent ="Multi Agent Review is ON. Feel free to use as you please.";
+    }
+
+});
+
+//I also want on start up for human review and other thing to not be there
+
+//on button click
+multiButton.addEventListener("click", async () => {
+    const task = multiTask.value.trim();
+
+    const evidence = multiEvidence.value.trim();
+
+    if (!task) {
+        multiOutput.textContent = 
+            "Please enter a task for Multi Agent Review to work on.";
+        return;
+    }
+    if (!evidence) {
+        multiOutput.textContent = 
+            "Please enter evidence for Multi Agent Review to work on.";
+        return;
+    }
+
+    multiOutput.textContent = "Running the Multi Agent Review should be ready shortly.";
+    //keep it hidden
+    //humanReviewSection.style.display = "none"; // Hide human review section initially
+
+    try {
+        const response = await fetch(`${API_BASE}/multi-agent-review`,
+        {
+          method: "POST",
+
+            headers: {
+                "Content-Type":
+                    "application/json"
+            },
+
+            body: JSON.stringify({
+                task: task,
+                evidence: evidence
+            })
+        });
+        const data = await response.json();
+
+        if (!response.ok) {
+            throw new Error(data.error || "Multi Agent Review request failed");
+        }
+
+        currentWorkflowId = data.workflow_id; // Store the workflow ID for later use
+
+        multiOutput.textContent =
+                `Planner:\n` +
+                `${data.planner.output}\n\n` +
+
+                `Worker:\n` +
+                `${data.worker.output}\n\n` +
+
+                `Reviewer:\n` +
+                `${data.reviewer.output}\n\n` +
+
+                `Status: ${data.status}`;
+        
+            //if (data.status ==="AWAITING_HUMAN_REVIEW") {   humanReviewPanel.style.display ="block"; }
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            multiOutput.textContent =
+                error.message ||
+                "Faiiled to connect to the Multi-Agent service.";
+        }
+
+
+    });
+
+    //nOW ONE FOR HUman review buttona dn then we record results and send it to the backend
+    humanReviewButton.addEventListener("click", async function() {
+        if (currentWorkflowId == null) {
+            humanReviewOutput.textContent =
+                "No workflow ID found. You need to run the Multi-Agent review first before trying to do a review.";
+            return;
+        }
+
+        const decision = humanDecision.value;
+        const comments = humanComments.value.trim();
+
+        humanReviewOutput.textContent = "Working on sending out the review...";
+//dont need as its a drop down menu
+        // if (!decision) {
+        //     humanReviewOutput.textContent =
+        //         "Please select a decision for the Human Review.";
+        //     return;
+        // }
+
+        try {
+            const response = await fetch(
+                `${API_BASE}/multi-agent/${currentWorkflowId}/human-review`,{
+                    method: "POST",
+
+                    headers: {
+                        "Content-Type":
+                            "application/json"
+                    },
+
+                    body: JSON.stringify({
+                        decision: decision,
+                        comments: comments
+                    })
+                }
+            );
+            const data = 
+            await response.json();
+
+            if (!response.ok) {
+                throw new Error(
+                    data.error 
+                    || 
+                    "Human Review request failed");
+            }
+
+            humanReviewOutput.textContent = "Human review did end up getting submitted successfully.";
+
+        } catch (error) {
+            console.error(error);
+            humanReviewOutput.textContent = error.message || "a error occured check what error broke the code.";
+        }
+    });
+
+
+
 
 /////////////////////////////////////////////////
 //////////RAG AREA////////////////////////
@@ -300,7 +562,7 @@ ragButton.addEventListener(
 
             const response =
                 await fetch(
-                    "http://127.0.0.1:5004/rag-query",{
+                    `${API_BASE}/rag-query`,{
                         method: "POST",
 
                         headers: {

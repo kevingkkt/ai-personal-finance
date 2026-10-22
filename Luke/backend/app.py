@@ -9,13 +9,52 @@ from mcp import Client
 app = Flask(__name__)
 CORS(app)
 
-DATABASE_API_URL = os.environ.get("DATABASE_API_URL", "http://127.0.0.1:5002")
+DATABASE_API_URL = os.environ.get(
+    "DATABASE_API_URL",
+    "http://bills-database:5002"
+)
 
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434/api/generate")
 
 MCP_URL = os.environ.get("MCP_URL","http://localhost:7001/mcp")
 
+
 RAG_URL = os.environ.get("RAG_URL","http://localhost:7002/rag")
+#taken off kevin code
+MULTI_AGENT_URL = os.environ.get("MULTI_AGENT_URL", "http://localhost:7003")
+AI_MODE_ENABLED = (
+    os.environ.get(
+        "AI_MODE_ENABLED",
+        "false"
+    ).lower()
+    == "true"
+)
+
+MCP_ENABLED = (
+    os.environ.get(
+        "MCP_ENABLED",
+        "false"
+    ).lower()
+    == "true"
+)
+
+RAG_ENABLED = (
+    os.environ.get(
+        "RAG_ENABLED",
+        "false"
+    ).lower()
+    == "true"
+)
+
+
+MULTI_AGENT_ENABLED = (
+    os.environ.get(
+        "MULTI_AGENT_ENABLED",
+        "false"
+    ).lower()
+    == "true"
+)
+
 #get all the bills
 @app.route("/bills", methods=["GET"])
 def get_bills():
@@ -319,6 +358,65 @@ def health():
         "status": "ok",
         "service": "The API worked in backend"
     })
+
+#forgot to do first part
+@app.route("/multi-agent-review",
+    methods=["POST"])
+def multi_agent_review():
+    if not MULTI_AGENT_ENABLED:
+        return jsonify({"error": "Sorry the Multi-Agent was set to disabled"}), 503
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    try:
+        response = requests.post(
+            f"{MULTI_AGENT_URL}/multi-agent-review",
+            json=data,
+            timeout=30
+        )
+        return jsonify(response.json()),response.status_code
+    except requests.exceptions.RequestException as error:
+        return jsonify({"error": "Could not connect to Multi-Agent server.","details": str(error)}), 503
+    
+
+
+#human review
+@app.route(
+    "/multi-agent/<workflow_id>/human-review",
+    methods=["POST"]
+)
+def multi_agent_human_review(workflow_id):
+
+    if not MULTI_AGENT_ENABLED:
+        return jsonify({
+            "error": "Multi-Agent is set to disabled"
+        }), 503
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    try:
+
+        response = requests.post(
+            f"{MULTI_AGENT_URL}/multi-agent/"
+            f"{workflow_id}/human-review",
+            json=data,
+            timeout=30
+        )
+
+        return jsonify(
+            response.json()
+        ), response.status_code
+
+    except requests.exceptions.RequestException as error:
+
+        return jsonify({
+            "error": "Could not connect to Multi-Agent server.",
+            "details": str(error)
+        }), 503
 
 
 if __name__ == "__main__":

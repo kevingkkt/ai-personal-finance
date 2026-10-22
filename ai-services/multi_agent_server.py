@@ -189,6 +189,7 @@ Perform the task using only the supplied evidence.
 
 Rules:
 - Do not invent information.
+- Use the TASK and PLANNER'S PLAN to guide your work.
 - Do not assume access to information that was not supplied.
 - If there is not enough evidence, state "INSUFFICIENT EVIDENCE" and explain what is missing.
 - Return the completed work for the Reviewer.
