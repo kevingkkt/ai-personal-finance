@@ -1036,25 +1036,17 @@ def review_multi_agent_workflow():
 
 
 
-def review_testing_report():
-    print()
-    print("TESTING REPORT REVIEW")
-
-    evidence_path = (
-        Path(__file__).parent
-        / "evidence"
-        / "kevin_testing_report.json"
-    )
-
-    if not evidence_path.exists():
-        print("Testing report evidence file was not found.")
-        return False
-
+def review_student_testing_report(evidence_path):
     with evidence_path.open(
         "r",
         encoding="utf-8"
     ) as file:
         report = json.load(file)
+
+    student = report.get(
+        "student",
+        evidence_path.stem
+    )
 
     pre_commit = report.get(
         "pre_commit_security",
@@ -1069,6 +1061,11 @@ def review_testing_report():
     tested_endpoints = post_commit.get(
         "tested_endpoints",
         []
+    )
+
+    workflow = post_commit.get(
+        "workflow",
+        f"{student} CI"
     )
 
     checks = {
@@ -1088,7 +1085,8 @@ def review_testing_report():
             len(tested_endpoints) >= 2
     }
 
-    all_passed = True
+    print()
+    print(f"{student} - {report.get('feature')}")
 
     for check_name, passed in checks.items():
 
@@ -1102,8 +1100,9 @@ def review_testing_report():
             f"{check_name}: {result}"
         )
 
-        if not passed:
-            all_passed = False
+    all_passed = all(
+        checks.values()
+    )
 
     recommendations = []
 
@@ -1124,12 +1123,12 @@ def review_testing_report():
 
     if not checks["CI workflow passed"]:
         recommendations.append(
-            "Fix the Kevin CI workflow."
+            f"Fix the {workflow} workflow."
         )
 
     if not checks["Two endpoint tests exist"]:
         recommendations.append(
-            "Add tests for at least two Kevin backend endpoints."
+            f"Add tests for at least two {student} backend endpoints."
         )
 
     if all_passed:
@@ -1138,15 +1137,15 @@ def review_testing_report():
             "endpoint testing meet the required validation checks."
         )
 
-    review_log = {
-        "review_type":
-            "Testing Report Review",
-
+    return {
         "student":
-            report.get("student"),
+            student,
 
         "feature":
             report.get("feature"),
+
+        "evidence_file":
+            evidence_path.name,
 
         "checks":
             checks,
@@ -1156,6 +1155,73 @@ def review_testing_report():
 
         "recommendations":
             recommendations,
+
+        "validation_result":
+            "PASS"
+            if all_passed
+            else "FAIL"
+    }
+
+
+# Reviews every student's <name>_testing_report.json in ai-services/evidence.
+def review_testing_report():
+    print()
+    print("TESTING REPORT REVIEW")
+
+    evidence_paths = sorted(
+        (
+            Path(__file__).parent
+            / "evidence"
+        ).glob("*_testing_report.json")
+    )
+
+    if not evidence_paths:
+        print("Testing report evidence file was not found.")
+        return False
+
+    student_reviews = []
+
+    for evidence_path in evidence_paths:
+
+        try:
+            student_reviews.append(
+                review_student_testing_report(
+                    evidence_path
+                )
+            )
+
+        except (OSError, ValueError, AttributeError) as error:
+            print(
+                f"Could not review {evidence_path.name}: {error}"
+            )
+
+            student_reviews.append({
+                "evidence_file":
+                    evidence_path.name,
+
+                "recommendations": [
+                    "Fix the testing report so it is valid JSON "
+                    "in the shared report format."
+                ],
+
+                "validation_result":
+                    "FAIL"
+            })
+
+    all_passed = all(
+        review["validation_result"] == "PASS"
+        for review in student_reviews
+    )
+
+    review_log = {
+        "review_type":
+            "Testing Report Review",
+
+        "reports_reviewed":
+            len(student_reviews),
+
+        "students":
+            student_reviews,
 
         "validation_result":
             "PASS"
@@ -1191,10 +1257,13 @@ def review_testing_report():
     print()
     print("Recommendations:")
 
-    for recommendation in recommendations:
-        print(
-            f"- {recommendation}"
-        )
+    for review in student_reviews:
+
+        for recommendation in review["recommendations"]:
+            print(
+                f"- {review.get('student', review['evidence_file'])}: "
+                f"{recommendation}"
+            )
 
     print()
 
