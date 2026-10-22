@@ -1,0 +1,42 @@
+Grace - Savings Goal Manager: pre-commit security scan log
+Generated: 2026-10-21T13:02:28Z  Branch: grace-release2  Base commit: 243f704
+Tools: ruff 0.17.1, detect-secrets 1.5.0, pip-audit 2.10.1, pre-commit 4.7.0
+
+== 1. Ruff security rules (S) - initial findings before fixes (committed versions at 243f704)
+grace/backend/app.py:702:14: S104 Possible binding to all interfaces
+grace/database/app.py:482:14: S104 Possible binding to all interfaces
+grace/database/app.py:484:9: S201 Use of `debug=True` in Flask app detected
+
+== 2. Ruff security rules (S) - after fixes
+$ ruff check grace --select S --per-file-ignores "grace/tests/*:S101"
+All checks passed!
+
+== 3. detect-secrets scan of grace/
+$ detect-secrets scan grace
+Findings: 0
+
+== 4. detect-secrets hook blocks a planted fake AWS key (file deleted afterwards)
+Detect secrets (Grace)...................................................Failed
+- hook id: detect-secrets-grace
+- exit code: 1
+
+ERROR: Potential secrets about to be committed to git repo!
+
+Secret Type: AWS Access Key
+Location:    grace/leak_check_tmp.py:1
+
+== 5. pip-audit
+$ pip-audit -r grace/backend/requirements.txt
+No known vulnerabilities found
+$ pip-audit -r grace/database/requirements.txt
+No known vulnerabilities found
+
+== 6. Full pre-commit run (all team hooks)
+$ pre-commit run --all-files
+Ruff security scan.......................................................Passed
+Detect secrets...........................................................Passed
+Pip audit Kevin backend..................................................Passed
+Ruff security scan (Grace)...............................................Passed
+Detect secrets (Grace)...................................................Passed
+Pip audit Grace backend..................................................Passed
+Pip audit Grace database.................................................Passed
