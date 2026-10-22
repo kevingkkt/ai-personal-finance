@@ -72,7 +72,9 @@ h1 {
 }
 
 .MCP,
-.RAG {
+.RAG,
+.multi
+ {
     margin-top: 30px;
     padding: 25px;
 
@@ -90,7 +92,8 @@ h1 {
     font-weight: bold;
 }
 
-#ragButton {
+#ragButton,
+#multiButton {
     width: 100%;
     margin: 15px 0;
     padding: 14px;
@@ -99,7 +102,8 @@ h1 {
 }
 
 #mcpOutput,
-#ragOutput {
+#ragOutput,
+#multiOutput {
     white-space: pre-wrap;
     background: #f4f7fb;
     padding: 20px;
@@ -116,7 +120,8 @@ h1 {
 }
 
 .MCP p,
-.RAG p {
+.RAG p,
+.multi p {
     gap: 10px;
     padding-top: 10px;
     padding-bottom: 10px;

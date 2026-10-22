@@ -332,6 +332,9 @@ const fuloutput = document.getElementById("fuloutput");
 const multiResponse = document.getElementById("multiResponse");
 
 const humanReviewOutput = document.getElementById("humanReviewOutput");
+
+//ned to define human review so it can be nothing and work
+let currentWorkflowId = null; // Store the workflow ID for human review
 //const humanReviewSection = document.querySelector(".Human Review");
 
 //set to off on default
@@ -445,7 +448,7 @@ multiButton.addEventListener("click", async () => {
 
     //nOW ONE FOR HUman review buttona dn then we record results and send it to the backend
     humanReviewButton.addEventListener("click", async function() {
-        if (!currentWorkflowId) {
+        if (currentWorkflowId == null) {
             humanReviewOutput.textContent =
                 "No workflow ID found. You need to run the Multi-Agent review first before trying to do a review.";
             return;
@@ -455,16 +458,16 @@ multiButton.addEventListener("click", async () => {
         const comments = humanComments.value.trim();
 
         humanReviewOutput.textContent = "Working on sending out the review...";
-
-        if (!decision) {
-            humanReviewOutput.textContent =
-                "Please select a decision for the Human Review.";
-            return;
-        }
+//dont need as its a drop down menu
+        // if (!decision) {
+        //     humanReviewOutput.textContent =
+        //         "Please select a decision for the Human Review.";
+        //     return;
+        // }
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:5001/human-review/${currentWorkflowId}`,{
+                `http://127.0.0.1:5004/multi-agent/${currentWorkflowId}/human-review`,{
                     method: "POST",
 
                     headers: {
@@ -488,11 +491,11 @@ multiButton.addEventListener("click", async () => {
                     "Human Review request failed");
             }
 
-            humanReviewOutput.textContent = "Human review submitted successfully.";
+            humanReviewOutput.textContent = "Human review did end up getting submitted successfully.";
 
         } catch (error) {
             console.error(error);
-            humanReviewOutput.textContent = error.message || "Failed to submit human review.";
+            humanReviewOutput.textContent = error.message || "a error occured check what error broke the code.";
         }
     });
 
