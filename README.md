@@ -25,3 +25,13 @@
    - python .\ai-services\mcp_server.py
    - python .\ai-services\multi_agent_server.py
 4) Run the project on a browser on http://localhost:8080
+
+
+## code on cloud
+
+1) ssh -i "$HOME.ssh\id_ed25519" lebronjames@20.213.19.132 in terminal
+2) cd ~/ai-personal-finance
+3) docker compose up --build -d
+
+
+- Open at http://20.213.19.132:8080/

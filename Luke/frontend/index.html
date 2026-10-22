@@ -101,10 +101,12 @@
                 Enable Multi Agent Review
                 <!--also want when off the buttons to turn off in front end-->
             </label>
-            <input type="text" id="multiQuestionTask" name="question" placeholder="Review the Bills feature feature.">
-            </input>
-            <input type="text" id="multiQuestionEvidence" name="question" placeholder="The feature tracks bills and whether they have been paid or not.">
-            </input>
+            <div class="MultiTwo">
+                <input type="text" id="multiQuestionTask" name="question" placeholder="Review the Bills feature feature.">
+                </input>
+                <input type="text" id="multiQuestionEvidence" name="question" placeholder="The feature tracks bills and whether they have been paid or not.">
+                </input>
+            </div>
             <button id="multiButton">
                 Begin Multi Agent Review
             </button>
@@ -113,7 +115,7 @@
                 <div id="multiOutput">
                     Awaiting use of Multi Agent Review This should not be seen I believe if things are working
                 </div>
-                <div class="Human Review">
+                <div class="HumanReview">
                     <h3>Human Review</h3>
                     <!--Now we need the differt outcomes-->
                     <label for="humanDecision">
@@ -137,16 +139,15 @@
                             Reject
                         </option>
                     </select>
-
+<!--
                     <label for="humanComments">
                         Comments
-                    </label>
+                    </label>-->
 
-                    <textarea
+                    <input type="text"
                         id="humanComments"
-                        rows="3"
                         placeholder="Enter any extra comments here..."
-                    ></textarea>
+                    ></input>
 
                     <button
                         type="button"
@@ -343,6 +344,7 @@ multiButton.disabled = true;
          multiEvidence.disabled = true;
          humanReviewButton.disabled = true;
          humanDecision.disabled = true;
+         humanComments.disabled = true;
 function isMultiEnabled() {
         return multiOnOff.checked;
     }
@@ -359,6 +361,7 @@ multiOnOff.addEventListener("change", () => {
          multiEvidence.disabled = true;
          humanReviewButton.disabled = true;
          humanDecision.disabled = true;
+         humanComments.disabled = true;
         multiOnOff.textContent ="Click the check box to enable Multi Agent Review. This will allow you to use the tool.";
     }
     else
@@ -368,6 +371,7 @@ multiOnOff.addEventListener("change", () => {
          multiEvidence.disabled = false;
          humanReviewButton.disabled = false;
          humanDecision.disabled = false;
+         humanComments.disabled = false;
          multiOnOff.textContent ="Multi Agent Review is ON. Feel free to use as you please.";
     }
 
