@@ -22,4 +22,5 @@
    - docker compose up --build -d
    - python .\ai-services\rag_server.py
    - python .\ai-services\mcp_server.py
+   - python .\ai-services\multi_agent_server.py
 3) Run the project on a browser on http://localhost:8080
