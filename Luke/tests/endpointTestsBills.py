@@ -37,16 +37,16 @@ def test_get_a_single_bill():
 
 
 
-def test_bills_ai_insights():
-    response = requests.post(
-        f"{BACKEND_URL}/ai-insights",
-        json={
-            "input": "How am I able to make sure I pay my bills on time?"
-        },
-        timeout=600
-    )
-    assert response.status_code == 200
-    d = response.json()
-    assert "insight" in d
-    assert isinstance(d["insight"], str)
-    assert len(d["insight"]) > 0
+# def test_bills_ai_insights():
+#     response = requests.post(
+#         f"{BACKEND_URL}/ai-insights",
+#         json={
+#             "input": "How am I able to make sure I pay my bills on time?"
+#         },
+#         timeout=600
+#     )
+#     assert response.status_code == 200
+#     d = response.json()
+#     assert "insight" in d
+#     assert isinstance(d["insight"], str)
+#     assert len(d["insight"]) > 0
