@@ -127,6 +127,7 @@ services:
   bills-frontend:
     build:
       context: ./Luke/frontend
+      dockerfile: dockerfile
     container_name: bills-frontend
     ports:
       - "3004:80"
