@@ -359,6 +359,28 @@ def health():
         "service": "The API worked in backend"
     })
 
+#forgot to do first part
+@app.route("/multi-agent-review",
+    methods=["POST"])
+def multi_agent_review():
+    if not MULTI_AGENT_ENABLED:
+        return jsonify({"error": "Sorry the Multi-Agent was set to disabled"}), 503
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    try:
+        response = requests.post(
+            f"{MULTI_AGENT_URL}/multi-agent-review",
+            json=data,
+            timeout=30
+        )
+        return jsonify(response.json()),response.status_code
+    except requests.exceptions.RequestException as error:
+        return jsonify({"error": "Could not connect to Multi-Agent server.","details": str(error)}), 503
+    
+
 
 #human review
 @app.route(
