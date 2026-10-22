@@ -6,6 +6,7 @@ on:
       - Luke
       - main
       - kevin
+      - kevin-release1
       
   workflow_dispatch:
 
@@ -78,6 +79,11 @@ jobs:
             check_url "http://localhost:3004/"
             check_url "http://localhost:5004/health"
             check_url "http://localhost:6004/health"
+
+        - name: Run backend tests to make sure it works
+          run: |
+            python -m pip install pytest requests
+            python -m pytest Luke/backend/bills/tests/test_endpoints.py -v
 
         - name: stop the bills docker
           if: always()
