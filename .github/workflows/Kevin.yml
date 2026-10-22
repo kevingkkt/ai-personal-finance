@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - kevin
-      - kevin-release1
+      - kevin-release2
 
   pull_request:
     branches:
