@@ -17,25 +17,25 @@
 
         <div class="feature-grid">
 
-            <a class="feature-card" href="http://127.0.0.1:3001">
+            <a id="kevin-link" class="feature-card" href="#">
                 <h2>Income & Expenses</h2>
                 <p>Track income, expenses and spending.</p>
                 <span>Kevin</span>
             </a>
 
-            <a class="feature-card" href="http://127.0.0.1:3002/">
+            <a id="lex-link"  class="feature-card" href="#">
                 <h2>Budget Manager</h2>
                 <p>Create budgets and monitor spending limits.</p>
                 <span>Lex</span>
             </a>
 
-            <a class="feature-card" href="http://127.0.0.1:3003">
+            <a id="grace-link" class="feature-card" href="#">
                 <h2>Savings Goals</h2>
                 <p>Create savings goals and track progress.</p>
                 <span>Grace</span>
             </a>
 
-            <a class="feature-card" href="http://127.0.0.1:3004">
+            <a class="feature-card" href="#" id="luke-link">
                 <h2>Bills & Payments</h2>
                 <p>Manage bills, due dates and payments.</p>
                 <span>Luke</span>
@@ -43,6 +43,22 @@
 
         </div>
     </div>
+
+    <script>
+        const host = window.location.hostname;
+
+        document.getElementById("kevin-link").href =
+            `http://${host}:3001`;
+
+        document.getElementById("lex-link").href =
+            `http://${host}:3002`;
+
+        document.getElementById("grace-link").href =
+            `http://${host}:3003`;
+
+        document.getElementById("luke-link").href =
+            `http://${host}:3004`;
+    </script>
 
 </body>
 </html>
