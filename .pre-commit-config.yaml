@@ -20,8 +20,8 @@ repos:
         pass_filenames: false
       
       - id: pip-audit-backend-bills
-        name: Pip audit Kevin backend bills
-        entry: python -m pip_audit -r Luke/backend/bills/requirements.txt
+        name: Pip audit backend bills
+        entry: python -m pip_audit -r Luke/backend/requirements.txt
         language: system
         pass_filenames: false
       
