@@ -132,7 +132,7 @@ h1 {
 
 .MCP p,
 .RAG p,
-.multi p
+.multi p,
 .HumanReview p {
     gap: 10px;
     padding-top: 10px;
