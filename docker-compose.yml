@@ -114,7 +114,7 @@ services:
     environment:
       - MCP_URL=http://host.docker.internal:7001/mcp
       - RAG_URL=http://host.docker.internal:7002/rag
-      - DATABASE_API_URL=http://bills-database:5002
+      - DATABASE_API_URL=http://bills-database:5002 
       - OLLAMA_URL=http://host.docker.internal:11434/api/generate
       - MULTI_AGENT_URL=http://host.docker.internal:7003
       - MULTI_AGENT_ENABLED=${MULTI_AGENT_ENABLED:-true}
