@@ -6,11 +6,50 @@ on:
       - kevin-release2
   workflow_dispatch:
 
-jobs:
-  deploy:
-    runs-on: ubuntu-latest
+# Never run two deployments to the VM at the same time.
+concurrency:
+  group: azure-deployment
+  cancel-in-progress: false
 
+permissions:
+  contents: read
+  actions: read
+
+jobs:
+  wait-for-ci:
+    name: Wait for student CI workflows
+    runs-on: ubuntu-latest
     steps:
+      - uses: actions/checkout@v4
+      - name: Require Grace CI, Kevin CI and Bills-Working to pass on this commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+          GH_REPO: ${{ github.repository }}
+          COMMIT_SHA: ${{ github.sha }}
+          REQUIRED_WORKFLOWS: "Grace CI,Kevin CI,Bills-Working"
+        run: bash deploy/wait-for-ci.sh
+
+  validate:
+    name: Validate cloud configuration
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Validate Compose with the cloud profile
+        run: docker compose --env-file .env.cloud config --quiet
+      - name: Confirm AI services are disabled by default
+        run: |
+          for flag in AI_MODE_ENABLED MCP_ENABLED RAG_ENABLED MULTI_AGENT_ENABLED; do
+            grep -qx "$flag=false" .env.cloud || { echo "FAIL $flag is not false in .env.cloud"; exit 1; }
+            echo "PASS $flag=false"
+          done
+
+  deploy:
+    name: Deploy to Azure VM
+    needs: [wait-for-ci, validate]
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
       - name: Configure SSH
         env:
           SSH_PRIVATE_KEY: ${{ secrets.AZURE_VM_SSH_KEY }}
@@ -25,15 +64,5 @@ jobs:
         env:
           VM_HOST: ${{ secrets.AZURE_VM_HOST }}
           VM_USER: ${{ secrets.AZURE_VM_USER }}
-        run: |
-          ssh -i ~/.ssh/azure_vm_key "$VM_USER@$VM_HOST" << 'EOF'
-            set -e
-            cd ~/ai-personal-finance
-
-            git fetch origin
-            git switch kevin-release2
-            git pull --ff-only origin kevin-release2
-
-            docker compose --env-file .env.cloud up -d --build
-            docker compose ps
-          EOF
+          DEPLOY_BRANCH: ${{ github.ref_name }}
+        run: bash deploy/azure-deploy.sh
