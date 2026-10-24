@@ -285,6 +285,9 @@ def rag_query():
 
 @app.route("/ai-insights", methods=["POST"])
 def ai_insights():
+    if not AI_MODE_ENABLED:
+        return jsonify({"error": "Sorry the AI-Mode was set to disabled"}), 503
+
     #adding flush to see if it truely isnt geting even in but we will see
     print("backend was called for AI insights", flush =True)
     inputData = request.get_json() or  {}
