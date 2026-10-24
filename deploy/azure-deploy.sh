@@ -5,7 +5,7 @@
 # Required: VM_HOST, VM_USER
 # Optional: SSH_KEY (default ~/.ssh/azure_vm_key), DEPLOY_BRANCH (default kevin-release2),
 #           APP_DIR (default ~/ai-personal-finance on the VM),
-#           PROFILE (baseline = AI services off, the default; ai = bonus B1 AI-Mode on)
+#           PROFILE (baseline = AI services off, the default; ai = bonus B1-B4 AI services on)
 #
 # Example: VM_HOST=20.213.19.132 VM_USER=azureuser ./deploy/azure-deploy.sh
 set -euo pipefail
@@ -18,8 +18,13 @@ APP_DIR="${APP_DIR:-~/ai-personal-finance}"
 PROFILE="${PROFILE:-baseline}"
 
 case "$PROFILE" in
-  baseline) ENV_FILE=.env.cloud; SETUP_AI=":" ;;
-  ai) ENV_FILE=.env.cloud-ai; SETUP_AI="bash deploy/setup-ollama.sh" ;;
+  baseline)
+    ENV_FILE=.env.cloud
+    # Stop any AI services left running by an earlier "ai" deploy.
+    SETUP_AI="sudo systemctl stop ai-mcp ai-rag ai-multi-agent ollama 2> /dev/null || true" ;;
+  ai)
+    ENV_FILE=.env.cloud-ai
+    SETUP_AI="bash deploy/setup-ollama.sh && bash deploy/setup-ai-servers.sh" ;;
   *) echo "PROFILE must be baseline or ai"; exit 1 ;;
 esac
 

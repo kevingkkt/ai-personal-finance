@@ -7,7 +7,7 @@ on:
   workflow_dispatch:
     inputs:
       profile:
-        description: "baseline = AI services off (default); ai = bonus B1 AI-Mode on"
+        description: "baseline = AI services off (default); ai = bonus B1-B4 AI-Mode, MCP, RAG, Multi-Agent on"
         type: choice
         options: [baseline, ai]
         default: baseline
