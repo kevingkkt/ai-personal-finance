@@ -166,6 +166,8 @@
     </div>
     
 <script >
+    //a fix maybe
+    const API_BASE = `http://${window.location.hostname}:5004`;
     //Table scripts
     //calling backend 
     async function fetchBills() {
@@ -174,7 +176,7 @@
         billRows.innerHTML = `<tr><td colspan="5">Waiting for bills...</td></tr>`;
         try 
         {
-            const response = await fetch("http://127.0.0.1:5004/bills");
+            const response = await fetch(`${API_BASE}/bills`);
             if (!response.ok) 
             {
                 throw new Error(`HTTP error! status: ${response.status}`);
@@ -214,7 +216,7 @@
         AIresponse.innerHTML = "Ai Has not responded yet";
         try {
             console.log("fetching AI insights with user input:", userinput);
-            const response = await fetch("http://127.0.0.1:5004/ai-insights", {
+            const response = await fetch(`${API_BASE}/ai-insights`, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
@@ -297,7 +299,7 @@ totalUnpaidButton.addEventListener("click", async () => {
 
     try {
 
-        const response = await fetch("http://127.0.0.1:5004/mcp/total-unpaid");
+        const response = await fetch(`${API_BASE}/mcp/total-unpaid`);
         const result = await response.json();
         if (!response.ok) {
             throw new Error(result.error);
@@ -401,7 +403,7 @@ multiButton.addEventListener("click", async () => {
     //humanReviewSection.style.display = "none"; // Hide human review section initially
 
     try {
-        const response = await fetch("http://127.0.0.1:5001/multi-agent-review",
+        const response = await fetch(`${API_BASE}/multi-agent-review`,
         {
           method: "POST",
 
@@ -471,7 +473,7 @@ multiButton.addEventListener("click", async () => {
 
         try {
             const response = await fetch(
-                `http://127.0.0.1:5004/multi-agent/${currentWorkflowId}/human-review`,{
+                `${API_BASE}/multi-agent/${currentWorkflowId}/human-review`,{
                     method: "POST",
 
                     headers: {
@@ -560,7 +562,7 @@ ragButton.addEventListener(
 
             const response =
                 await fetch(
-                    "http://127.0.0.1:5004/rag-query",{
+                    `${API_BASE}/rag-query`,{
                         method: "POST",
 
                         headers: {

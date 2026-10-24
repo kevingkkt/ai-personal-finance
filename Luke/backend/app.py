@@ -9,7 +9,10 @@ from mcp import Client
 app = Flask(__name__)
 CORS(app)
 
-DATABASE_API_URL = os.environ.get("DATABASE_API_URL", "http://127.0.0.1:5002")
+DATABASE_API_URL = os.environ.get(
+    "DATABASE_API_URL",
+    "http://bills-database:5002"
+)
 
 OLLAMA_URL = os.environ.get("OLLAMA_URL", "http://localhost:11434/api/generate")
 
@@ -355,6 +358,28 @@ def health():
         "status": "ok",
         "service": "The API worked in backend"
     })
+
+#forgot to do first part
+@app.route("/multi-agent-review",
+    methods=["POST"])
+def multi_agent_review():
+    if not MULTI_AGENT_ENABLED:
+        return jsonify({"error": "Sorry the Multi-Agent was set to disabled"}), 503
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    try:
+        response = requests.post(
+            f"{MULTI_AGENT_URL}/multi-agent",
+            json=data,
+            timeout=167
+        )
+        return jsonify(response.json()),response.status_code
+    except requests.exceptions.RequestException as error:
+        return jsonify({"error": "Could not connect to Multi-Agent server.","details": str(error)}), 503
+    
 
 
 #human review

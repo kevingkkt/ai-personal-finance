@@ -34,4 +34,4 @@
 3) docker compose up --build -d
 
 
-- Open at http://20.213.19.132:8080/
+- Open in incognito at http://20.213.19.132:8080/

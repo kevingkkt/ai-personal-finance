@@ -1,4 +1,6 @@
-const API_URL = "http://127.0.0.1:5003";
+// Use the host serving this page, so the same build works locally and on the Azure VM.
+const API_URL = `http://${window.location.hostname}:5003`;
+document.getElementById("home-link").href = `http://${window.location.hostname}:8080`;
 
 const state = {
     goals: [],
@@ -132,6 +134,7 @@ function progress(goal) {
 
 function renderGoals() {
     renderMcpGoals();
+    renderMultiAgentGoals();
     const goalsBody = getElement("#goals-body");
 
     if (state.goals.length === 0) {
@@ -917,6 +920,104 @@ savingsRagButton.addEventListener("click", async () => {
             `Evidence confidence: ${data.confidence}`,
             `Source: ${citations.join("; ")}`].join("\n");
     });
+});
+
+// Release 2: the savings backend builds evidence from stored goals and calls the shared Multi-Agent Server.
+const savingsAgentButton = document.getElementById("savings-multi-agent-button");
+const savingsAgentResult = document.getElementById("savings-multi-agent-result");
+const savingsAgentGoal = document.getElementById("savings-multi-agent-goal");
+const savingsAgentTask = document.getElementById("savings-multi-agent-task");
+const savingsAgentMode = createSavingsMode("Multi-Agent", savingsAgentButton, savingsAgentResult,
+    [savingsAgentGoal, savingsAgentTask]);
+const humanReviewForm = document.getElementById("savings-human-review");
+const humanReviewDecision = document.getElementById("savings-human-decision");
+const humanReviewComments = document.getElementById("savings-human-comments");
+const humanReviewSubmit = document.getElementById("savings-human-submit");
+const humanReviewResult = document.getElementById("savings-human-result");
+let savingsWorkflow = null;
+
+function renderMultiAgentGoals() {
+    const selectedId = savingsAgentGoal.value;
+    const allGoals = document.createElement("option");
+    allGoals.value = "";
+    allGoals.textContent = "All goals";
+    savingsAgentGoal.replaceChildren(allGoals);
+    state.goals.forEach(goal => {
+        const option = document.createElement("option");
+        option.value = String(goal.id);
+        option.textContent = `${goal.goal_name} (ID ${goal.id})`;
+        savingsAgentGoal.appendChild(option);
+    });
+    savingsAgentGoal.value = state.goals.some(goal => String(goal.id) === selectedId) ? selectedId : "";
+}
+
+function hideHumanReview() {
+    savingsWorkflow = null;
+    humanReviewForm.classList.add("hidden");
+}
+
+function showHumanReview(workflow) {
+    savingsWorkflow = workflow;
+    humanReviewDecision.value = "approve";
+    humanReviewComments.value = "";
+    humanReviewResult.textContent = "";
+    [humanReviewDecision, humanReviewComments, humanReviewSubmit].forEach(el => { el.disabled = false; });
+    humanReviewForm.classList.remove("hidden");
+}
+
+function formatWorkflow(workflow) {
+    return [
+        `Status: ${workflow.status}`,
+        `Workflow ID: ${workflow.workflow_id}`,
+        "", "Planner", workflow.planner.output,
+        "", "Worker", workflow.worker.output,
+        "", "Reviewer", workflow.reviewer.output
+    ].join("\n");
+}
+
+document.getElementById("savings-multi-agent-toggle").addEventListener("change", hideHumanReview);
+
+savingsAgentButton.addEventListener("click", async () => {
+    if (!savingsAgentMode.enabled) return;
+    hideHumanReview();
+    let workflow = null;
+    await savingsAgentMode.run("Planner, Worker and Reviewer are working. This can take a few minutes...",
+        910000, async signal => {
+            const body = { goal_id: savingsAgentGoal.value || null };
+            const task = savingsAgentTask.value.trim();
+            if (task) body.task = task;
+            workflow = await call("/multi-agent-review", {
+                method: "POST", body: JSON.stringify(body), signal
+            });
+            return formatWorkflow(workflow);
+        });
+    if (savingsAgentMode.enabled && workflow?.status === "AWAITING_HUMAN_REVIEW") {
+        showHumanReview(workflow);
+    }
+});
+
+humanReviewForm.addEventListener("submit", async event => {
+    event.preventDefault();
+    if (!savingsWorkflow) return;
+    const decision = humanReviewDecision.value;
+    const comments = humanReviewComments.value.trim();
+    if (decision !== "approve" && !comments) {
+        humanReviewResult.textContent = "Add a comment explaining your decision.";
+        return;
+    }
+    humanReviewSubmit.disabled = true;
+    humanReviewResult.textContent = "Saving decision...";
+    try {
+        const reviewed = await call(`/multi-agent/${savingsWorkflow.workflow_id}/human-review`, {
+            method: "POST", body: JSON.stringify({ decision, comments })
+        });
+        humanReviewResult.textContent =
+            `Decision recorded: ${reviewed.status} at ${reviewed.human_review.reviewed_at}`;
+        [humanReviewDecision, humanReviewComments].forEach(el => { el.disabled = true; });
+    } catch (error) {
+        humanReviewResult.textContent = error.message;
+        humanReviewSubmit.disabled = false;
+    }
 });
 
 loadGoals();
