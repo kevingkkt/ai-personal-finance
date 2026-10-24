@@ -1,0 +1,6 @@
+Cloud AI-Mode check for 20.213.19.132 at 2026-10-24T13:09:23Z
+
+[PASS] Savings goals AI-Mode (Grace): POST http://20.213.19.132:5003/ai-insights -> 200 (145s)
+       {"goal_id":null,"goal_name":null,"insight":"To track your savings goals, focus on prioritizing the High-Risk Goals like the Professional Course and Home Office Upgrade. Then, work on the Low-Risk Goals such as the Emergency Fund and Course Fees. For the Emergency Fund, ensure it is managed closely to avoid running low on savings. Additionally, set aside money regularly for the Long-Term Investment. Regularly track each goal's progress to adjust your savings strategy as needed.","model":"deepseek-r1:1.5b","scope":"overall"}
+[PASS] Income and expense AI-Mode (Kevin): GET http://20.213.19.132:5001/ai-insights -> 200 (77s)
+       {"insight":"Total Income: $450.00\nTotal Expenses: $365.90\nHighest Spending Category: Bills - $120.00\nSaving Suggestion: Save 60% of your remaining income after expenses, which is $50.46.","model":"deepseek-r1:1.5b"}
