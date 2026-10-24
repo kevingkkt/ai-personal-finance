@@ -14,6 +14,7 @@ LOG_FILE="${LOG_FILE:-ai-services/logs/cloud_security_check.log}"
 frontends=(8080 3001 3003 3004)
 backends=(5001 5003 5004)
 databases=(6001 6003 6004)
+ai_services=(11434 7001 7002 7003)
 
 passed=0
 failed=0
@@ -44,6 +45,16 @@ for port in "${databases[@]}"; do
     check "Database port $port closed" false "port is reachable"
   else
     check "Database port $port closed" true "connection refused or filtered"
+  fi
+done
+
+echo
+echo "== B5 Endpoint security: AI services (Ollama, MCP, RAG, Multi-Agent) not reachable from the internet"
+for port in "${ai_services[@]}"; do
+  if nc -z -w 3 "$HOST" "$port" 2>/dev/null; then
+    check "AI service port $port closed" false "port is reachable"
+  else
+    check "AI service port $port closed" true "connection refused or filtered"
   fi
 done
 

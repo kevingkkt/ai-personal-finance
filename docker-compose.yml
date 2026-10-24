@@ -31,6 +31,8 @@ services:
     container_name: grace-backend
     ports:
       - "5003:5003"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       DATABASE_API_URL: http://grace-database:6003
       OLLAMA_URL: http://host.docker.internal:11434/api/generate
@@ -80,6 +82,8 @@ services:
     container_name: kevin-backend
     ports:
       - "5001:5001"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - DATABASE_API_URL=http://kevin-database:5002
       - OLLAMA_URL=http://host.docker.internal:11434/api/generate
@@ -123,6 +127,8 @@ services:
     container_name: bills-backend
     ports:
       - "5004:5001"
+    extra_hosts:
+      - "host.docker.internal:host-gateway"
     environment:
       - MCP_URL=http://host.docker.internal:7001/mcp
       - RAG_URL=http://host.docker.internal:7002/rag

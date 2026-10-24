@@ -4,7 +4,8 @@
 #
 # Required: VM_HOST, VM_USER
 # Optional: SSH_KEY (default ~/.ssh/azure_vm_key), DEPLOY_BRANCH (default kevin-release2),
-#           APP_DIR (default ~/ai-personal-finance on the VM)
+#           APP_DIR (default ~/ai-personal-finance on the VM),
+#           PROFILE (baseline = AI services off, the default; ai = bonus B1 AI-Mode on)
 #
 # Example: VM_HOST=20.213.19.132 VM_USER=azureuser ./deploy/azure-deploy.sh
 set -euo pipefail
@@ -14,8 +15,15 @@ set -euo pipefail
 SSH_KEY="${SSH_KEY:-$HOME/.ssh/azure_vm_key}"
 DEPLOY_BRANCH="${DEPLOY_BRANCH:-kevin-release2}"
 APP_DIR="${APP_DIR:-~/ai-personal-finance}"
+PROFILE="${PROFILE:-baseline}"
 
-echo "Deploying branch $DEPLOY_BRANCH to $VM_USER@$VM_HOST:$APP_DIR"
+case "$PROFILE" in
+  baseline) ENV_FILE=.env.cloud; SETUP_AI=":" ;;
+  ai) ENV_FILE=.env.cloud-ai; SETUP_AI="bash deploy/setup-ollama.sh" ;;
+  *) echo "PROFILE must be baseline or ai"; exit 1 ;;
+esac
+
+echo "Deploying branch $DEPLOY_BRANCH ($PROFILE profile, $ENV_FILE) to $VM_USER@$VM_HOST:$APP_DIR"
 
 # Pull the branch first so the VM always runs the latest remote-deploy.sh.
 ssh -i "$SSH_KEY" -o BatchMode=yes "$VM_USER@$VM_HOST" \
@@ -24,4 +32,5 @@ ssh -i "$SSH_KEY" -o BatchMode=yes "$VM_USER@$VM_HOST" \
    git fetch origin
    git switch $DEPLOY_BRANCH
    git pull --ff-only origin $DEPLOY_BRANCH
-   bash deploy/remote-deploy.sh"
+   $SETUP_AI
+   ENV_FILE=$ENV_FILE bash deploy/remote-deploy.sh"

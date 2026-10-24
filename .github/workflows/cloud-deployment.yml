@@ -5,6 +5,12 @@ on:
     branches:
       - kevin-release2
   workflow_dispatch:
+    inputs:
+      profile:
+        description: "baseline = AI services off (default); ai = bonus B1 AI-Mode on"
+        type: choice
+        options: [baseline, ai]
+        default: baseline
 
 # Never run two deployments to the VM at the same time.
 concurrency:
@@ -65,4 +71,5 @@ jobs:
           VM_HOST: ${{ secrets.AZURE_VM_HOST }}
           VM_USER: ${{ secrets.AZURE_VM_USER }}
           DEPLOY_BRANCH: ${{ github.ref_name }}
+          PROFILE: ${{ inputs.profile || 'baseline' }}
         run: bash deploy/azure-deploy.sh
