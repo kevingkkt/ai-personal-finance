@@ -6,6 +6,8 @@ services:
     container_name: finance-front-page
     ports:
       - "8080:80"
+    volumes:
+      - ./deploy/nginx/security-headers.conf:/etc/nginx/conf.d/security-headers.conf:ro
 
 
 
@@ -16,7 +18,7 @@ services:
       context: ./grace/database
     container_name: grace-database
     ports:
-      - "6003:6003"
+      - "127.0.0.1:6003:6003"
     environment:
       DB_PATH: /app/data/savings_goals.db
     volumes:
@@ -41,6 +43,8 @@ services:
       MCP_ENABLED: "${MCP_ENABLED:-true}"
       RAG_ENABLED: "${RAG_ENABLED:-true}"
       MULTI_AGENT_ENABLED: "${MULTI_AGENT_ENABLED:-true}"
+      ALLOWED_ORIGINS: "${ALLOWED_ORIGINS:-*}"
+      RATE_LIMIT: "${RATE_LIMIT:-300 per minute}"
     depends_on:
       - grace-database
     restart: unless-stopped
@@ -51,6 +55,8 @@ services:
     container_name: grace-frontend
     ports:
       - "3003:80"
+    volumes:
+      - ./deploy/nginx/security-headers.conf:/etc/nginx/conf.d/security-headers.conf:ro
     depends_on:
       - grace-backend
     restart: unless-stopped
@@ -64,7 +70,7 @@ services:
       context: ./kevin/database
     container_name: kevin-database
     ports:
-      - "6001:5002"
+      - "127.0.0.1:6001:5002"
     volumes:
       - ./kevin/database/transactions.db:/app/transactions.db
 
@@ -84,6 +90,8 @@ services:
       - AI_MODE_ENABLED=${AI_MODE_ENABLED:-true}
       - MCP_ENABLED=${MCP_ENABLED:-true}
       - RAG_ENABLED=${RAG_ENABLED:-true}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-*}
+      - RATE_LIMIT=${RATE_LIMIT:-300 per minute}
     depends_on:
       - kevin-database
      
@@ -94,6 +102,8 @@ services:
     container_name: kevin-frontend
     ports:
       - "3001:80"
+    volumes:
+      - ./deploy/nginx/security-headers.conf:/etc/nginx/conf.d/security-headers.conf:ro
     depends_on:
       - kevin-backend
 
@@ -105,7 +115,7 @@ services:
       context: ./Luke/database
     container_name: bills-database
     ports:
-      - "6004:5002"
+      - "127.0.0.1:6004:5002"
 
   bills-backend:
     build:
@@ -123,6 +133,8 @@ services:
       - AI_MODE_ENABLED=${AI_MODE_ENABLED:-true}
       - MCP_ENABLED=${MCP_ENABLED:-true}
       - RAG_ENABLED=${RAG_ENABLED:-true}
+      - ALLOWED_ORIGINS=${ALLOWED_ORIGINS:-*}
+      - RATE_LIMIT=${RATE_LIMIT:-300 per minute}
     depends_on:
       - bills-database
 
@@ -133,6 +145,8 @@ services:
     container_name: bills-frontend
     ports:
       - "3004:80"
+    volumes:
+      - ./deploy/nginx/security-headers.conf:/etc/nginx/conf.d/security-headers.conf:ro
     depends_on:
       - bills-backend
 
