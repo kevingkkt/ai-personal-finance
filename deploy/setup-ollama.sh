@@ -19,10 +19,16 @@ fi
 
 # Listen on all interfaces so the backend containers can reach it through
 # host.docker.internal. The Azure NSG (DenyAllInBound) keeps 11434 closed to
-# the internet.
+# the internet. Keep one model and one request in memory at a time: AI-Mode,
+# RAG and Multi-Agent use different models, and loading them together next to
+# the containers runs the 8 GB VM out of memory, which kills Ollama mid-reply.
 sudo mkdir -p /etc/systemd/system/ollama.service.d
-printf '[Service]\nEnvironment="OLLAMA_HOST=0.0.0.0:11434"\n' \
-  | sudo tee /etc/systemd/system/ollama.service.d/override.conf > /dev/null
+sudo tee /etc/systemd/system/ollama.service.d/override.conf > /dev/null <<'EOF'
+[Service]
+Environment="OLLAMA_HOST=0.0.0.0:11434"
+Environment="OLLAMA_MAX_LOADED_MODELS=1"
+Environment="OLLAMA_NUM_PARALLEL=1"
+EOF
 sudo systemctl daemon-reload
 sudo systemctl enable ollama
 sudo systemctl restart ollama
