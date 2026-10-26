@@ -7,6 +7,7 @@ on:
       - main
       - kevin
       - kevin-release1
+      - kevin-release2
       
   workflow_dispatch:
 
