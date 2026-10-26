@@ -1,4 +1,5 @@
 flask
 flask-cors
+Flask-Limiter==4.1.1
 requests
 mcp==2.2.0

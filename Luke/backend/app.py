@@ -1,5 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import os
 import requests
 import asyncio
@@ -7,7 +9,21 @@ import json
 from mcp import Client
 
 app = Flask(__name__)
-CORS(app)
+
+# Cloud security: only the app's own frontends may call this API, and each
+# client IP is rate limited. Local runs default to any origin.
+ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get("ALLOWED_ORIGINS", "*").split(",")
+    if origin.strip()
+]
+CORS(app, origins=ALLOWED_ORIGINS)
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=[os.environ.get("RATE_LIMIT", "300 per minute")],
+    storage_uri="memory://",
+)
 
 DATABASE_API_URL = os.environ.get(
     "DATABASE_API_URL",
@@ -269,6 +285,9 @@ def rag_query():
 
 @app.route("/ai-insights", methods=["POST"])
 def ai_insights():
+    if not AI_MODE_ENABLED:
+        return jsonify({"error": "Sorry the AI-Mode was set to disabled"}), 503
+
     #adding flush to see if it truely isnt geting even in but we will see
     print("backend was called for AI insights", flush =True)
     inputData = request.get_json() or  {}
@@ -422,6 +441,6 @@ def multi_agent_human_review(workflow_id):
 if __name__ == "__main__":
     app.run(
         host="0.0.0.0",
-        debug=True,
+        debug=False,
         port=5001
     )

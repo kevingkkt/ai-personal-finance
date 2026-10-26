@@ -2,9 +2,9 @@ name: Grace CI
 
 on:
   push:
-    branches: [grace-release1, grace-release2, kevin-release1, main]
+    branches: [grace-release1, grace-release2, kevin-release1, kevin-release2, main]
   pull_request:
-    branches: [main, kevin-release1]
+    branches: [main, kevin-release1, kevin-release2]
   workflow_dispatch:
 
 jobs:

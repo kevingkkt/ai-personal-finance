@@ -1,0 +1,47 @@
+Cloud security check for 20.213.19.132 at 2026-10-24T12:26:40Z
+
+== B6 Data security: databases not reachable from the internet
+[PASS] Database port 6001 closed: connection refused or filtered
+[PASS] Database port 6003 closed: connection refused or filtered
+[PASS] Database port 6004 closed: connection refused or filtered
+
+== B5 Endpoint security: API only accepts the app's own frontends
+[PASS] Port 5001 rejects https://evil.example: no Access-Control-Allow-Origin header
+[PASS] Port 5001 allows http://20.213.19.132:3003: Access-Control-Allow-Origin: http://20.213.19.132:3003
+[PASS] Port 5003 rejects https://evil.example: no Access-Control-Allow-Origin header
+[PASS] Port 5003 allows http://20.213.19.132:3003: Access-Control-Allow-Origin: http://20.213.19.132:3003
+[PASS] Port 5004 rejects https://evil.example: no Access-Control-Allow-Origin header
+[PASS] Port 5004 allows http://20.213.19.132:3003: Access-Control-Allow-Origin: http://20.213.19.132:3003
+
+== B5 Endpoint security: no debug pages on errors
+[PASS] Port 5001 hides debug output: plain error response
+[PASS] Port 5003 hides debug output: plain error response
+[PASS] Port 5004 hides debug output: plain error response
+
+== B5 Endpoint security: rate limiting
+[PASS] Port 5003 rate limits a burst of requests: expected 429 within 400 requests
+
+== B5 Endpoint security: frontend security headers
+[PASS] Port 8080 sends X-Content-Type-Options: X-Content-Type-Options: nosniff
+[PASS] Port 8080 sends X-Frame-Options: X-Frame-Options: DENY
+[PASS] Port 8080 sends Referrer-Policy: Referrer-Policy: strict-origin-when-cross-origin
+[PASS] Port 8080 sends Content-Security-Policy: Content-Security-Policy: frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'
+[PASS] Port 8080 hides nginx version: no version in Server header
+[PASS] Port 3001 sends X-Content-Type-Options: X-Content-Type-Options: nosniff
+[PASS] Port 3001 sends X-Frame-Options: X-Frame-Options: DENY
+[PASS] Port 3001 sends Referrer-Policy: Referrer-Policy: strict-origin-when-cross-origin
+[PASS] Port 3001 sends Content-Security-Policy: Content-Security-Policy: frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'
+[PASS] Port 3001 hides nginx version: no version in Server header
+[PASS] Port 3003 sends X-Content-Type-Options: X-Content-Type-Options: nosniff
+[PASS] Port 3003 sends X-Frame-Options: X-Frame-Options: DENY
+[PASS] Port 3003 sends Referrer-Policy: Referrer-Policy: strict-origin-when-cross-origin
+[PASS] Port 3003 sends Content-Security-Policy: Content-Security-Policy: frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'
+[PASS] Port 3003 hides nginx version: no version in Server header
+[PASS] Port 3004 sends X-Content-Type-Options: X-Content-Type-Options: nosniff
+[PASS] Port 3004 sends X-Frame-Options: X-Frame-Options: DENY
+[PASS] Port 3004 sends Referrer-Policy: Referrer-Policy: strict-origin-when-cross-origin
+[PASS] Port 3004 sends Content-Security-Policy: Content-Security-Policy: frame-ancestors 'none'; object-src 'none'; base-uri 'self'; form-action 'self'
+[PASS] Port 3004 hides nginx version: no version in Server header
+
+RESULT: PASS (33/33 checks)
+Log written to ai-services/logs/cloud_security_check.log
