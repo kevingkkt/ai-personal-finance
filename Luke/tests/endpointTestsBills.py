@@ -22,7 +22,7 @@ def test_get_bills():
 
 
 
-
+#end point check
 def test_get_a_single_bill():
     response = requests.get(f"{BACKEND_URL}/bills/1")
     assert response.status_code == 200
