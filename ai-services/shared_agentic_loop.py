@@ -419,6 +419,19 @@ def validate_savings_mcp():
     return True
 
 Bills_URL = os.getenv('BILLS_BACKEND_URL', 'http://127.0.0.1:5004')
+def validate_bills_endpoints():
+    response = requests.get(f"{Bills_URL}/bills", timeout=(5, 15))
+    response.raise_for_status()
+    bills = response.json()
+    require(isinstance(bills, list) and len(bills) >= 2, 'Insufficient bills returned')
+    bill_id = bills[0]['bill_id']
+    response = requests.get(f"{Bills_URL}/bills/{bill_id}", timeout=(5, 15))
+    response.raise_for_status()
+    bill = response.json()
+    require(bill['bill_id'] == bill_id, 'Wrong bill returned')
+    for field in ['payment_status', 'due_date', 'amount', 'description']:
+        require(field in bill, f'Missing field {field} in bill')
+    return True
 
 def validate_bills_mcp():
     response = requests.get(f"{Bills_URL}/bills/unpaid", timeout=(5, 15))
@@ -1573,11 +1586,14 @@ def main():
         'testing-review',
         'cloud-deployment-review',
         'kevin-database',   
-        'kevin-release0'
+        'kevin-release0',
+        'validate_bills_endpoints'
     ])
     parser.add_argument('--output', type=Path)
     args = parser.parse_args()
     checks = []
+    if args.mode in {'validate_bills_endpoints'}:
+        checks.append(('bills-endpoint-testing', validate_bills_endpoints))
     if args.mode in {'database', 'endpoints', 'release0'}:
         checks.append((f'savings-{args.mode}', lambda: validate_savings_release0(args.mode)))
     if args.mode == 'architecture':
