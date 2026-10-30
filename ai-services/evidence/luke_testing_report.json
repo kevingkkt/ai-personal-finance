@@ -1,0 +1,35 @@
+{
+  "student": "Luke",
+  "feature": "Bills & Payments",
+  "pre_commit_security": {
+    "ruff_security": "PASS",
+    "detect_secrets": "PASS",
+    "pip_audit": "PASS",
+    "hooks": [
+      "ruff-security-luke",
+      "detect-secrets-luke",
+      "pip-audit-luke-backend"
+    ],
+    "findings_resolved": [],
+    "log": "ai-services/logs/bills_pre_commit_security.log"
+  },
+  "post_commit_ci": {
+    "workflow": "Bills-Working",
+    "workflow_file": ".github/workflows/Bills-Working.yml",
+    "status": "PASS",
+    "commit": "REPLACE_WITH_TESTED_COMMIT",
+    "run_url": "REPLACE_WITH_GITHUB_ACTIONS_RUN_URL",
+    "test_method": "pytest against the Bills backend and database",
+    "tested_endpoints": [
+      "GET /health",
+      "GET /bills",
+      "GET /bills/1"
+    ],
+    "tests": [
+      "test_database_health",
+      "test_backend_health",
+      "test_get_bills"
+    ],
+    "log": "ai-services/logs/bills_ci_endpoint_tests.log"
+  }
+}

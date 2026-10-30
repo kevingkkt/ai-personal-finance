@@ -5,7 +5,7 @@ on:
     branches:
       - main
       - kevin
-      - kevin-release1
+      - kevin-release2
 
   pull_request:
     branches:
@@ -39,6 +39,7 @@ jobs:
       - name: Install Kevin backend dependencies
         run: |
           pip install -r kevin/backend/requirements.txt
+          pip install pytest
 
 
       - name: Install Kevin database dependencies
@@ -62,12 +63,13 @@ jobs:
           python -m py_compile kevin/tests/test_backend.py
 
 
-      - name: Check Release 1 AI service files
+      - name: Check AI service files
         run: |
           python -m py_compile ai-services/mcp_server.py
           python -m py_compile ai-services/mcp_test_client.py
           python -m py_compile ai-services/rag_server.py
           python -m py_compile ai-services/shared_agentic_loop.py
+          python -m py_compile ai-services/multi_agent_server.py
 
 
 
@@ -85,7 +87,31 @@ jobs:
         run: |
           docker build -t kevin-frontend ./kevin/frontend
 
+            
+      - name: Start Kevin database and backend
+        run: |
+          docker compose up -d kevin-database kevin-backend
 
+      - name: Wait for Kevin backend
+        run: |
+          for i in {1..20}; do
+            if curl -f http://localhost:5001/health; then
+              echo "Kevin backend is ready"
+              exit 0
+            fi
+            sleep 3
+          done
+
+          echo "Kevin backend did not start in time"
+          docker compose logs kevin-backend
+          exit 1
+
+      - name: Test Kevin backend endpoints with pytest
+        run: |
+          python -m pytest \
+            kevin/tests/test_backend.py::test_backend_health \
+            kevin/tests/test_backend.py::test_get_transactions \
+            -v
  
 
       - name: Confirm MCP and RAG disabled in CI

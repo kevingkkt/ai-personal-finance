@@ -5,17 +5,17 @@ DATABASE_URL = "http://127.0.0.1:6001"
 
 
 def test_backend_health():
-    response = requests.get(f"{BACKEND_URL}/health")
+    response = requests.get(f"{BACKEND_URL}/health", timeout=5)
     assert response.status_code == 200
 
 
 def test_database_health():
-    response = requests.get(f"{DATABASE_URL}/health")
+    response = requests.get(f"{DATABASE_URL}/health", timeout=5)
     assert response.status_code == 200
 
 
 def test_get_transactions():
-    response = requests.get(f"{BACKEND_URL}/transactions")
+    response = requests.get(f"{BACKEND_URL}/transactions", timeout=5)
     assert response.status_code == 200
 
     data = response.json()
@@ -25,7 +25,7 @@ def test_get_transactions():
 
 
 def test_get_single_transaction():
-    response = requests.get(f"{BACKEND_URL}/transactions/1")
+    response = requests.get(f"{BACKEND_URL}/transactions/1", timeout=5)
     assert response.status_code == 200
 
     data = response.json()
@@ -37,12 +37,12 @@ def test_get_single_transaction():
 
 
 def test_invalid_transaction():
-    response = requests.get(f"{BACKEND_URL}/transactions/9999")
+    response = requests.get(f"{BACKEND_URL}/transactions/9999", timeout=5)
     assert response.status_code == 404
 
 
 def test_htmx_transactions():
-    response = requests.get(f"{BACKEND_URL}/transactions-html")
+    response = requests.get(f"{BACKEND_URL}/transactions-html", timeout=5)
     assert response.status_code == 200
     assert "<table>" in response.text
     assert "Monthly salary" in response.text

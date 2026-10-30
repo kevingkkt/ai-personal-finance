@@ -1,0 +1,13 @@
+{
+  "platform": "Azure",
+  "deployment_status": "PASS",
+  "frontend_accessible": true,
+  "backend_accessible": true,
+  "database_operational": true,
+  "crud_operational": true,
+  "ai_mode_disabled": true,
+  "mcp_disabled": true,
+  "rag_disabled": true,
+  "multi_agent_disabled": true,
+  "human_release_decision": "approve"
+}

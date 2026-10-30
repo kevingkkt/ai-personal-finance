@@ -1,0 +1,14 @@
+# Python
+__pycache__/
+*.py[cod]
+.pytest_cache/
+.ruff_cache/
+
+# Local environments and editors
+.venv/
+.vscode/
+.DS_Store
+
+# Local environment overrides (.env.cloud is shared and stays tracked)
+.env
+.env.local

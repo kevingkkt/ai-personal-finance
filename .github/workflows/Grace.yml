@@ -2,9 +2,9 @@ name: Grace CI
 
 on:
   push:
-    branches: [grace-release1, main]
+    branches: [grace-release1, grace-release2, kevin-release1, kevin-release2, main]
   pull_request:
-    branches: [main]
+    branches: [main, kevin-release1, kevin-release2]
   workflow_dispatch:
 
 jobs:
@@ -14,6 +14,7 @@ jobs:
       AI_MODE_ENABLED: "false"
       MCP_ENABLED: "false"
       RAG_ENABLED: "false"
+      MULTI_AGENT_ENABLED: "false"
       RUN_SAVINGS_CI_INTEGRATION: "true"
     steps:
       - uses: actions/checkout@v4
@@ -27,8 +28,8 @@ jobs:
         run: docker compose config --quiet
       - name: Run shared regression tests without local AI services
         run: |
-          mkdir -p reports/release1
-          python -m pytest ai-services/tests --junitxml=reports/release1/shared-tests.xml
+          mkdir -p reports/release2
+          python -m pytest ai-services/tests --junitxml=reports/release2/shared-tests.xml
       - name: Build savings microservices
         run: docker compose build grace-database grace-backend grace-frontend
       - name: Start savings microservices
@@ -49,30 +50,56 @@ jobs:
               else:
                   raise SystemExit(f'Service did not become ready: {url}')
           PY
-      - name: Validate savings and disabled AI modes
-        run: python -m pytest grace/tests/test_release1_ci.py --junitxml=reports/release1/savings-ci-tests.xml
+      - name: "Post-commit endpoint tests: GET /goals and POST /goals/<id>/contributions"
+        run: python -m pytest grace/tests/test_release2_endpoints.py -v --junitxml=reports/release2/endpoint-tests.xml
+      - name: Validate savings, Multi-Agent routes and disabled AI modes
+        if: always()
+        run: python -m pytest grace/tests/test_release1_ci.py grace/tests/test_release2_multi_agent.py --junitxml=reports/release2/savings-ci-tests.xml
       - name: Capture execution evidence
         if: always()
         run: |
-          mkdir -p reports/release1
-          docker compose ps > reports/release1/containers.txt
-          docker compose logs --no-color grace-database grace-backend grace-frontend > reports/release1/services.log
+          mkdir -p reports/release2
+          docker compose ps > reports/release2/containers.txt
+          docker compose logs --no-color grace-database grace-backend grace-frontend > reports/release2/services.log
           python - <<'PY'
           import json
           import os
+          import xml.etree.ElementTree as ET
           from pathlib import Path
+          report = Path('reports/release2')
+          tests = []
+          junit = report / 'endpoint-tests.xml'
+          if junit.exists():
+              for case in ET.parse(junit).iter('testcase'):
+                  failed = case.find('failure') is not None or case.find('error') is not None
+                  skipped = case.find('skipped') is not None
+                  tests.append({'test': case.get('name'),
+                                'result': 'FAIL' if failed else 'SKIP' if skipped else 'PASS'})
           evidence = {
+              'student': 'Grace',
+              'workflow': os.environ['GITHUB_WORKFLOW'],
+              'branch': os.environ['GITHUB_REF_NAME'],
               'commit': os.environ['GITHUB_SHA'],
               'run_url': f"{os.environ['GITHUB_SERVER_URL']}/{os.environ['GITHUB_REPOSITORY']}/actions/runs/{os.environ['GITHUB_RUN_ID']}",
-              'disabled_modes': {key: os.environ[key] for key in ['AI_MODE_ENABLED', 'MCP_ENABLED', 'RAG_ENABLED']},
+              'tested_endpoints': ['GET /goals', 'POST /goals/<goal_id>/contributions'],
+              'endpoint_tests': tests,
+              'status': 'PASS' if tests and all(t['result'] == 'PASS' for t in tests) else 'FAIL',
+              'disabled_modes': {key: os.environ[key] for key in
+                                 ['AI_MODE_ENABLED', 'MCP_ENABLED', 'RAG_ENABLED', 'MULTI_AGENT_ENABLED']},
           }
-          Path('reports/release1/workflow.json').write_text(json.dumps(evidence, indent=2))
+          (report / 'workflow.json').write_text(json.dumps(evidence, indent=2))
+          rows = '\n'.join(f"| {t['test']} | {t['result']} |" for t in tests)
+          summary = (f"## Grace post-commit endpoint tests: {evidence['status']}\n\n"
+                     f"Endpoints: `GET /goals`, `POST /goals/<goal_id>/contributions`\n\n"
+                     f"| Test | Result |\n|---|---|\n{rows}\n")
+          with open(os.environ['GITHUB_STEP_SUMMARY'], 'a') as file:
+              file.write(summary)
           PY
       - uses: actions/upload-artifact@v4
         if: always()
         with:
-          name: savings-release1-evidence
-          path: reports/release1/
+          name: savings-release2-evidence
+          path: reports/release2/
       - name: Stop disposable CI services
         if: always()
         run: docker compose down --volumes

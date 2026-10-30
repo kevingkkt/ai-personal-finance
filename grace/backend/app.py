@@ -1,5 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import os
 import requests
 import asyncio
@@ -8,7 +10,21 @@ from datetime import datetime
 from zoneinfo import ZoneInfo
 
 app = Flask(__name__)
-CORS(app)
+
+# Cloud security: only the app's own frontends may call this API, and each
+# client IP is rate limited. Local runs default to any origin.
+ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get("ALLOWED_ORIGINS", "*").split(",")
+    if origin.strip()
+]
+CORS(app, origins=ALLOWED_ORIGINS)
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=[os.environ.get("RATE_LIMIT", "300 per minute")],
+    storage_uri="memory://",
+)
 
 DATABASE_API_URL = os.environ.get(
     "DATABASE_API_URL",
@@ -33,9 +49,11 @@ app.config.update(
     AI_MODE_ENABLED=env_enabled("AI_MODE_ENABLED"),
     MCP_ENABLED=env_enabled("MCP_ENABLED"),
     RAG_ENABLED=env_enabled("RAG_ENABLED"),
+    MULTI_AGENT_ENABLED=env_enabled("MULTI_AGENT_ENABLED"),
 )
 MCP_URL = os.getenv("MCP_URL", "http://localhost:7001/mcp")
 RAG_URL = os.getenv("RAG_URL", "http://localhost:7002/rag")
+MULTI_AGENT_URL = os.getenv("MULTI_AGENT_URL", "http://localhost:7003")
 
 
 def mode_disabled(mode):
@@ -575,9 +593,129 @@ def savings_rag_query():
         return jsonify(error='Knowledge service is unavailable'), 502
 
 
+# Tasks are tagged so savings workflows can be found in the shared history and audit log.
+MULTI_AGENT_TAG = '[Savings Goal Manager]'
+DEFAULT_MULTI_AGENT_TASK = ('Review the savings goal progress, identify any goals at risk of '
+                            'missing their target date, and recommend next steps.')
+HUMAN_DECISIONS = {'approve', 'correct', 'partial', 'reject'}
+
+
+def load_from_database(path):
+    response = requests.get(f'{DATABASE_API_URL}{path}', timeout=(3, 10))
+    if response.status_code == 404:
+        raise LookupError(path)
+    response.raise_for_status()
+    return response.json()
+
+
+def savings_evidence(goal_id=None):
+    """Build Worker evidence from stored savings data, never from client-supplied text."""
+    goals = [load_from_database(f'/goals/{goal_id}')] if goal_id else load_from_database('/goals')
+    today = datetime.now(ZoneInfo('Australia/Sydney')).strftime('%d-%m-%Y')
+    records = []
+    for goal in goals:
+        target = float(goal['target_amount'])
+        saved = float(goal['current_amount'])
+        record = {
+            'goal_id': goal['id'],
+            'goal_name': goal['goal_name'],
+            'target_amount': target,
+            'current_amount': saved,
+            'remaining_amount': round(max(target - saved, 0), 2),
+            'progress_percentage': round(saved / target * 100, 1) if target else 0,
+            'target_date': goal['target_date'],
+        }
+        if goal_id:
+            record['contributions'] = [
+                {'amount': c['amount'], 'contribution_date': c['contribution_date']}
+                for c in load_from_database(f'/goals/{goal_id}/contributions')
+            ]
+        records.append(record)
+    return {'feature': 'Savings Goal Manager', 'reference_date': today, 'goals': records}
+
+
+def forward_to_multi_agent(method, path, timeout, **kwargs):
+    try:
+        response = requests.request(method, f'{MULTI_AGENT_URL}{path}', timeout=timeout, **kwargs)
+        return response.json(), response.status_code
+    except requests.Timeout:
+        return {'error': 'Multi-Agent request timed out'}, 504
+    except (requests.RequestException, ValueError):
+        return {'error': 'Could not connect to Multi-Agent server'}, 503
+
+
+@app.post('/multi-agent-review')
+def savings_multi_agent_review():
+    if not app.config['MULTI_AGENT_ENABLED']:
+        return mode_disabled('Multi-Agent')
+    data = request.get_json(silent=True)
+    if data is None:
+        data = {}
+    if not isinstance(data, dict):
+        return jsonify(error='A JSON object is required'), 400
+    task = data.get('task')
+    if task is None or (isinstance(task, str) and not task.strip()):
+        task = DEFAULT_MULTI_AGENT_TASK
+    elif not isinstance(task, str) or len(task.strip()) > 1000:
+        return jsonify(error='task must be text of at most 1000 characters'), 400
+    goal_id = data.get('goal_id')
+    if goal_id in ('', None):
+        goal_id = None
+    elif isinstance(goal_id, bool) or not str(goal_id).isdigit() or int(goal_id) < 1:
+        return jsonify(error='goal_id must be a positive whole number'), 400
+    else:
+        goal_id = int(goal_id)
+    try:
+        evidence = savings_evidence(goal_id)
+    except LookupError:
+        return jsonify(error='Savings goal not found'), 404
+    except requests.Timeout:
+        return jsonify(error='Database request timed out'), 504
+    except (requests.RequestException, ValueError, KeyError, TypeError):
+        return jsonify(error='Could not load savings evidence'), 502
+    if not evidence['goals']:
+        return jsonify(error='Add a savings goal before running a review'), 400
+    # Three sequential LLM calls can take several minutes on a local model.
+    body, status = forward_to_multi_agent(
+        'POST', '/multi-agent', (5, 900),
+        json={'task': f'{MULTI_AGENT_TAG} {task.strip()}', 'evidence': evidence})
+    return jsonify(body), status
+
+
+@app.post('/multi-agent/<uuid:workflow_id>/human-review')
+def savings_multi_agent_human_review(workflow_id):
+    if not app.config['MULTI_AGENT_ENABLED']:
+        return mode_disabled('Multi-Agent')
+    data = request.get_json(silent=True)
+    if not isinstance(data, dict):
+        return jsonify(error='A JSON object is required'), 400
+    decision = str(data.get('decision', '')).strip().lower()
+    comments = str(data.get('comments', '')).strip()
+    if decision not in HUMAN_DECISIONS:
+        return jsonify(error='decision must be approve, correct, partial, or reject'), 400
+    if decision != 'approve' and not comments:
+        return jsonify(error='Comments are required unless the workflow is approved'), 400
+    if len(comments) > 2000:
+        return jsonify(error='comments must be at most 2000 characters'), 400
+    body, status = forward_to_multi_agent(
+        'POST', f'/multi-agent/{workflow_id}/human-review', (5, 30),
+        json={'decision': decision, 'comments': comments})
+    return jsonify(body), status
+
+
+@app.get('/multi-agent-history')
+def savings_multi_agent_history():
+    if not app.config['MULTI_AGENT_ENABLED']:
+        return mode_disabled('Multi-Agent')
+    body, status = forward_to_multi_agent('GET', '/multi-agent-history', (5, 30))
+    if status == 200 and isinstance(body, list):
+        body = [w for w in body if str(w.get('task', '')).startswith(MULTI_AGENT_TAG)]
+    return jsonify(body), status
+
+
 if __name__ == "__main__":
     app.run(
-        host="0.0.0.0",
+        host="0.0.0.0",  # noqa: S104 - container must accept traffic from other services; Docker controls exposure
         debug=False,
         port=5003
     )

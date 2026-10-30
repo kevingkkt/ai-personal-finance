@@ -1,4 +1,5 @@
-const API_URL = "http://127.0.0.1:5001/transactions";
+const BACKEND_URL = `http://${window.location.hostname}:5001`;
+const API_URL = `${BACKEND_URL}/transactions`;
 
 const form = document.getElementById("transactionForm");
 const table = document.getElementById("transactionTable");
@@ -436,7 +437,7 @@ aiButton.addEventListener(
 
             const response =
                 await fetch(
-                    "http://127.0.0.1:5001/ai-insights"
+                    `${BACKEND_URL}/ai-insights`
                 );
 
             const data =
@@ -491,7 +492,7 @@ mcpButton.addEventListener(
 
             const response =
                 await fetch(
-                    "http://127.0.0.1:5001/mcp-income-expense-summary"
+                    `${BACKEND_URL}/mcp-income-expense-summary`
                 );
 
             const data =
@@ -565,7 +566,7 @@ ragButton.addEventListener(
 
             const response =
                 await fetch(
-                    "http://127.0.0.1:5001/rag-query",
+                    `${BACKEND_URL}/rag-query`,
                     {
                         method: "POST",
                         headers: {
@@ -614,6 +615,244 @@ ragButton.addEventListener(
         }
     }
 );
+
+// MULTI-AGENT
+
+const multiAgentButton =
+    document.getElementById("multiAgentButton");
+
+const multiAgentTask =
+    document.getElementById("multiAgentTask");
+
+const multiAgentEvidence =
+    document.getElementById("multiAgentEvidence");
+
+const multiAgentResult =
+    document.getElementById("multiAgentResult");
+
+const humanReviewPanel =
+    document.getElementById("humanReviewPanel");
+
+const humanDecision =
+    document.getElementById("humanDecision");
+
+const humanComments =
+    document.getElementById("humanComments");
+
+const humanReviewButton =
+    document.getElementById("humanReviewButton");
+
+const humanReviewResult =
+    document.getElementById("humanReviewResult");
+
+
+let currentWorkflowId = null;
+
+
+
+
+multiAgentButton.addEventListener(
+    "click",
+    async function () {
+
+        const task =
+            multiAgentTask.value.trim();
+
+        const evidence =
+            multiAgentEvidence.value.trim();
+
+
+        if (!task) {
+
+            multiAgentResult.textContent =
+                "Please enter a review task.";
+
+            return;
+        }
+
+
+        if (!evidence) {
+
+            multiAgentResult.textContent =
+                "Please enter evidence for the agents to review.";
+
+            return;
+        }
+
+
+        multiAgentResult.textContent =
+            "Running Planner, Worker and Reviewer...";
+
+        humanReviewPanel.style.display =
+            "none";
+
+        humanReviewResult.textContent =
+            "";
+
+        currentWorkflowId = null;
+
+
+        try {
+
+            const response =
+                await fetch(
+                    `${BACKEND_URL}/multi-agent-review`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            task: task,
+                            evidence: evidence
+                        })
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "Multi-Agent request failed"
+                );
+            }
+
+
+            currentWorkflowId =
+                data.workflow_id;
+
+
+            multiAgentResult.textContent =
+                `Planner:\n` +
+                `${data.planner.output}\n\n` +
+
+                `Worker:\n` +
+                `${data.worker.output}\n\n` +
+
+                `Reviewer:\n` +
+                `${data.reviewer.output}\n\n` +
+
+                `Status: ${data.status}`;
+
+
+            if (
+                data.status ===
+                "AWAITING_HUMAN_REVIEW"
+            ) {
+
+                humanReviewPanel.style.display =
+                    "block";
+            }
+
+
+        } catch (error) {
+
+            console.error(error);
+
+            multiAgentResult.textContent =
+                error.message ||
+                "Could not connect to the Multi-Agent service.";
+        }
+    }
+);
+
+
+// Submit Human Review
+
+humanReviewButton.addEventListener(
+    "click",
+    async function () {
+
+        if (!currentWorkflowId) {
+
+            humanReviewResult.textContent =
+                "No active workflow is available.";
+
+            return;
+        }
+
+
+        const decision =
+            humanDecision.value;
+
+        const comments =
+            humanComments.value.trim();
+
+
+        humanReviewResult.textContent =
+            "Submitting human review...";
+
+
+        try {
+
+            const response =
+                await fetch(
+                    `${BACKEND_URL}/multi-agent/${currentWorkflowId}/human-review`,
+                    {
+                        method: "POST",
+
+                        headers: {
+                            "Content-Type":
+                                "application/json"
+                        },
+
+                        body: JSON.stringify({
+                            decision: decision,
+                            comments: comments
+                        })
+                    }
+                );
+
+
+            const data =
+                await response.json();
+
+
+            if (!response.ok) {
+
+                throw new Error(
+                    data.error ||
+                    "Human review failed"
+                );
+            }
+
+
+            humanReviewResult.textContent =
+                `Human Decision: ${data.human_review.decision}\n` +
+                `Comments: ${data.human_review.comments || "No comments"}\n` +
+                `Final Status: ${data.status}`;
+
+
+        } catch (error) {
+            humanReviewResult.textContent =
+                "Could not submit the human review.";
+        }
+
+    }
+);
+
+document.addEventListener("DOMContentLoaded", () => {
+    const refreshButton = document.getElementById("refreshTransactionsButton");
+
+    if (refreshButton) {
+        refreshButton.setAttribute(
+            "hx-get",
+            `${BACKEND_URL}/transactions-html`
+        );
+
+        if (window.htmx) {
+            htmx.process(refreshButton);
+        }
+    }
+});
 
 
 // Load transactions when page opens

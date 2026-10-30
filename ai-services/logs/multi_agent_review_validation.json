@@ -1,0 +1,16 @@
+{
+  "review_type": "Multi-Agent Workflow Review",
+  "workflow_id": "a3891973-5157-4930-9e1b-a672d017ed89",
+  "status": "APPROVED",
+  "checks": {
+    "Planner output exists": true,
+    "Worker output exists": true,
+    "Reviewer output exists": true,
+    "Human review exists": true,
+    "Workflow completed": true
+  },
+  "recommendations": [
+    "The Multi-Agent workflow contains all required stages."
+  ],
+  "validation_result": "PASS"
+}

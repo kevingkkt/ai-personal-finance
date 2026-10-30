@@ -264,3 +264,4 @@ tbody tr:hover {
 .mode-switch input:focus-visible { outline: 3px solid #333; outline-offset: 3px; }
 .release-one textarea:disabled,
 .release-one select:disabled { background: #f3f4f6; cursor: not-allowed; }
+#savings-human-review { margin-top: 1.5rem; padding-top: 1rem; border-top: 1px solid #e5e7eb; }

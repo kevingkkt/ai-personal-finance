@@ -1,0 +1,160 @@
+{
+  "student": "Grace",
+  "feature": "Savings Goal Manager",
+  "deployment": "cloud",
+  "run_at": "2026-10-22T15:00:48+00:00",
+  "frontend_url": "http://20.213.19.132:3003",
+  "backend_url": "http://20.213.19.132:5003",
+  "ai_services": "disabled by default (.env.cloud)",
+  "checks": [
+    {
+      "check": "Frontend page served",
+      "request": "GET /",
+      "expected_status": 200,
+      "status": 200,
+      "result": "PASS",
+      "seconds": 0.1
+    },
+    {
+      "check": "Backend health",
+      "request": "GET /health",
+      "expected_status": 200,
+      "status": 200,
+      "result": "PASS",
+      "seconds": 0.1
+    },
+    {
+      "check": "Read all goals",
+      "request": "GET /goals",
+      "expected_status": 200,
+      "status": 200,
+      "result": "PASS",
+      "seconds": 0.1
+    },
+    {
+      "check": "Create goal",
+      "request": "POST /goals",
+      "expected_status": 201,
+      "status": 201,
+      "result": "PASS",
+      "seconds": 0.1
+    },
+    {
+      "check": "Read one goal",
+      "request": "GET /goals/12",
+      "expected_status": 200,
+      "status": 200,
+      "result": "PASS",
+      "seconds": 0.1
+    },
+    {
+      "check": "Update goal",
+      "request": "PUT /goals/12",
+      "expected_status": 200,
+      "status": 200,
+      "result": "PASS",
+      "seconds": 0.1
+    },
+    {
+      "check": "Create contribution",
+      "request": "POST /goals/12/contributions",
+      "expected_status": 201,
+      "status": 201,
+      "result": "PASS",
+      "seconds": 0.1
+    },
+    {
+      "check": "Read contributions",
+      "request": "GET /goals/12/contributions",
+      "expected_status": 200,
+      "status": 200,
+      "result": "PASS",
+      "seconds": 0.1
+    },
+    {
+      "check": "Update contribution",
+      "request": "PUT /contributions/11",
+      "expected_status": 200,
+      "status": 200,
+      "result": "PASS",
+      "seconds": 0.1
+    },
+    {
+      "check": "Goal total follows contributions",
+      "request": "GET /goals/12",
+      "expected_status": 200,
+      "status": 200,
+      "result": "PASS",
+      "seconds": 0.1
+    },
+    {
+      "check": "Delete contribution",
+      "request": "DELETE /contributions/11",
+      "expected_status": 200,
+      "status": 200,
+      "result": "PASS",
+      "seconds": 0.1
+    },
+    {
+      "check": "Delete goal",
+      "request": "DELETE /goals/12",
+      "expected_status": 200,
+      "status": 200,
+      "result": "PASS",
+      "seconds": 0.1
+    },
+    {
+      "check": "Deleted goal is gone",
+      "request": "GET /goals/12",
+      "expected_status": 404,
+      "status": 404,
+      "result": "PASS",
+      "seconds": 0.1
+    },
+    {
+      "check": "AI-Mode disabled",
+      "request": "POST /ai-insights",
+      "expected_status": 503,
+      "status": 503,
+      "result": "PASS",
+      "seconds": 0.1
+    },
+    {
+      "check": "MCP disabled",
+      "request": "POST /goals/1/mcp-summary",
+      "expected_status": 503,
+      "status": 503,
+      "result": "PASS",
+      "seconds": 0.1
+    },
+    {
+      "check": "RAG disabled",
+      "request": "POST /rag-query",
+      "expected_status": 503,
+      "status": 503,
+      "result": "PASS",
+      "seconds": 0.1
+    },
+    {
+      "check": "Multi-Agent disabled",
+      "request": "POST /multi-agent-review",
+      "expected_status": 503,
+      "status": 503,
+      "result": "PASS",
+      "seconds": 0.1
+    },
+    {
+      "check": "Multi-Agent history disabled",
+      "request": "GET /multi-agent-history",
+      "expected_status": 503,
+      "status": 503,
+      "result": "PASS",
+      "seconds": 0.1
+    }
+  ],
+  "result": "PASS",
+  "log": "ai-services/logs/grace_cloud_deployment.log",
+  "deployed_commit": "78df8bc77042a6d31434a9ca19fd83b7c3d28e9b",
+  "deployment_workflow_run": "https://github.com/kevingkkt/ai-personal-finance/actions/runs/39799016207",
+  "environment": "Shared group Azure VM 20.213.19.132, deployed by .github/workflows/cloud-deployment.yml from kevin-release1 with .env.cloud"
+}

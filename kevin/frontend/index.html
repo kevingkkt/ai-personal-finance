@@ -82,8 +82,8 @@
         <h2>Transactions</h2>
 
         <button
+            id="refreshTransactionsButton"
             type="button"
-            hx-get="http://127.0.0.1:5001/transactions-html"
             hx-target="#htmxResult"
             hx-swap="innerHTML"
         >
@@ -179,6 +179,102 @@
 
         </div>
 
+
+
+                <!-- Multi-Agent Workflow -->
+
+        <div class="multi-agent-section">
+
+            <h2>Multi-Agent Review</h2>
+
+            <p>
+                Run the shared Planner, Worker and Reviewer agents,
+                then complete the final Human Review.
+            </p>
+
+            <label for="multiAgentTask">
+                Review Task
+            </label>
+
+            <input
+                type="text"
+                id="multiAgentTask"
+                value="Review Kevin income and expense feature"
+            >
+
+            <label for="multiAgentEvidence">
+                Evidence
+            </label>
+
+            <textarea
+                id="multiAgentEvidence"
+                rows="4"
+            >The feature tracks income and expenses and calculates the remaining balance.</textarea>
+
+            <button
+                type="button"
+                id="multiAgentButton"
+            >
+                Run Multi-Agent Review
+            </button>
+
+            <div id="multiAgentResult"></div>
+
+
+            <!-- Human Review -->
+
+            <div
+                id="humanReviewPanel"
+                style="display: none;"
+            >
+
+                <h3>Human Review</h3>
+
+                <label for="humanDecision">
+                    Decision
+                </label>
+
+                <select id="humanDecision">
+                    <option value="approve">
+                        Approve
+                    </option>
+
+                    <option value="partial">
+                        Partial Accept
+                    </option>
+
+                    <option value="correct">
+                        Correction Required
+                    </option>
+
+                    <option value="reject">
+                        Reject
+                    </option>
+                </select>
+
+                <label for="humanComments">
+                    Comments
+                </label>
+
+                <textarea
+                    id="humanComments"
+                    rows="3"
+                    placeholder="Enter your review comments..."
+                ></textarea>
+
+                <button
+                    type="button"
+                    id="humanReviewButton"
+                >
+                    Submit Human Review
+                </button>
+
+                <div id="humanReviewResult"></div>
+
+            </div>
+
+        </div>
+        
     </div>
 
 

@@ -1,0 +1,64 @@
+repos:
+  - repo: local
+    hooks:
+      - id: ruff-security
+        name: Ruff security scan
+        entry: python -m ruff check kevin --select S --per-file-ignores "kevin/tests/*:S101"
+        language: system
+        pass_filenames: false
+
+      - id: detect-secrets
+        name: Detect secrets
+        entry: python -m detect_secrets scan
+        language: system
+        pass_filenames: false
+
+      - id: pip-audit-backend
+        name: Pip audit Kevin backend
+        entry: python -m pip_audit -r kevin/backend/requirements.txt
+        language: system
+        pass_filenames: false
+
+      # Grace - Savings Goal Manager
+      # language: python lets pre-commit install pinned tools itself, so the hooks
+      # work on Windows and macOS whether or not a "python" command is on PATH.
+      - id: ruff-security-grace
+        name: Ruff security scan (Grace)
+        entry: ruff check grace --select S --per-file-ignores "grace/tests/*:S101"
+        language: python
+        additional_dependencies: [ruff==0.17.1]
+        pass_filenames: false
+
+      # Fails the commit if a staged Grace file adds a secret not already in the baseline.
+      - id: detect-secrets-grace
+        name: Detect secrets (Grace)
+        entry: detect-secrets-hook --baseline .secrets.baseline
+        language: python
+        additional_dependencies: [detect-secrets==1.5.0]
+        files: ^(grace/|ai-services/(evidence|logs)/grace_)
+
+      - id: pip-audit-grace-backend
+        name: Pip audit Grace backend
+        entry: pip-audit -r grace/backend/requirements.txt
+        language: python
+        additional_dependencies: [pip-audit==2.10.1]
+        pass_filenames: false
+
+      - id: pip-audit-grace-database
+        name: Pip audit Grace database
+        entry: pip-audit -r grace/database/requirements.txt
+        language: python
+        additional_dependencies: [pip-audit==2.10.1]
+        pass_filenames: false
+      
+      - id: pip-audit-backend-bills
+        name: Pip audit backend bills
+        entry: python -m pip_audit -r Luke/backend/requirements.txt
+        language: system
+        pass_filenames: false
+      
+      - id: ruff-secutiy-bills
+        name: Ruff security scan bills
+        entry: python -m ruff check Luke/backend/bills --select S --per-file-ignores "Luke/backend/bills/tests/*:S101"
+        language: system
+        pass_filenames: false

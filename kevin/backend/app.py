@@ -1,5 +1,7 @@
 from flask import Flask, jsonify, request
 from flask_cors import CORS
+from flask_limiter import Limiter
+from flask_limiter.util import get_remote_address
 import os
 import requests
 import asyncio
@@ -8,12 +10,26 @@ from mcp import Client
 
 
 app = Flask(__name__)
-CORS(app)
+
+# Cloud security: only the app's own frontends may call this API, and each
+# client IP is rate limited. Local runs default to any origin.
+ALLOWED_ORIGINS = [
+    origin.strip()
+    for origin in os.environ.get("ALLOWED_ORIGINS", "*").split(",")
+    if origin.strip()
+]
+CORS(app, origins=ALLOWED_ORIGINS)
+limiter = Limiter(
+    get_remote_address,
+    app=app,
+    default_limits=[os.environ.get("RATE_LIMIT", "300 per minute")],
+    storage_uri="memory://",
+)
 
 
-# ----------------------------------
+
 # Configuration
-# ----------------------------------
+
 
 DATABASE_API_URL = os.environ.get(
     "DATABASE_API_URL",
@@ -35,10 +51,48 @@ RAG_URL = os.environ.get(
     "http://localhost:7002/rag"
 )
 
+MULTI_AGENT_URL = os.environ.get(
+    "MULTI_AGENT_URL",
+    "http://localhost:7003"
+)
 
-# ----------------------------------
+AI_MODE_ENABLED = (
+    os.environ.get(
+        "AI_MODE_ENABLED",
+        "false"
+    ).lower()
+    == "true"
+)
+
+MCP_ENABLED = (
+    os.environ.get(
+        "MCP_ENABLED",
+        "false"
+    ).lower()
+    == "true"
+)
+
+RAG_ENABLED = (
+    os.environ.get(
+        "RAG_ENABLED",
+        "false"
+    ).lower()
+    == "true"
+)
+
+
+MULTI_AGENT_ENABLED = (
+    os.environ.get(
+        "MULTI_AGENT_ENABLED",
+        "false"
+    ).lower()
+    == "true"
+)
+
+
+
 # GET all transactions
-# ----------------------------------
+
 
 @app.route("/transactions", methods=["GET"])
 def get_transactions():
@@ -60,9 +114,9 @@ def get_transactions():
         }), 500
 
 
-# ----------------------------------
+
 # GET one transaction
-# ----------------------------------
+
 
 @app.route(
     "/transactions/<int:transaction_id>",
@@ -87,9 +141,8 @@ def get_transaction(transaction_id):
         }), 500
 
 
-# ----------------------------------
 # CREATE transaction
-# ----------------------------------
+
 
 @app.route("/transactions", methods=["POST"])
 def create_transaction():
@@ -112,9 +165,8 @@ def create_transaction():
         }), 500
 
 
-# ----------------------------------
 # UPDATE transaction
-# ----------------------------------
+
 
 @app.route(
     "/transactions/<int:transaction_id>",
@@ -140,9 +192,9 @@ def update_transaction(transaction_id):
         }), 500
 
 
-# ----------------------------------
+
 # DELETE transaction
-# ----------------------------------
+
 
 @app.route(
     "/transactions/<int:transaction_id>",
@@ -167,9 +219,8 @@ def delete_transaction(transaction_id):
         }), 500
 
 
-# ----------------------------------
 # HTMX route
-# ----------------------------------
+
 
 @app.route(
     "/transactions-html",
@@ -234,12 +285,16 @@ def get_transactions_html():
         )
 
 
-# ----------------------------------
 # AI Spending Insights
-# ----------------------------------
+
 
 @app.route("/ai-insights", methods=["GET"])
 def ai_insights():
+
+    if not AI_MODE_ENABLED:
+        return jsonify({
+            "error": "AI Mode is disabled"
+        }), 503
 
     try:
         database_response = requests.get(
@@ -430,9 +485,7 @@ Keep the response short.
         }), 500
 
 
-# ----------------------------------
-# MCP helper
-# ----------------------------------
+
 
 async def call_income_expense_mcp(
     total_income,
@@ -479,9 +532,6 @@ async def call_income_expense_mcp(
         )
 
 
-# ----------------------------------
-# MCP Income & Expense Summary
-# ----------------------------------
 
 @app.route(
     "/mcp-income-expense-summary",
@@ -489,6 +539,11 @@ async def call_income_expense_mcp(
 )
 def mcp_income_expense_summary():
 
+    if not MCP_ENABLED:
+        return jsonify({
+            "error": "MCP is disabled"
+        }), 503
+    
     try:
 
         database_response = requests.get(
@@ -576,15 +631,18 @@ def mcp_income_expense_summary():
         }), 500
 
 
-# ----------------------------------
-# RAG
-# ----------------------------------
+
 
 @app.route(
     "/rag-query",
     methods=["POST"]
 )
 def rag_query():
+
+    if not RAG_ENABLED:
+        return jsonify({
+            "error": "RAG is disabled"
+        }), 503
 
     data = request.get_json(
         silent=True
@@ -639,10 +697,103 @@ def rag_query():
                 str(error)
         }), 503
 
+# Multi-Agent Workflow
 
-# ----------------------------------
-# Health
-# ----------------------------------
+
+@app.route(
+    "/multi-agent-review",
+    methods=["POST"]
+)
+def multi_agent_review():
+
+    if not MULTI_AGENT_ENABLED:
+        return jsonify({
+            "error": "Multi-Agent is disabled"
+        }), 503
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    task = str(
+        data.get("task", "")
+    ).strip()
+
+    evidence = data.get(
+        "evidence",
+        ""
+    )
+
+    if not task:
+        return jsonify({
+            "error": "A task is required."
+        }), 400
+
+    try:
+
+        response = requests.post(
+            f"{MULTI_AGENT_URL}/multi-agent",
+            json={
+                "task": task,
+                "evidence": evidence
+            },
+            timeout=900
+        )
+
+        return jsonify(
+            response.json()
+        ), response.status_code
+
+    except requests.exceptions.RequestException as error:
+
+        return jsonify({
+            "error": "Could not connect to Multi-Agent server.",
+            "details": str(error)
+        }), 503
+
+
+
+# Multi-Agent Human Review
+
+
+@app.route(
+    "/multi-agent/<workflow_id>/human-review",
+    methods=["POST"]
+)
+def multi_agent_human_review(workflow_id):
+
+    if not MULTI_AGENT_ENABLED:
+        return jsonify({
+            "error": "Multi-Agent is disabled"
+        }), 503
+
+    data = request.get_json(
+        silent=True
+    ) or {}
+
+    try:
+
+        response = requests.post(
+            f"{MULTI_AGENT_URL}/multi-agent/"
+            f"{workflow_id}/human-review",
+            json=data,
+            timeout=30
+        )
+
+        return jsonify(
+            response.json()
+        ), response.status_code
+
+    except requests.exceptions.RequestException as error:
+
+        return jsonify({
+            "error": "Could not connect to Multi-Agent server.",
+            "details": str(error)
+        }), 503
 
 @app.route(
     "/health",
@@ -659,14 +810,10 @@ def health():
     })
 
 
-# ----------------------------------
-# Run Flask
-# ----------------------------------
-
 if __name__ == "__main__":
 
     app.run(
-        host="0.0.0.0",
-        debug=True,
+        host="0.0.0.0", # noqa: S104
+        debug=False,
         port=5001
     )
